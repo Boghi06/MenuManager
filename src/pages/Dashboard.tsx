@@ -16,6 +16,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Checkbox } from "@/components/ui/checkbox"
 import { Dialog } from "@base-ui/react/dialog"
 import { COLORS } from "../constants"
+import { supabase } from "@/lib/supabase"
 
 export default function Dashboard() {
   const navigate = useNavigate()
@@ -111,7 +112,7 @@ export default function Dashboard() {
           <button
             className="mt-auto w-full flex items-center text-sm rounded px-3 py-2 border transition-colors hover:bg-red-50"
             style={{ color: COLORS.accent, borderColor: COLORS.accent }}
-            onClick={() => navigate('/login')}
+            onClick={async () => { await supabase.auth.signOut(); navigate('/login') }}
           >
             <LogOut className="w-4 h-4 mr-2" />
             Logout
