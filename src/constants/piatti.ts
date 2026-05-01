@@ -20,7 +20,7 @@ export const CODE_TO_TIPO: Record<string, string> = {
 export const EMPTY_FORM: PiattoForm = {
   nome_it: '', nome_en: '', nome_fr: '', nome_de: '',
   tipo: 'primo', ricetta: '',
-  vegetariano: false, vegano: false, no_lattosio: false, km0: false,
+  vegetariano: false, vegano: false, no_lattosio: false, locale: false,
   all_glutine: false, all_crostacei: false, all_uova: false, all_pesce: false,
   all_arachidi: false, all_soia: false, all_latte: false, all_frutta_guscio: false,
   all_sedano: false, all_senape: false, all_sesamo: false, all_solfiti: false,
@@ -44,7 +44,7 @@ export const CARATTERISTICHE: CaratteristicaConfig[] = [
   { field: 'vegetariano', label: 'Vegetariano',   Icon: Salad,   badgeClass: 'bg-green-100 text-green-700' },
   { field: 'vegano',      label: 'Vegano',         Icon: Leaf,    badgeClass: 'bg-green-100 text-green-700' },
   { field: 'no_lattosio', label: 'Senza lattosio', Icon: MilkOff, badgeClass: 'bg-blue-100 text-blue-700' },
-  { field: 'km0',   label: 'KM0',      Icon: ChefHat, badgeClass: 'bg-amber-100 text-amber-700' },
+  { field: 'locale', label: 'Locale', Icon: ChefHat, badgeClass: 'bg-amber-100 text-amber-700' },
 ]
 
 export const ALLERGENI: AllergenoConfig[] = [
