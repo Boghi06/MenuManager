@@ -18,23 +18,23 @@ export function AppSidebar({ activeCategory, onCategoryChange }: AppSidebarProps
       style={{ backgroundColor: COLORS.secondary }}
     >
       <div className="flex flex-col gap-2">
-        <h3 className="text-base font-semibold uppercase font-geist">Opzioni</h3>
-        <button className="w-full flex items-center text-sm rounded" style={{ color: COLORS.text }}>
+        <h3 className="text-base font-semibold uppercase font-geist px-2 py-1">Opzioni</h3>
+        <button className="w-full flex items-center text-sm rounded px-2 py-1 transition-colors hover:bg-black/10" style={{ color: COLORS.text }}>
           <ConciergeBell className="w-6 h-6 mr-2" />
           Elenco Piatti
         </button>
-        <button className="w-full flex items-center text-sm rounded" style={{ color: COLORS.text }}>
+        <button className="w-full flex items-center text-sm rounded px-2 py-1 transition-colors hover:bg-black/10" style={{ color: COLORS.text }}>
           <FileText className="w-6 h-6 mr-2" />
           Menú
         </button>
       </div>
 
       <div className="flex flex-col gap-2">
-        <h3 className="text-base font-semibold uppercase font-geist">Categorie</h3>
+        <h3 className="text-base font-semibold uppercase font-geist px-2 py-1">Categorie</h3>
         {CATEGORIE.map(({ label, value }) => (
           <button
             key={value}
-            className="w-full flex items-center text-sm rounded"
+            className="w-full flex items-center text-sm rounded px-2 py-1 transition-colors hover:bg-black/10"
             style={{ color: COLORS.text }}
             onClick={() => onCategoryChange(value)}
           >

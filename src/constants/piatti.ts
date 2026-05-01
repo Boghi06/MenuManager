@@ -64,8 +64,10 @@ export const ALLERGENI: AllergenoConfig[] = [
   { field: 'all_uova',          label: 'Uova',            Icon: Egg },
 ]
 
-export const TRANSLATIONS: Array<{ lang: string; field: TranslationField }> = [
-  { lang: 'Italiano', field: 'nome_it' },
+export const TITLE_MAX_LENGTH = 55
+
+export const TRANSLATIONS: Array<{ lang: string; field: TranslationField; maxLength?: number }> = [
+  { lang: 'Italiano', field: 'nome_it', maxLength: TITLE_MAX_LENGTH },
   { lang: 'Inglese',  field: 'nome_en' },
   { lang: 'Tedesco',  field: 'nome_de' },
   { lang: 'Francese', field: 'nome_fr' },

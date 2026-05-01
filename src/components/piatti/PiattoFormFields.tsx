@@ -19,16 +19,28 @@ export const PiattoFormFields = memo(function PiattoFormFields({ form, onChange 
       <div className="flex flex-col gap-2 pb-8 border-b border-gray-200 px-8">
         <div className="font-geist text-base">Nome piatto / Traduzioni</div>
         <div className="bg-gray-200 p-4 rounded-lg flex flex-col gap-3">
-          {TRANSLATIONS.map(({ lang, field }) => (
-            <div key={lang} className="flex items-center gap-4">
-              <label className="w-20 text-sm">{lang}</label>
-              <Input
-                value={(form[field] as string) ?? ''}
-                onChange={e => onChange({ [field]: e.target.value })}
-                className="flex-1 bg-white border-none rounded-sm h-8"
-              />
-            </div>
-          ))}
+          {TRANSLATIONS.map(({ lang, field, maxLength }) => {
+            const val = (form[field] as string) ?? ''
+            const atLimit = maxLength !== undefined && val.length >= maxLength
+            return (
+              <div key={lang} className="flex items-center gap-4">
+                <label className="w-20 text-sm">{lang}</label>
+                <div className="flex-1 relative">
+                  <Input
+                    value={val}
+                    onChange={e => onChange({ [field]: e.target.value })}
+                    maxLength={maxLength}
+                    className="w-full bg-white border-none rounded-sm h-8"
+                  />
+                  {maxLength !== undefined && (
+                    <span className={`absolute right-2 top-1/2 -translate-y-1/2 text-xs tabular-nums pointer-events-none ${atLimit ? 'text-red-500' : 'text-gray-400'}`}>
+                      {val.length}/{maxLength}
+                    </span>
+                  )}
+                </div>
+              </div>
+            )
+          })}
         </div>
       </div>
 

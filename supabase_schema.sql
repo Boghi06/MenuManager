@@ -18,7 +18,7 @@ insert into public.dish_types (code, description) values
 -- ── Main dish table ──────────────────────────────────────────
 create table public.piatti (
   id            bigint      primary key,
-  nome_it       text        not null,
+  nome_it       text        not null check (char_length(nome_it) < 55),
   nome_en       text,
   nome_fr       text,
   nome_de       text,
