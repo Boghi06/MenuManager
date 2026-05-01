@@ -8,7 +8,7 @@ export interface Piatto {
   vegetariano: boolean
   vegano: boolean
   no_lattosio: boolean
-  KM0: boolean
+  km0: boolean
   ricetta: string | null
   all_glutine: boolean
   all_crostacei: boolean
