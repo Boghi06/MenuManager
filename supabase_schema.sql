@@ -1,24 +1,19 @@
 -- ============================================================
 -- SCHEMA: Hotel Garden Menu Platform
--- Run this in the Supabase SQL Editor (Project > SQL Editor)
+-- Run this FIRST in Supabase SQL Editor (Project > SQL Editor)
 -- ============================================================
 
--- ── Dish types lookup ────────────────────────────────────────
+-- ── Dish types lookup (4 canonical categories) ───────────────
 create table public.dish_types (
   code        text primary key,
   description text not null
 );
 
 insert into public.dish_types (code, description) values
-  ('ant',   'Antipasti lunch'),
-  ('pr',    'Primi piatti'),
-  ('vit',   'Vitello'),
-  ('mz',    'Manzo – bolliti – grigliate'),
-  ('vol',   'Volatili'),
-  ('pesce', 'Pesce'),
-  ('ma',    'Maiale'),
-  ('cont',  'Contorni'),
-  ('dol',   'Dolci');
+  ('pr',  'Primi'),
+  ('se',  'Secondi'),
+  ('con', 'Contorni'),
+  ('des', 'Dessert');
 
 -- ── Main dish table ──────────────────────────────────────────
 create table public.piatti (
@@ -33,7 +28,7 @@ create table public.piatti (
   vegetariano   boolean     not null default false,
   vegano        boolean     not null default false,
   no_lattosio   boolean     not null default false,
-  veneziano     boolean     not null default false,
+  locale        boolean     not null default false,
 
   -- Recipe
   ricetta       text,
@@ -88,8 +83,8 @@ create trigger piatti_updated_at
   for each row execute function public.handle_updated_at();
 
 -- ── Row Level Security ───────────────────────────────────────
-alter table public.dish_types  enable row level security;
-alter table public.piatti      enable row level security;
+alter table public.dish_types   enable row level security;
+alter table public.piatti       enable row level security;
 alter table public.activity_log enable row level security;
 
 -- dish_types: read-only for authenticated users
@@ -109,7 +104,7 @@ create policy "Authenticated update piatti"
 create policy "Authenticated delete piatti"
   on public.piatti for delete to authenticated using (true);
 
--- activity_log: authenticated users can write and read their own logs
+-- activity_log: authenticated users can write and read
 create policy "Authenticated insert logs"
   on public.activity_log for insert to authenticated with check (true);
 
