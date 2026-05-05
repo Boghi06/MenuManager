@@ -8,7 +8,7 @@ export function AppHeader() {
     >
       <img src="/LOGO.svg" alt="Hotel Garden Terme" className="h-12 w-auto" />
       <div
-        className="w-10 h-10 rounded-full text-white flex items-center justify-center text-xl font-fraunces"
+        className="w-10 h-10 rounded-full text-white flex items-center justify-center text-2xl font-fraunces"
         style={{ backgroundColor: COLORS.text }}
       >
         GG

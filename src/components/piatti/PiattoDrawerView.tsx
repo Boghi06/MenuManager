@@ -24,19 +24,19 @@ export function PiattoDrawerView({ piatto, open, onClose, onEdit, onDelete }: Pi
           <div className="flex-1 overflow-y-auto pb-8">
 
             <div className="flex flex-col gap-1 pb-8 border-b border-gray-200 px-8">
-              <div className="text-sm text-gray-500 font-geist">
+              <div className="text-base text-gray-500 font-geist">
                 {piatto?.id} · {TIPO_LABEL[piatto?.tipo ?? ''] ?? '—'}
               </div>
-              <h2 className="text-3xl font-light font-fraunces">{piatto?.nome_it}</h2>
+              <h2 className="text-4xl font-light font-fraunces">{piatto?.nome_it}</h2>
             </div>
 
             <div className="flex flex-col gap-2 mt-8 pb-8 border-b border-gray-200 px-8">
-              <div className="font-geist text-base">Nome piatto / Traduzioni</div>
+              <div className="font-geist text-lg">Nome piatto / Traduzioni</div>
               <div className="bg-gray-200 p-4 rounded-lg flex flex-col gap-3">
                 {TRANSLATIONS.map(({ lang, field }) => (
                   <div key={lang} className="flex items-center gap-4">
-                    <span className="w-20 text-sm text-gray-500">{lang}</span>
-                    <span className="flex-1 text-sm bg-white rounded-sm px-3 py-1.5 min-h-8">
+                    <span className="w-20 text-base text-gray-500">{lang}</span>
+                    <span className="flex-1 text-base bg-white rounded-sm px-3 py-1.5 min-h-8">
                       {(piatto?.[field] as string | null) ?? ''}
                     </span>
                   </div>
@@ -45,15 +45,15 @@ export function PiattoDrawerView({ piatto, open, onClose, onEdit, onDelete }: Pi
             </div>
 
             <div className="flex flex-col gap-2 mt-8 px-8 border-b border-gray-200 pb-8">
-              <div className="font-geist text-base">Tipologia</div>
-              <div className="bg-gray-200 rounded-md h-10 flex items-center px-4 font-semibold text-sm">
+              <div className="font-geist text-lg">Tipologia</div>
+              <div className="bg-gray-200 rounded-md h-10 flex items-center px-4 font-semibold text-base">
                 {TIPO_LABEL[piatto?.tipo ?? ''] ?? '—'}
               </div>
             </div>
 
             <div className="flex flex-col gap-2 mt-8 px-8 border-b border-gray-200 pb-8">
-              <div className="font-geist text-base">Preparazione</div>
-              <div className="w-full min-h-32 border border-gray-200 rounded-md p-3 text-sm">
+              <div className="font-geist text-lg">Preparazione</div>
+              <div className="w-full min-h-32 border border-gray-200 rounded-md p-3 text-base">
                 {piatto?.ricetta
                   ? <span>{piatto.ricetta}</span>
                   : <span className="text-gray-400 italic">Nessuna preparazione inserita.</span>
@@ -63,8 +63,8 @@ export function PiattoDrawerView({ piatto, open, onClose, onEdit, onDelete }: Pi
 
             <div className="grid grid-cols-2 gap-8 mt-8 px-8 pb-8">
               <div className="flex flex-col gap-4">
-                <div className="font-geist text-base">Caratteristiche</div>
-                <div className="flex flex-col gap-2 text-sm">
+                <div className="font-geist text-lg">Caratteristiche</div>
+                <div className="flex flex-col gap-2 text-base">
                   {attiveCaratteristiche.length > 0
                     ? attiveCaratteristiche.map(({ field, label, Icon }) => (
                         <div key={field} className="flex items-center gap-2">
@@ -76,8 +76,8 @@ export function PiattoDrawerView({ piatto, open, onClose, onEdit, onDelete }: Pi
                 </div>
               </div>
               <div className="flex flex-col gap-4">
-                <div className="font-geist text-base">Allergeni</div>
-                <div className="flex flex-col gap-2 text-sm">
+                <div className="font-geist text-lg">Allergeni</div>
+                <div className="flex flex-col gap-2 text-base">
                   {attiveAllergeni.length > 0
                     ? attiveAllergeni.map(({ field, label, Icon }) => (
                         <div key={field} className="flex items-center gap-2">
@@ -103,7 +103,7 @@ export function PiattoDrawerView({ piatto, open, onClose, onEdit, onDelete }: Pi
             </Button>
             <div className="flex gap-4">
               <button
-                className="h-10 px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-sm font-medium transition-colors"
+                className="h-10 px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-base font-medium transition-colors"
                 style={{ color: COLORS.text }}
                 onClick={onClose}
               >

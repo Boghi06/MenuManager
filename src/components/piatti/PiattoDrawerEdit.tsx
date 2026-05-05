@@ -39,9 +39,9 @@ export function PiattoDrawerEdit({ piatto, open, onClose, onSave, onDelete }: Pi
         <div className="flex flex-col h-full pt-8">
           <div className="flex-1 overflow-y-auto pb-8">
             <div className="flex flex-col gap-1 pb-8 border-b border-gray-200 px-8">
-              <div className="text-sm text-gray-500 font-geist">Modifica piatto</div>
-              <h2 className="text-3xl font-light font-fraunces">{piatto?.nome_it}</h2>
-              <div className="text-sm text-gray-500">
+              <div className="text-base text-gray-500 font-geist">Modifica piatto</div>
+              <h2 className="text-4xl font-light font-fraunces">{piatto?.nome_it}</h2>
+              <div className="text-base text-gray-500">
                 {piatto?.id} - {TIPO_LABEL[piatto?.tipo ?? ''] ?? '—'}
               </div>
             </div>
@@ -61,7 +61,7 @@ export function PiattoDrawerEdit({ piatto, open, onClose, onSave, onDelete }: Pi
             </Button>
             <div className="flex gap-4">
               <button
-                className="h-10 px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-sm font-medium transition-colors"
+                className="h-10 px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-base font-medium transition-colors"
                 style={{ color: COLORS.text }}
                 onClick={onClose}
               >

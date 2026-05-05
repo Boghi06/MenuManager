@@ -14,7 +14,7 @@ export function PiattoBadges({ piatto }: PiattoBadgesProps) {
       {attiveCaratteristiche.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-2">
           {attiveCaratteristiche.map(({ field, label, Icon, badgeClass }) => (
-            <span key={field} className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full ${badgeClass}`}>
+            <span key={field} className={`inline-flex items-center gap-1 text-sm px-2 py-0.5 rounded-full ${badgeClass}`}>
               <Icon className="w-3 h-3" />{label}
             </span>
           ))}
@@ -23,7 +23,7 @@ export function PiattoBadges({ piatto }: PiattoBadgesProps) {
       {attiveAllergeni.length > 0 && (
         <div className="flex flex-wrap gap-1 mt-1">
           {attiveAllergeni.map(({ field, label, Icon }) => (
-            <span key={field} className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">
+            <span key={field} className="inline-flex items-center gap-1 text-sm px-2 py-0.5 rounded-full bg-orange-50 text-orange-600">
               <Icon className="w-3 h-3" />{label}
             </span>
           ))}

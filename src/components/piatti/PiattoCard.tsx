@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { MoreVertical, ExternalLink, Pencil, Trash2 } from 'lucide-react'
+import { MoreVertical, ExternalLink, Pencil, Trash2, AlertCircle } from 'lucide-react'
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger, DropdownMenuGroup,
@@ -28,8 +28,15 @@ export const PiattoCard = memo(function PiattoCard({
         <div className="flex flex-1">
           <div className="w-1 mr-4 shrink-0 rounded-full" style={{ backgroundColor: COLORS.text }} />
           <div className="flex-1 pr-12">
-            <h2 className="text-xl font-serif mb-1" style={{ color: COLORS.text }}>{piatto.nome_it}</h2>
-            <p className="text-sm text-gray-500 mb-2 font-sans">{piatto.id} - {TIPO_LABEL[piatto.tipo ?? ''] ?? '—'}</p>
+            <div className="flex items-center gap-2 mb-1">
+              <h2 className="text-2xl font-serif" style={{ color: COLORS.text }}>{piatto.nome_it}</h2>
+              {!piatto.ricetta && (
+                <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-full px-2 py-0.5 shrink-0">
+                  <AlertCircle className="w-3 h-3" /> Ricetta mancante
+                </span>
+              )}
+            </div>
+            <p className="text-base text-gray-500 mb-2 font-sans">{piatto.id} - {TIPO_LABEL[piatto.tipo ?? ''] ?? '—'}</p>
             <PiattoBadges piatto={piatto} />
           </div>
         </div>

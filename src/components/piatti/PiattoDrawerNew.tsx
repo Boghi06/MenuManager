@@ -45,8 +45,8 @@ export function PiattoDrawerNew({ open, onClose, onSave }: PiattoDrawerNewProps)
         <div className="flex flex-col h-full pt-8">
           <div className="flex-1 overflow-y-auto pb-8">
             <div className="flex flex-col gap-1 pb-8 border-b border-gray-200 px-8">
-              <div className="text-sm text-gray-500 font-geist">Nuovo piatto</div>
-              <h2 className="text-3xl font-light font-fraunces">Aggiungi piatto</h2>
+              <div className="text-base text-gray-500 font-geist">Nuovo piatto</div>
+              <h2 className="text-4xl font-light font-fraunces">Aggiungi piatto</h2>
             </div>
             <div className="mt-8">
               <PiattoFormFields form={form} onChange={onChange} />
@@ -54,10 +54,10 @@ export function PiattoDrawerNew({ open, onClose, onSave }: PiattoDrawerNewProps)
           </div>
 
           <SheetFooter className="border-t border-gray-200 pt-6 flex flex-col w-full px-8 gap-3">
-            {error && <p className="text-sm text-red-500 text-right">{error}</p>}
+            {error && <p className="text-base text-red-500 text-right">{error}</p>}
             <div className="flex flex-row justify-end items-center gap-4">
               <button
-                className="h-10 px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-sm font-medium transition-colors"
+                className="h-10 px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-base font-medium transition-colors"
                 style={{ color: COLORS.text }}
                 onClick={handleClose}
               >

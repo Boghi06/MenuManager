@@ -17,14 +17,14 @@ export const PiattoFormFields = memo(function PiattoFormFields({ form, onChange 
   return (
     <>
       <div className="flex flex-col gap-2 pb-8 border-b border-gray-200 px-8">
-        <div className="font-geist text-base">Nome piatto / Traduzioni</div>
+        <div className="font-geist text-lg">Nome piatto / Traduzioni</div>
         <div className="bg-gray-200 p-4 rounded-lg flex flex-col gap-3">
           {TRANSLATIONS.map(({ lang, field, maxLength }) => {
             const val = (form[field] as string) ?? ''
             const atLimit = maxLength !== undefined && val.length >= maxLength
             return (
               <div key={lang} className="flex items-center gap-4">
-                <label className="w-20 text-sm">{lang}</label>
+                <label className="w-20 text-base">{lang}</label>
                 <div className="flex-1 relative">
                   <Input
                     value={val}
@@ -33,7 +33,7 @@ export const PiattoFormFields = memo(function PiattoFormFields({ form, onChange 
                     className="w-full bg-white border-none rounded-sm h-8"
                   />
                   {maxLength !== undefined && (
-                    <span className={`absolute right-2 top-1/2 -translate-y-1/2 text-xs tabular-nums pointer-events-none ${atLimit ? 'text-red-500' : 'text-gray-400'}`}>
+                    <span className={`absolute right-2 top-1/2 -translate-y-1/2 text-sm tabular-nums pointer-events-none ${atLimit ? 'text-red-500' : 'text-gray-400'}`}>
                       {val.length}/{maxLength}
                     </span>
                   )}
@@ -45,7 +45,7 @@ export const PiattoFormFields = memo(function PiattoFormFields({ form, onChange 
       </div>
 
       <div className="flex flex-col gap-2 mt-8 px-8 border-b border-gray-200 pb-8">
-        <div className="font-geist text-base">Tipologia</div>
+        <div className="font-geist text-lg">Tipologia</div>
         <Select value={form.tipo ?? 'primo'} onValueChange={v => onChange({ tipo: v })}>
           <SelectTrigger className="w-full bg-gray-200 border-none rounded-md h-10 shadow-none ring-0 focus:ring-0 font-semibold px-4">
             <SelectValue placeholder="Seleziona tipologia" />
@@ -60,7 +60,7 @@ export const PiattoFormFields = memo(function PiattoFormFields({ form, onChange 
       </div>
 
       <div className="flex flex-col gap-2 mt-8 px-8 border-b border-gray-200 pb-8">
-        <div className="font-geist text-base">Preparazione</div>
+        <div className="font-geist text-lg">Preparazione</div>
         <Textarea
           value={form.ricetta ?? ''}
           onChange={e => onChange({ ricetta: e.target.value })}
@@ -70,12 +70,12 @@ export const PiattoFormFields = memo(function PiattoFormFields({ form, onChange 
 
       <div className="grid grid-cols-2 gap-8 mt-8 px-8 pb-8">
         <div className="flex flex-col gap-4">
-          <div className="font-geist text-base">Caratteristiche</div>
+          <div className="font-geist text-lg">Caratteristiche</div>
           <div className="flex flex-col gap-3">
             {CARATTERISTICHE.map(({ field, label, Icon }) => (
               <div key={field} className="flex items-center space-x-2">
                 <Checkbox id={`form-${field}`} className="rounded-full" checked={!!form[field]} onCheckedChange={cb(field)} />
-                <label htmlFor={`form-${field}`} className="flex items-center gap-2 text-sm">
+                <label htmlFor={`form-${field}`} className="flex items-center gap-2 text-base">
                   <Icon className="w-4 h-4" /> {label}
                 </label>
               </div>
@@ -84,13 +84,13 @@ export const PiattoFormFields = memo(function PiattoFormFields({ form, onChange 
         </div>
 
         <div className="flex flex-col gap-4">
-          <div className="font-geist text-base">Allergeni</div>
+          <div className="font-geist text-lg">Allergeni</div>
           <div className="grid grid-cols-2 gap-4">
-            {ALLERGENI.map(({ field, label, Icon }) => (
+            {ALLERGENI.map(({ field, label, Icon, number }) => (
               <div key={field} className="flex items-center space-x-2">
                 <Checkbox id={`form-${field}`} className="rounded-full" checked={!!form[field]} onCheckedChange={cb(field)} />
-                <label htmlFor={`form-${field}`} className="flex items-center gap-2 text-sm">
-                  <Icon className="w-4 h-4" /> {label}
+                <label htmlFor={`form-${field}`} className="flex items-center gap-2 text-lg">
+                  <Icon className="w-5 h-5" /> {number}. {label}
                 </label>
               </div>
             ))}

@@ -59,7 +59,7 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 text-sm px-2" style={{ color: COLORS.accent }}>
+            <div className="flex items-center gap-2 text-base px-2" style={{ color: COLORS.accent }}>
               <AlertCircle className="w-4 h-4 shrink-0" />
               {error}
             </div>

@@ -38,6 +38,7 @@ export interface AllergenoConfig {
   field: keyof PiattoForm
   label: string
   Icon: LucideIcon
+  number: number
 }
 
 export const CARATTERISTICHE: CaratteristicaConfig[] = [
@@ -48,20 +49,20 @@ export const CARATTERISTICHE: CaratteristicaConfig[] = [
 ]
 
 export const ALLERGENI: AllergenoConfig[] = [
-  { field: 'all_arachidi',      label: 'Arachidi',        Icon: Nut },
-  { field: 'all_crostacei',     label: 'Crostacei',       Icon: Shell },
-  { field: 'all_frutta_guscio', label: 'Frutta a guscio', Icon: Nut },
-  { field: 'all_glutine',       label: 'Glutine',         Icon: Wheat },
-  { field: 'all_latte',         label: 'Latte',           Icon: Milk },
-  { field: 'all_lupini',        label: 'Lupini',          Icon: Bean },
-  { field: 'all_molluschi',     label: 'Molluschi',       Icon: Shell },
-  { field: 'all_pesce',         label: 'Pesce',           Icon: Fish },
-  { field: 'all_sedano',        label: 'Sedano',          Icon: Salad },
-  { field: 'all_senape',        label: 'Senape',          Icon: Leaf },
-  { field: 'all_sesamo',        label: 'Sesamo',          Icon: Sprout },
-  { field: 'all_solfiti',       label: 'Solfiti',         Icon: FlaskConical },
-  { field: 'all_soia',          label: 'Soia',            Icon: Bean },
-  { field: 'all_uova',          label: 'Uova',            Icon: Egg },
+  { field: 'all_glutine',       label: 'Glutine',         Icon: Wheat,         number: 1  },
+  { field: 'all_crostacei',     label: 'Crostacei',       Icon: Shell,         number: 2  },
+  { field: 'all_uova',          label: 'Uova',            Icon: Egg,           number: 3  },
+  { field: 'all_pesce',         label: 'Pesce',           Icon: Fish,          number: 4  },
+  { field: 'all_arachidi',      label: 'Arachidi',        Icon: Nut,           number: 5  },
+  { field: 'all_soia',          label: 'Soia',            Icon: Bean,          number: 6  },
+  { field: 'all_latte',         label: 'Latte',           Icon: Milk,          number: 7  },
+  { field: 'all_frutta_guscio', label: 'Frutta a guscio', Icon: Nut,           number: 8  },
+  { field: 'all_sedano',        label: 'Sedano',          Icon: Salad,         number: 9  },
+  { field: 'all_senape',        label: 'Senape',          Icon: Leaf,          number: 10 },
+  { field: 'all_sesamo',        label: 'Sesamo',          Icon: Sprout,        number: 11 },
+  { field: 'all_solfiti',       label: 'Solfiti',         Icon: FlaskConical,  number: 12 },
+  { field: 'all_lupini',        label: 'Lupini',          Icon: Bean,          number: 13 },
+  { field: 'all_molluschi',     label: 'Molluschi',       Icon: Shell,         number: 14 },
 ]
 
 export const TITLE_MAX_LENGTH = 55
