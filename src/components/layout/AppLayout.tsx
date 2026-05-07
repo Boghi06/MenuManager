@@ -6,15 +6,16 @@ import { AppSidebar } from './AppSidebar'
 interface AppLayoutProps {
   activeCategory: string
   onCategoryChange: (cat: string) => void
+  counts?: Record<string, number>
   children: ReactNode
 }
 
-export function AppLayout({ activeCategory, onCategoryChange, children }: AppLayoutProps) {
+export function AppLayout({ activeCategory, onCategoryChange, counts, children }: AppLayoutProps) {
   return (
     <div className="flex flex-col h-screen font-sans overflow-hidden" style={{ backgroundColor: COLORS.primary }}>
       <AppHeader />
       <div className="flex flex-1 overflow-hidden">
-        <AppSidebar activeCategory={activeCategory} onCategoryChange={onCategoryChange} />
+        <AppSidebar activeCategory={activeCategory} onCategoryChange={onCategoryChange} counts={counts} />
         <main className="flex-1 flex flex-col min-w-0 overflow-hidden" style={{ backgroundColor: COLORS.primary }}>
           {children}
         </main>

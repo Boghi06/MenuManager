@@ -31,7 +31,7 @@ export interface CaratteristicaConfig {
   field: keyof PiattoForm
   label: string
   Icon: LucideIcon
-  badgeClass: string
+  isAccent: boolean
 }
 
 export interface AllergenoConfig {
@@ -42,10 +42,10 @@ export interface AllergenoConfig {
 }
 
 export const CARATTERISTICHE: CaratteristicaConfig[] = [
-  { field: 'vegetariano', label: 'Vegetariano',   Icon: Salad,   badgeClass: 'bg-green-100 text-green-700' },
-  { field: 'vegano',      label: 'Vegano',         Icon: Leaf,    badgeClass: 'bg-green-100 text-green-700' },
-  { field: 'no_lattosio', label: 'Senza lattosio', Icon: MilkOff, badgeClass: 'bg-blue-100 text-blue-700' },
-  { field: 'locale', label: 'Locale', Icon: ChefHat, badgeClass: 'bg-amber-100 text-amber-700' },
+  { field: 'vegetariano', label: 'Vegetariano',   Icon: Salad,   isAccent: false },
+  { field: 'vegano',      label: 'Vegano',         Icon: Leaf,    isAccent: false },
+  { field: 'no_lattosio', label: 'Senza lattosio', Icon: MilkOff, isAccent: false },
+  { field: 'locale',      label: 'Locale',         Icon: ChefHat, isAccent: true  },
 ]
 
 export const ALLERGENI: AllergenoConfig[] = [

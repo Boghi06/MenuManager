@@ -22,6 +22,14 @@ export default function Dashboard() {
   const [nuovoOpen, setNuovoOpen] = useState(false)
   const [eliminaId, setEliminaId] = useState<number | null>(null)
 
+  const counts = useMemo(() => ({
+    all: piatti.length,
+    pr:  piatti.filter(p => p.tipo === 'pr').length,
+    se:  piatti.filter(p => p.tipo === 'se').length,
+    con: piatti.filter(p => p.tipo === 'con').length,
+    des: piatti.filter(p => p.tipo === 'des').length,
+  }), [piatti])
+
   const filteredPiatti = useMemo(() => piatti.filter(p => {
     const matchesCategory = activeCategory === 'all' || p.tipo === activeCategory
     const matchesSearch = p.nome_it.toLowerCase().includes(search.toLowerCase())
@@ -46,7 +54,7 @@ export default function Dashboard() {
   }
 
   return (
-    <AppLayout activeCategory={activeCategory} onCategoryChange={setActiveCategory}>
+    <AppLayout activeCategory={activeCategory} onCategoryChange={setActiveCategory} counts={counts}>
       <div className="w-full pt-8 shrink-0">
         <div className="flex flex-col gap-4 px-8 pb-4 border-b border-gray-200">
           <div className="text-lg font-geist">{filteredPiatti.length} Piatti</div>
@@ -64,15 +72,14 @@ export default function Dashboard() {
               <Search className="absolute left-3 top-3 h-4 w-4" style={{ color: COLORS.text }} />
               <Input
                 type="text"
-                placeholder="Cerca"
+                placeholder={`Cerca per nome o ID tra ${piatti.length.toLocaleString('it-IT')} piatti…`}
                 className="pl-9 h-10 border-gray-300 rounded-lg"
                 value={search}
                 onChange={e => setSearch(e.target.value)}
               />
             </div>
             <button
-              className="h-10 border border-gray-300 px-4 py-2 rounded-lg flex items-center bg-white hover:bg-gray-50 text-base font-medium transition-colors"
-              style={{ color: COLORS.text }}
+              className="h-10 px-4 py-2 rounded-lg flex items-center bg-black text-white text-base font-medium hover:bg-neutral-800 transition-colors"
               onClick={() => setNuovoOpen(true)}
             >
               <Plus className="w-4 h-4 mr-2" />
@@ -80,6 +87,13 @@ export default function Dashboard() {
             </button>
           </div>
         </div>
+      </div>
+
+      <div className="grid grid-cols-[4px_1fr_320px_32px] gap-5 px-8 py-2.5 text-xs font-semibold uppercase tracking-wider text-gray-500 border-b border-gray-100 bg-gray-50 shrink-0">
+        <span />
+        <span>Piatto</span>
+        <span>Allergeni · Caratteristiche</span>
+        <span />
       </div>
 
       <div className="flex-1 overflow-y-auto">

@@ -7,9 +7,10 @@ import { supabase } from '@/lib/supabase'
 interface AppSidebarProps {
   activeCategory: string
   onCategoryChange: (cat: string) => void
+  counts?: Record<string, number>
 }
 
-export function AppSidebar({ activeCategory, onCategoryChange }: AppSidebarProps) {
+export function AppSidebar({ activeCategory, onCategoryChange, counts }: AppSidebarProps) {
   const navigate = useNavigate()
 
   return (
@@ -42,7 +43,12 @@ export function AppSidebar({ activeCategory, onCategoryChange }: AppSidebarProps
               className="w-5 h-5 mr-2"
               style={{ color: activeCategory === value ? COLORS.accent : 'currentColor' }}
             />
-            {label}
+            <span className="flex-1 text-left">{label}</span>
+            {counts && (
+              <span className="text-sm text-gray-500 tabular-nums">
+                {(counts[value] ?? 0).toLocaleString('it-IT')}
+              </span>
+            )}
           </button>
         ))}
       </div>

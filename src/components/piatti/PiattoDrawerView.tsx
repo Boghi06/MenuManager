@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button'
 import { Pencil, Trash2 } from 'lucide-react'
 import { COLORS } from '@/constants'
 import { TIPO_LABEL, CARATTERISTICHE, ALLERGENI, TRANSLATIONS } from '@/constants/piatti'
+import { AllergenNum } from '@/components/piatti/PiattoBadges'
 import type { Piatto } from '@/types/piatto'
 
 interface PiattoDrawerViewProps {
@@ -79,9 +80,9 @@ export function PiattoDrawerView({ piatto, open, onClose, onEdit, onDelete }: Pi
                 <div className="font-geist text-lg">Allergeni</div>
                 <div className="flex flex-col gap-2 text-base">
                   {attiveAllergeni.length > 0
-                    ? attiveAllergeni.map(({ field, label, Icon }) => (
+                    ? attiveAllergeni.map(({ field, label, number }) => (
                         <div key={field} className="flex items-center gap-2">
-                          <Icon className="w-4 h-4" /> {label}
+                          <AllergenNum n={number} size={22} /> {label}
                         </div>
                       ))
                     : <span className="text-gray-400 italic">Nessun allergene selezionato.</span>

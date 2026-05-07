@@ -1,10 +1,10 @@
 import { memo } from 'react'
-import { MoreVertical, ExternalLink, Pencil, Trash2, AlertCircle } from 'lucide-react'
+import { MoreVertical, ExternalLink, Pencil, Trash2 } from 'lucide-react'
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger, DropdownMenuGroup,
 } from '@/components/ui/dropdown-menu'
-import { COLORS } from '@/constants'
+import { COLORS, TIPO_BAR } from '@/constants'
 import { TIPO_LABEL } from '@/constants/piatti'
 import { PiattoBadges } from './PiattoBadges'
 import type { Piatto } from '@/types/piatto'
@@ -21,28 +21,34 @@ export const PiattoCard = memo(function PiattoCard({
 }: PiattoCardProps) {
   return (
     <div
-      className="relative border-b border-gray-200 py-6 group hover:bg-gray-50 transition-colors cursor-pointer"
+      className="grid grid-cols-[4px_1fr_320px_32px] gap-5 px-8 py-6 border-b border-gray-200 group hover:bg-gray-50 transition-colors cursor-pointer items-start"
       onClick={() => onOpenRicetta(piatto)}
     >
-      <div className="flex px-8">
-        <div className="flex flex-1">
-          <div className="w-1 mr-4 shrink-0 rounded-full" style={{ backgroundColor: COLORS.text }} />
-          <div className="flex-1 pr-12">
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-2xl font-serif" style={{ color: COLORS.text }}>{piatto.nome_it}</h2>
-              {!piatto.ricetta && (
-                <span className="inline-flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 rounded-full px-2 py-0.5 shrink-0">
-                  <AlertCircle className="w-3 h-3" /> Ricetta mancante
-                </span>
-              )}
-            </div>
-            <p className="text-base text-gray-500 mb-2 font-sans">{piatto.id} - {TIPO_LABEL[piatto.tipo ?? ''] ?? '—'}</p>
-            <PiattoBadges piatto={piatto} />
-          </div>
+      <div
+        className="self-stretch rounded-full"
+        style={{ backgroundColor: TIPO_BAR[piatto.tipo ?? ''] ?? COLORS.text }}
+      />
+
+      <div>
+        <div className="flex items-center gap-2 mb-1">
+          <h2 className="text-2xl font-serif" style={{ color: COLORS.text }}>{piatto.nome_it}</h2>
+          {!piatto.ricetta && (
+            <span
+              className="text-[11px] font-medium uppercase tracking-wider px-2 py-0.5 rounded-sm shrink-0"
+              style={{ color: COLORS.accent, border: `1px solid ${COLORS.accent}` }}
+            >
+              Ricetta mancante
+            </span>
+          )}
         </div>
+        <p className="text-base text-gray-500 font-sans">{piatto.id} - {TIPO_LABEL[piatto.tipo ?? ''] ?? '—'}</p>
       </div>
 
-      <div className="absolute top-4 right-4" onClick={e => e.stopPropagation()}>
+      <div>
+        <PiattoBadges piatto={piatto} />
+      </div>
+
+      <div onClick={e => e.stopPropagation()}>
         <DropdownMenu>
           <DropdownMenuTrigger className="p-2 hover:bg-gray-200 rounded-md outline-none focus:outline-none opacity-0 group-hover:opacity-100 data-popup-open:opacity-100 data-open:opacity-100 transition-opacity">
             <MoreVertical className="w-5 h-5" style={{ color: COLORS.text }} />
