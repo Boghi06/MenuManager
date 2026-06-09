@@ -1,8 +1,10 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getCache, setCache } from '@/lib/cache'
 import type { MenuVoce, Servizio, SezioneTipo } from '@/types/menuVoce'
 
 const MAX_ALTERNATIVE = 3
+const vociKey = (anno: number, mese: number, idx: 1 | 2) => `menu_voci:${anno}-${mese}-${idx}`
 
 /** Risolve (creandolo se manca) l'id della bisettimana per anno/mese/idx. */
 async function risolviBisettimanaId(anno: number, mese: number, idx: 1 | 2): Promise<string> {
@@ -31,14 +33,30 @@ async function risolviBisettimanaId(anno: number, mese: number, idx: 1 | 2): Pro
 
 export function useMenuComposer(anno: number, mese: number, bisettIdx: 1 | 2) {
   const [bisettimanaId, setBisettimanaId] = useState<string | null>(null)
-  const [voci, setVoci] = useState<MenuVoce[]>([])
-  const [loading, setLoading] = useState(true)
+  const [voci, setVociState] = useState<MenuVoce[]>(
+    () => getCache<MenuVoce[]>(vociKey(anno, mese, bisettIdx)) ?? [],
+  )
+  const [loading, setLoading] = useState(
+    getCache<MenuVoce[]>(vociKey(anno, mese, bisettIdx)) === undefined,
+  )
   const [error, setError] = useState<string | null>(null)
+
+  // mantiene cache e stato allineati (accetta valore o updater come useState)
+  const setVoci = (next: MenuVoce[] | ((prev: MenuVoce[]) => MenuVoce[])) => {
+    setVociState(prev => {
+      const value = typeof next === 'function' ? (next as (p: MenuVoce[]) => MenuVoce[])(prev) : next
+      setCache(vociKey(anno, mese, bisettIdx), value)
+      return value
+    })
+  }
 
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
     setError(null)
+    // stale-while-revalidate: se in cache mostra subito, altrimenti loading
+    const cached = getCache<MenuVoce[]>(vociKey(anno, mese, bisettIdx))
+    if (cached) { setVociState(cached); setLoading(false) }
+    else setLoading(true)
     ;(async () => {
       try {
         const id = await risolviBisettimanaId(anno, mese, bisettIdx)
@@ -51,7 +69,11 @@ export function useMenuComposer(anno: number, mese: number, bisettIdx: 1 | 2) {
           .order('posizione')
         if (cancelled) return
         if (vErr) setError(vErr.message)
-        else setVoci((data ?? []) as MenuVoce[])
+        else {
+          const rows = (data ?? []) as MenuVoce[]
+          setCache(vociKey(anno, mese, bisettIdx), rows)
+          setVociState(rows)
+        }
       } catch (e) {
         if (!cancelled) setError(e instanceof Error ? e.message : 'Errore di caricamento del menù')
       } finally {

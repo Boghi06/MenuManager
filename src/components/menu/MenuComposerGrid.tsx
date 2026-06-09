@@ -41,17 +41,17 @@ export function MenuComposerGrid({
     <table className="w-full table-fixed border-collapse">
       <thead>
         <tr>
-          <th className="w-[110px] py-3.5 pr-2 text-left text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500 border-b border-[#D4D4D4]">
+          <th className="w-[84px] py-3 pr-2 text-left text-[10px] font-semibold uppercase tracking-[0.1em] text-gray-500 border-b border-[#D4D4D4]">
             Sezione
           </th>
           {giorniLabels.map((g, c) => (
             <th
               key={c}
-              className="py-3.5 px-2.5 text-left align-bottom border-b border-[#D4D4D4] border-r border-r-[#E5E5E5]
+              className="py-3 px-2 text-left align-bottom border-b border-[#D4D4D4] border-r border-r-[#E5E5E5]
                          first:border-l first:border-l-[#E5E5E5]"
             >
-              <div className="font-fraunces text-xl text-black leading-none">{g}</div>
-              <div className="text-[10px] uppercase tracking-[0.05em] text-gray-500 mt-1">{servizio}</div>
+              <div className="font-sans text-sm font-semibold text-black leading-none">{g}</div>
+              <div className="text-[10px] uppercase tracking-[0.05em] text-gray-500 mt-1.5">{servizio}</div>
             </th>
           ))}
         </tr>
@@ -59,10 +59,10 @@ export function MenuComposerGrid({
       <tbody>
         {SEZIONI_ORDER.map(tipo => (
           <tr key={tipo}>
-            <td className="py-3.5 pr-2 align-top border-b border-[#E5E5E5]">
-              <div className="flex items-center gap-2">
-                <div className="shrink-0 rounded-sm" style={{ width: 4, height: 20, background: TIPO_BAR[tipo] }} />
-                <span className="font-fraunces text-base italic text-black">{TIPO_LABEL[tipo]}</span>
+            <td className="py-2.5 pr-2 align-top border-b border-[#E5E5E5]">
+              <div className="flex items-center gap-1.5">
+                <div className="shrink-0 rounded-sm" style={{ width: 3, height: 18, background: TIPO_BAR[tipo] }} />
+                <span className="font-fraunces text-sm italic text-black leading-tight">{TIPO_LABEL[tipo]}</span>
               </div>
             </td>
             {giorniLabels.map((_, c) => {
@@ -71,7 +71,7 @@ export function MenuComposerGrid({
               return (
                 <td
                   key={c}
-                  className="p-2 align-top border-b border-[#E5E5E5] border-r border-r-[#E5E5E5]
+                  className="p-1.5 align-top border-b border-[#E5E5E5] border-r border-r-[#E5E5E5]
                              first:border-l first:border-l-[#E5E5E5]"
                 >
                   {tipo === 'se' ? (

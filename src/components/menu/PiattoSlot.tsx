@@ -38,24 +38,24 @@ export function PiattoSlot({
   return (
     <div
       onClick={onClick}
-      className={`group/slot w-full flex items-center gap-2.5 border border-[#D4D4D4] bg-white rounded
-                  ${onClick ? 'cursor-pointer' : ''} ${compact ? 'px-2.5 py-1.5' : 'px-3 py-2'}`}
+      className={`group/slot w-full flex items-start gap-1.5 border border-[#D4D4D4] bg-white rounded
+                  ${onClick ? 'cursor-pointer' : ''} ${compact ? 'px-1.5 py-1' : 'px-2 py-1.5'}`}
     >
       <div
-        className="shrink-0 rounded-sm"
-        style={{ width: 4, height: compact ? 18 : 26, background: TIPO_BAR[tipo] ?? '#000000' }}
+        className="shrink-0 self-stretch rounded-sm"
+        style={{ width: 3, background: TIPO_BAR[tipo] ?? '#000000' }}
       />
       <div className="flex-1 min-w-0">
         {compact && (
           <div className="text-[9px] uppercase tracking-[0.05em] text-gray-500 leading-none">contorno</div>
         )}
         <div
-          className={`font-fraunces text-black leading-tight truncate ${compact ? 'text-[13px]' : 'text-base'}`}
+          className={`font-fraunces text-black leading-tight break-words ${compact ? 'text-[13px]' : 'text-sm'}`}
         >
           {nome}
         </div>
         {!compact && piattoId != null && (
-          <div className="text-[11px] text-gray-500 font-sans mt-0.5">#{piattoId}</div>
+          <div className="text-[10px] text-gray-400 font-sans leading-tight">#{piattoId}</div>
         )}
       </div>
       {onRemove && (
@@ -63,9 +63,9 @@ export function PiattoSlot({
           type="button"
           onClick={(e) => { e.stopPropagation(); onRemove() }}
           title="Rimuovi"
-          className="shrink-0 p-1 text-gray-400 opacity-60 hover:opacity-100 hover:text-black transition-opacity"
+          className="shrink-0 p-0.5 text-gray-400 opacity-0 group-hover/slot:opacity-60 hover:!opacity-100 hover:text-black transition-opacity"
         >
-          <X className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
+          <X className={compact ? 'w-3.5 h-3.5' : 'w-3.5 h-3.5'} />
         </button>
       )}
     </div>

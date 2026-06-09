@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
+import { ArrowLeft } from 'lucide-react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { MenuComposerGrid } from '@/components/menu/MenuComposerGrid'
 import { SelettorePiatto } from '@/components/menu/SelettorePiatto'
@@ -16,6 +17,7 @@ type SelectorTarget =
   | { kind: 'contorno'; secondoVoceId: number }
 
 export default function MenuComposer() {
+  const navigate = useNavigate()
   const { anno: annoP, mese: meseP, bisett: bisettP } = useParams()
   const anno = Number(annoP)
   const mese = Number(meseP)
@@ -61,6 +63,13 @@ export default function MenuComposer() {
     <AppLayout showCategorie={false}>
       {/* Header */}
       <div className="px-8 pt-8 pb-6 border-b border-gray-200">
+        <button
+          onClick={() => navigate(`/menu?anno=${anno}`)}
+          className="inline-flex items-center gap-1.5 text-[13px] text-gray-500 mb-3 transition-colors hover:text-black"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Tutti i mesi
+        </button>
         <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-500 mb-2">
           Composizione menù
         </p>
@@ -101,12 +110,6 @@ export default function MenuComposer() {
               ))}
             </div>
 
-            <button
-              disabled
-              className="h-9 px-3 border border-gray-300 rounded-md bg-white text-sm text-gray-400 cursor-not-allowed"
-            >
-              Duplica giorno
-            </button>
             <button
               disabled
               className="h-9 px-3 border border-gray-900 rounded-md bg-gray-900 text-white text-sm opacity-35 cursor-not-allowed"

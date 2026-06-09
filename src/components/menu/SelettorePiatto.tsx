@@ -30,7 +30,11 @@ export function SelettorePiatto({ open, onOpenChange, filtroTipo, onPick }: Sele
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md p-0 flex flex-col">
+      <SheetContent
+        side="right"
+        className="w-full p-0 flex flex-col"
+        style={{ width: '34rem', maxWidth: '34rem' }}
+      >
         <SheetHeader className="p-6 border-b border-gray-100">
           <p className="text-[11px] font-semibold uppercase tracking-[0.08em] text-gray-500">
             Aggiungi {label.toLowerCase()}
