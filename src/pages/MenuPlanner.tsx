@@ -1,14 +1,21 @@
 import { useState } from 'react'
+import { useSearchParams } from 'react-router-dom'
+import { Copy } from 'lucide-react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { BisettimanaCard } from '@/components/menu/BisettimanaCard'
+import { DuplicaSettimanaDialog } from '@/components/menu/DuplicaSettimanaDialog'
 import { useBisettimane } from '@/hooks/useBisettimane'
 import { MESI } from '@/constants/mesi'
 import type { StatoBisettimana } from '@/hooks/useBisettimane'
 
 export default function MenuPlanner() {
   const currentYear = new Date().getFullYear()
-  const [anno, setAnno] = useState(currentYear)
-  const { mappa, anniEsistenti, maxAnnoEsistente, loading, operazione, inizializzaAnno, copiaAnno, error } = useBisettimane(anno)
+  const [searchParams] = useSearchParams()
+  const annoParam = Number(searchParams.get('anno'))
+  const [anno, setAnno] = useState(Number.isInteger(annoParam) && annoParam > 0 ? annoParam : currentYear)
+  const { mappa, anniEsistenti, maxAnnoEsistente, loading, operazione, inizializzaAnno, copiaAnno, refresh, error } = useBisettimane(anno)
+
+  const [duplicaOpen, setDuplicaOpen] = useState(false)
 
   const operando = operazione !== null
   const canGoBack = !loading && !operando && anniEsistenti.has(anno - 1)
@@ -68,10 +75,11 @@ export default function MenuPlanner() {
               </>
             ) : (
               <button
-                disabled
-                className="h-9 px-3 border border-gray-300 rounded-md bg-white text-sm text-gray-400 cursor-not-allowed"
+                onClick={() => setDuplicaOpen(true)}
+                className="h-9 px-3 inline-flex items-center gap-1.5 border border-gray-300 rounded-md bg-white text-sm transition-colors hover:bg-gray-50"
               >
-                Duplica anno
+                <Copy className="w-4 h-4" />
+                Duplica settimana
               </button>
             )}
           </div>
@@ -139,6 +147,14 @@ export default function MenuPlanner() {
           </>
         )}
       </div>
+
+      <DuplicaSettimanaDialog
+        open={duplicaOpen}
+        onClose={() => setDuplicaOpen(false)}
+        annoCorrente={anno}
+        anniDisponibili={[...anniEsistenti].sort((a, b) => b - a)}
+        onDone={refresh}
+      />
     </AppLayout>
   )
 }

@@ -1,4 +1,5 @@
-import { useState, useMemo, useCallback } from 'react'
+import { useState, useMemo, useCallback, useRef } from 'react'
+import { useVirtualizer } from '@tanstack/react-virtual'
 import { Search, Plus } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { COLORS } from '@/constants'
@@ -35,6 +36,16 @@ export default function Dashboard() {
     const matchesSearch = p.nome_it.toLowerCase().includes(search.toLowerCase())
     return matchesCategory && matchesSearch
   }), [piatti, activeCategory, search])
+
+  // Virtualizzazione: in DOM solo le righe visibili (+ overscan), non tutte.
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const rowVirtualizer = useVirtualizer({
+    count: filteredPiatti.length,
+    getScrollElement: () => scrollRef.current,
+    estimateSize: () => 113, // altezza media riga; corretta a runtime da measureElement
+    overscan: 8,
+    getItemKey: (index) => filteredPiatti[index].id,
+  })
 
   const openEdit = useCallback((piatto: Piatto) => {
     setViewPiatto(null)
@@ -96,22 +107,41 @@ export default function Dashboard() {
         <span />
       </div>
 
-      <div className="flex-1 overflow-y-auto">
+      <div ref={scrollRef} className="flex-1 overflow-y-auto">
         {loading && (
           <div className="flex items-center justify-center h-32 text-base text-gray-400">Caricamento...</div>
         )}
         {!loading && error && (
           <div className="flex items-center justify-center h-32 text-base text-red-500">Errore: {error}</div>
         )}
-        {!loading && !error && filteredPiatti.map(piatto => (
-          <PiattoCard
-            key={piatto.id}
-            piatto={piatto}
-            onOpenRicetta={setViewPiatto}
-            onOpenModifica={openEdit}
-            onOpenElimina={openElimina}
-          />
-        ))}
+        {!loading && !error && (
+          <div style={{ height: rowVirtualizer.getTotalSize(), position: 'relative' }}>
+            {rowVirtualizer.getVirtualItems().map(virtualRow => {
+              const piatto = filteredPiatti[virtualRow.index]
+              return (
+                <div
+                  key={virtualRow.key}
+                  data-index={virtualRow.index}
+                  ref={rowVirtualizer.measureElement}
+                  style={{
+                    position: 'absolute',
+                    top: 0,
+                    left: 0,
+                    width: '100%',
+                    transform: `translateY(${virtualRow.start}px)`,
+                  }}
+                >
+                  <PiattoCard
+                    piatto={piatto}
+                    onOpenRicetta={setViewPiatto}
+                    onOpenModifica={openEdit}
+                    onOpenElimina={openElimina}
+                  />
+                </div>
+              )
+            })}
+          </div>
+        )}
       </div>
 
       <PiattoDrawerView

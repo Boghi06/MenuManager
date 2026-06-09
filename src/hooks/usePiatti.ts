@@ -1,14 +1,29 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getCache, setCache } from '@/lib/cache'
 import { TIPO_TO_CODE } from '@/constants/piatti'
 import type { Piatto, PiattoForm } from '@/types/piatto'
 
+const CACHE_KEY = 'piatti'
+
 export function usePiatti() {
-  const [piatti, setPiatti] = useState<Piatto[]>([])
-  const [loading, setLoading] = useState(true)
+  const cached = getCache<Piatto[]>(CACHE_KEY)
+  const [piatti, setPiattiState] = useState<Piatto[]>(cached ?? [])
+  // se abbiamo già i dati in cache mostriamoli subito: niente flash di caricamento
+  const [loading, setLoading] = useState(cached === undefined)
   const [error, setError] = useState<string | null>(null)
 
+  // mantiene cache e stato sempre allineati (accetta valore o updater come useState)
+  const setPiatti = (next: Piatto[] | ((prev: Piatto[]) => Piatto[])) => {
+    setPiattiState(prev => {
+      const value = typeof next === 'function' ? (next as (p: Piatto[]) => Piatto[])(prev) : next
+      setCache(CACHE_KEY, value)
+      return value
+    })
+  }
+
   useEffect(() => {
+    // revalidate in background (stale-while-revalidate)
     supabase.from('piatti').select('*').order('id').then(({ data, error }) => {
       if (error) {
         console.error('Supabase fetch error:', error)

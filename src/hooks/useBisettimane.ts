@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/lib/supabase'
+import { getCache, setCache } from '@/lib/cache'
 
 export type StatoBisettimana = 'full' | 'partial' | 'empty'
 export type TipoOperazione = 'inizializza' | 'copia' | null
@@ -24,17 +25,27 @@ async function inserisciRigheAnno(anno: number) {
   if (error) throw error
 }
 
+const ANNI_KEY = 'bisettimane:anni'
+const bisKey = (anno: number) => `bisettimane:${anno}`
+
 export function useBisettimane(anno: number) {
-  const [bisettimane, setBisettimane] = useState<Bisettimana[]>([])
-  const [anniEsistenti, setAnniEsistenti] = useState<Set<number>>(new Set())
-  const [loading, setLoading] = useState(true)
+  const [bisettimane, setBisettimane] = useState<Bisettimana[]>(
+    () => getCache<Bisettimana[]>(bisKey(anno)) ?? [],
+  )
+  const [anniEsistenti, setAnniEsistenti] = useState<Set<number>>(
+    () => new Set(getCache<number[]>(ANNI_KEY) ?? []),
+  )
+  const [loading, setLoading] = useState(getCache<Bisettimana[]>(bisKey(anno)) === undefined)
   const [operazione, setOperazione] = useState<TipoOperazione>(null)
   const [error, setError] = useState<string | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
 
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
+    // stale-while-revalidate: se l'anno è in cache mostralo subito, altrimenti loading
+    const cached = getCache<Bisettimana[]>(bisKey(anno))
+    if (cached) { setBisettimane(cached); setLoading(false) }
+    else setLoading(true)
     ;(async () => {
       const [{ data: anniData }, { data: bisData, error: bisError }] = await Promise.all([
         supabase.from('bisettimane').select('anno'),
@@ -46,9 +57,17 @@ export function useBisettimane(anno: number) {
           .order('bisettimana_idx'),
       ])
       if (cancelled) return
-      if (anniData) setAnniEsistenti(new Set(anniData.map((r: { anno: number }) => r.anno)))
+      if (anniData) {
+        const anni = [...new Set(anniData.map((r: { anno: number }) => r.anno))]
+        setCache(ANNI_KEY, anni)
+        setAnniEsistenti(new Set(anni))
+      }
       if (bisError) setError(bisError.message)
-      else setBisettimane(bisData ?? [])
+      else {
+        const rows = bisData ?? []
+        setCache(bisKey(anno), rows)
+        setBisettimane(rows)
+      }
       setLoading(false)
     })()
     return () => { cancelled = true }
@@ -102,6 +121,9 @@ export function useBisettimane(anno: number) {
     }
   }, [])
 
+  // forza una rivalidazione (es. dopo una duplica settimana)
+  const refresh = useCallback(() => setRefreshKey(k => k + 1), [])
+
   const mappa = new Map<string, Bisettimana>()
   for (const b of bisettimane) mappa.set(`${b.mese}-${b.bisettimana_idx}`, b)
 
@@ -109,6 +131,6 @@ export function useBisettimane(anno: number) {
 
   return {
     bisettimane, mappa, anniEsistenti, maxAnnoEsistente,
-    loading, operazione, inizializzaAnno, copiaAnno, error,
+    loading, operazione, inizializzaAnno, copiaAnno, refresh, error,
   }
 }
