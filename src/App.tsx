@@ -3,6 +3,8 @@ import Login from "./pages/Login"
 import Dashboard from "./pages/Dashboard"
 import MenuPlanner from "./pages/MenuPlanner"
 import MenuComposer from "./pages/MenuComposer"
+import Impostazioni from "./pages/Impostazioni"
+import GestioneEventi from "./pages/GestioneEventi"
 import { ProtectedRoute } from "./components/ProtectedRoute"
 
 function App() {
@@ -24,6 +26,16 @@ function App() {
         <Route path="/menu/:anno/:mese/:bisett" element={
           <ProtectedRoute>
             <MenuComposer />
+          </ProtectedRoute>
+        } />
+        <Route path="/eventi" element={
+          <ProtectedRoute>
+            <GestioneEventi />
+          </ProtectedRoute>
+        } />
+        <Route path="/impostazioni" element={
+          <ProtectedRoute>
+            <Impostazioni />
           </ProtectedRoute>
         } />
         <Route path="*" element={<Navigate to="/" replace />} />

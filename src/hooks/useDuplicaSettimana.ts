@@ -68,8 +68,10 @@ export function useDuplicaSettimana() {
     setLoading(true)
     setError(null)
     try {
-      const srcId = await risolviBisettimanaId(sorgente.anno, sorgente.mese, sorgente.idx)
-      const dstId = await risolviBisettimanaId(destinazione.anno, destinazione.mese, destinazione.idx)
+      const [srcId, dstId] = await Promise.all([
+        risolviBisettimanaId(sorgente.anno, sorgente.mese, sorgente.idx),
+        risolviBisettimanaId(destinazione.anno, destinazione.mese, destinazione.idx),
+      ])
 
       const srcVoci = await vociSettimana(srcId, sorgente.settimana)
       if (srcVoci.length === 0) return { status: 'empty' }

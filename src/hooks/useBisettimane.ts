@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { supabase } from '@/lib/supabase'
 import { getCache, setCache } from '@/lib/cache'
 
@@ -124,8 +124,11 @@ export function useBisettimane(anno: number) {
   // forza una rivalidazione (es. dopo una duplica settimana)
   const refresh = useCallback(() => setRefreshKey(k => k + 1), [])
 
-  const mappa = new Map<string, Bisettimana>()
-  for (const b of bisettimane) mappa.set(`${b.mese}-${b.bisettimana_idx}`, b)
+  const mappa = useMemo(() => {
+    const m = new Map<string, Bisettimana>()
+    for (const b of bisettimane) m.set(`${b.mese}-${b.bisettimana_idx}`, b)
+    return m
+  }, [bisettimane])
 
   const maxAnnoEsistente = anniEsistenti.size > 0 ? Math.max(...anniEsistenti) : null
 

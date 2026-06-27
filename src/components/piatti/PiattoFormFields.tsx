@@ -51,6 +51,7 @@ export const PiattoFormFields = memo(function PiattoFormFields({ form, onChange 
             <SelectValue placeholder="Seleziona tipologia" />
           </SelectTrigger>
           <SelectContent className="bg-gray-200 border-none shadow-none ring-0 rounded-md font-sans">
+            <SelectItem value="antipasto" className="hover:bg-gray-300 focus:bg-gray-300 cursor-pointer px-4 py-2">Antipasto</SelectItem>
             <SelectItem value="primo"    className="hover:bg-gray-300 focus:bg-gray-300 cursor-pointer px-4 py-2">Primo</SelectItem>
             <SelectItem value="secondo"  className="hover:bg-gray-300 focus:bg-gray-300 cursor-pointer px-4 py-2">Secondo</SelectItem>
             <SelectItem value="contorno" className="hover:bg-gray-300 focus:bg-gray-300 cursor-pointer px-4 py-2">Contorno</SelectItem>
