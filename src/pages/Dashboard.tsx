@@ -23,11 +23,13 @@ export default function Dashboard() {
   const [nuovoOpen, setNuovoOpen] = useState(false)
   const [eliminaId, setEliminaId] = useState<number | null>(null)
 
-  const counts = useMemo(() => {
-    const c = { all: piatti.length, ant: 0, pr: 0, se: 0, con: 0, des: 0 } as Record<string, number>
-    for (const p of piatti) if (p.tipo in c) c[p.tipo]++
-    return c
-  }, [piatti])
+  const counts = useMemo(() => ({
+    all: piatti.length,
+    pr:  piatti.filter(p => p.tipo === 'pr').length,
+    se:  piatti.filter(p => p.tipo === 'se').length,
+    con: piatti.filter(p => p.tipo === 'con').length,
+    des: piatti.filter(p => p.tipo === 'des').length,
+  }), [piatti])
 
   const filteredPiatti = useMemo(() => piatti.filter(p => {
     const matchesCategory = activeCategory === 'all' || p.tipo === activeCategory
