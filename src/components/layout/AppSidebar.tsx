@@ -1,5 +1,5 @@
 import { useNavigate, useLocation } from 'react-router-dom'
-import { ConciergeBell, FileText, CircleDot, LogOut } from 'lucide-react'
+import { ConciergeBell, FileText, CircleDot, LogOut, Settings, CalendarHeart } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { COLORS } from '@/constants'
 import { CATEGORIE } from '@/constants/piatti'
@@ -17,6 +17,8 @@ export function AppSidebar({ showCategorie = true, activeCategory, onCategoryCha
   const location = useLocation()
   const isPiattiActive = location.pathname === '/' || location.pathname.startsWith('/piatti')
   const isMenuActive = location.pathname.startsWith('/menu')
+  const isEventiActive = location.pathname === '/eventi'
+  const isImpostazioniActive = location.pathname === '/impostazioni'
 
   return (
     <aside
@@ -27,10 +29,7 @@ export function AppSidebar({ showCategorie = true, activeCategory, onCategoryCha
         <h3 className="text-lg font-semibold uppercase font-geist px-2 py-1">Opzioni</h3>
         <button
           onClick={() => navigate('/')}
-          className={cn(
-            "w-full flex items-center text-base rounded px-3 py-1 transition-colors",
-            isPiattiActive ? "bg-black/10 font-semibold" : "hover:bg-black/10"
-          )}
+          className={cn("w-full flex items-center text-base rounded px-3 py-1 transition-colors", isPiattiActive ? "bg-black/10 font-semibold" : "hover:bg-black/10")}
           style={{ color: COLORS.text }}
         >
           <ConciergeBell className="w-6 h-6 mr-2" />
@@ -38,14 +37,27 @@ export function AppSidebar({ showCategorie = true, activeCategory, onCategoryCha
         </button>
         <button
           onClick={() => navigate('/menu')}
-          className={cn(
-            "w-full flex items-center text-base rounded px-3 py-1 transition-colors",
-            isMenuActive ? "bg-black/10 font-semibold" : "hover:bg-black/10"
-          )}
+          className={cn("w-full flex items-center text-base rounded px-3 py-1 transition-colors", isMenuActive ? "bg-black/10 font-semibold" : "hover:bg-black/10")}
           style={{ color: COLORS.text }}
         >
           <FileText className="w-6 h-6 mr-2" />
           Pianificazione menù
+        </button>
+        <button
+          onClick={() => navigate('/eventi')}
+          className={cn("w-full flex items-center text-base rounded px-3 py-1 transition-colors", isEventiActive ? "bg-black/10 font-semibold" : "hover:bg-black/10")}
+          style={{ color: COLORS.text }}
+        >
+          <CalendarHeart className="w-6 h-6 mr-2" />
+          Gestione eventi
+        </button>
+        <button
+          onClick={() => navigate('/impostazioni')}
+          className={cn("w-full flex items-center text-base rounded px-3 py-1 transition-colors", isImpostazioniActive ? "bg-black/10 font-semibold" : "hover:bg-black/10")}
+          style={{ color: COLORS.text }}
+        >
+          <Settings className="w-6 h-6 mr-2" />
+          Footer menù
         </button>
       </div>
 

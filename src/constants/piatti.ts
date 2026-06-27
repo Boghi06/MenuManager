@@ -20,6 +20,11 @@ export const CODE_TO_TIPO: Record<string, string> = {
 // righe (sezioni) della griglia composizione — il contorno NON è una riga
 export const SEZIONI_ORDER = ['ant', 'pr', 'se', 'des'] as const
 
+// numero massimo di alternative per sezione: 1 antipasto, 3 primi, 3 secondi, 1 dessert
+export const SEZIONI_MAX: Record<string, number> = {
+  ant: 1, pr: 3, se: 3, des: 1,
+}
+
 // barra-tipo in scala di grigi (mini-bar a sinistra di un piatto)
 export const TIPO_BAR: Record<string, string> = {
   ant: '#000000', pr: '#1F1F1F', se: '#3D3D3D', con: '#737373', des: '#9E9E9E',

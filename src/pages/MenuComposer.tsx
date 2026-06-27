@@ -1,14 +1,17 @@
-import { useMemo, useState } from 'react'
+import { useMemo, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { AppLayout } from '@/components/layout/AppLayout'
 import { MenuComposerGrid } from '@/components/menu/MenuComposerGrid'
 import { SelettorePiatto } from '@/components/menu/SelettorePiatto'
+import { StampaPreview } from '@/components/menu/StampaPreview'
 import { useMenuComposer } from '@/hooks/useMenuComposer'
+import { useMenuFlags } from '@/hooks/useMenuFlags'
 import { usePiatti } from '@/hooks/usePiatti'
+import { useEventi } from '@/hooks/useEventi'
 import { getBisettimanaRange, formatBisettimanaRange } from '@/lib/bisettimane'
 import { MESI } from '@/constants/mesi'
-import type { Servizio, SezioneTipo } from '@/types/menuVoce'
+import type { FlagKey, Servizio, SezioneTipo } from '@/types/menuVoce'
 
 const GIORNI_SHORT = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom']
 
@@ -26,10 +29,13 @@ export default function MenuComposer() {
   const [settimana, setSettimana] = useState<0 | 1>(0)
   const [servizio, setServizio] = useState<Servizio>('pranzo')
   const [target, setTarget] = useState<SelectorTarget | null>(null)
+  const [stampaOpen, setStampaOpen] = useState(false)
 
-  const { voci, loading, error, aggiungiPiatto, setContorno, rimuoviPiatto } =
+  const { bisettimanaId, voci, loading, error, aggiungiPiatto, setContorno, rimuoviPiatto } =
     useMenuComposer(anno, mese, idx)
   const { piatti } = usePiatti()
+  const { getFlag, toggleFlag, getEvento, setEvento } = useMenuFlags(bisettimanaId)
+  const { eventi } = useEventi()
 
   const nomeById = useMemo(() => {
     const m = new Map<number, string>()
@@ -47,17 +53,16 @@ export default function MenuComposer() {
     })
   }, [range.start, settimana])
 
-  // filtro libreria per il selettore attivo
   const filtroTipo = target?.kind === 'contorno' ? 'con' : target?.tipo ?? 'pr'
 
-  function handlePick(piattoId: number) {
+  const handlePick = useCallback((piattoId: number) => {
     if (!target) return
     if (target.kind === 'sezione') {
       void aggiungiPiatto(target.giorno, servizio, target.tipo, piattoId)
     } else {
       void setContorno(target.secondoVoceId, piattoId)
     }
-  }
+  }, [target, servizio, aggiungiPiatto, setContorno])
 
   return (
     <AppLayout showCategorie={false}>
@@ -111,8 +116,8 @@ export default function MenuComposer() {
             </div>
 
             <button
-              disabled
-              className="h-9 px-3 border border-gray-900 rounded-md bg-gray-900 text-white text-sm opacity-35 cursor-not-allowed"
+              onClick={() => setStampaOpen(true)}
+              className="h-9 px-3 border border-gray-900 rounded-md bg-gray-900 text-white text-sm hover:bg-gray-700 transition-colors"
             >
               Stampa
             </button>
@@ -140,6 +145,11 @@ export default function MenuComposer() {
             onRemove={(voceId) => void rimuoviPiatto(voceId)}
             onAddContorno={(secondoVoceId) => setTarget({ kind: 'contorno', secondoVoceId })}
             onRemoveContorno={(secondoVoceId) => void setContorno(secondoVoceId, null)}
+            getFlag={(giorno, key) => getFlag(giorno, servizio, key)}
+            onToggleFlag={(giorno, key: FlagKey) => void toggleFlag(giorno, servizio, key)}
+            getEventoId={(giorno) => getEvento(giorno, servizio)}
+            onSetEventoId={(giorno, id) => void setEvento(giorno, servizio, id)}
+            eventi={eventi}
           />
         )}
       </div>
@@ -149,6 +159,19 @@ export default function MenuComposer() {
         onOpenChange={(o) => { if (!o) setTarget(null) }}
         filtroTipo={filtroTipo}
         onPick={handlePick}
+      />
+
+      <StampaPreview
+        open={stampaOpen}
+        onClose={() => setStampaOpen(false)}
+        voci={voci}
+        piatti={piatti}
+        anno={anno}
+        mese={mese}
+        bisettimanaIdx={idx}
+        getFlag={getFlag}
+        getEvento={getEvento}
+        eventi={eventi}
       />
     </AppLayout>
   )

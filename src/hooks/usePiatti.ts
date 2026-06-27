@@ -42,13 +42,16 @@ export function usePiatti() {
 
   const createPiatto = async (form: PiattoForm): Promise<string | null> => {
     const newId = piatti.length > 0 ? Math.max(...piatti.map(p => p.id)) + 1 : 1
-    const { error } = await supabase.from('piatti').insert({ id: newId, ...toDbForm(form) })
+    const { data, error } = await supabase
+      .from('piatti')
+      .insert({ id: newId, ...toDbForm(form) })
+      .select('*')
+      .single()
     if (error) {
       console.error('Errore inserimento:', error)
       return error.message
     }
-    const { data: fresh } = await supabase.from('piatti').select('*').order('id')
-    if (fresh) setPiatti(fresh as Piatto[])
+    if (data) setPiatti(prev => [...prev, data as Piatto].sort((a, b) => a.id - b.id))
     return null
   }
 

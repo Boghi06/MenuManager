@@ -9,14 +9,14 @@ export interface Alternativa {
 interface MenuCellaProps {
   alternative: Alternativa[]
   tipo: string
+  /** Numero massimo di alternative per questa sezione (default 3). */
+  maxAlternative?: number
   onAdd: () => void
   onRemove: (voceId: number) => void
 }
 
-const MAX_ALTERNATIVE = 3
-
-/** Contenuto di una cella di sezione principale (ant/pr/des): fino a 3 alternative + "Aggiungi". */
-export function MenuCella({ alternative, tipo, onAdd, onRemove }: MenuCellaProps) {
+/** Contenuto di una cella di sezione principale (ant/pr/des). */
+export function MenuCella({ alternative, tipo, maxAlternative = 3, onAdd, onRemove }: MenuCellaProps) {
   return (
     <div className="flex flex-col gap-1.5">
       {alternative.map(a => (
@@ -28,7 +28,7 @@ export function MenuCella({ alternative, tipo, onAdd, onRemove }: MenuCellaProps
           onRemove={() => onRemove(a.voceId)}
         />
       ))}
-      {alternative.length < MAX_ALTERNATIVE && (
+      {alternative.length < maxAlternative && (
         <PiattoSlot tipo={tipo} addLabel="Aggiungi" onClick={onAdd} />
       )}
     </div>
