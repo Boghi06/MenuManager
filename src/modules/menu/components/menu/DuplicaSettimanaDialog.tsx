@@ -212,7 +212,7 @@ export function DuplicaSettimanaDialog({
           <Dialog.Backdrop className="fixed inset-0 z-[60] bg-black/40" />
           <Dialog.Popup className="fixed z-[60] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full max-w-md bg-white rounded-xl shadow-xl p-8 flex flex-col gap-4">
             <div className="flex items-start gap-3">
-              <AlertTriangle className="w-5 h-5 text-[#B23A1F] shrink-0 mt-0.5" />
+              <AlertTriangle className="w-5 h-5 text-brand shrink-0 mt-0.5" />
               <div>
                 <Dialog.Title className="text-lg font-semibold text-black">
                   La settimana di destinazione non è vuota
@@ -234,7 +234,7 @@ export function DuplicaSettimanaDialog({
                 onClick={() => { setConfirmCount(null); void esegui(true) }}
                 disabled={loading}
                 className="h-10 px-4 rounded-md text-white text-sm font-medium transition-opacity hover:opacity-80 disabled:opacity-40"
-                style={{ backgroundColor: '#B23A1F' }}
+                style={{ backgroundColor: 'var(--brand)' }}
               >
                 Sovrascrivi
               </button>

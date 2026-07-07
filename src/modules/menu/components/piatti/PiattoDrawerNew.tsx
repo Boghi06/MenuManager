@@ -1,7 +1,6 @@
 import { useState, useCallback } from 'react'
 import { Sheet, SheetContent, SheetFooter } from '@/core/ui/sheet'
 import { Button } from '@/core/ui/button'
-import { COLORS } from '@/constants'
 import { EMPTY_FORM } from '@/modules/menu/constants/piatti'
 import { PiattoFormFields } from './PiattoFormFields'
 import type { PiattoForm } from '@/modules/menu/types/piatto'
@@ -58,14 +57,14 @@ export function PiattoDrawerNew({ open, onClose, onSave }: PiattoDrawerNewProps)
             <div className="flex flex-row justify-end items-center gap-4">
               <button
                 className="h-10 px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-base font-medium transition-colors"
-                style={{ color: COLORS.text }}
+                style={{ color: 'var(--brand-ink)' }}
                 onClick={handleClose}
               >
                 Annulla
               </button>
               <Button
                 className="text-white h-10 hover:opacity-80"
-                style={{ backgroundColor: COLORS.text }}
+                style={{ backgroundColor: 'var(--brand-ink)' }}
                 onClick={handleSave}
                 disabled={saving || !form.nome_it.trim()}
               >

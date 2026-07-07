@@ -3,7 +3,6 @@ import { Input } from "@/core/ui/input"
 import { Button } from "@/core/ui/button"
 import { User, Lock, AlertCircle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { COLORS } from "@/constants"
 import { clientConfig } from "@/config/clients"
 import { supabase } from "@/core/lib/supabase"
 
@@ -31,7 +30,7 @@ export default function Login() {
   }
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{ backgroundColor: COLORS.primary }}>
+    <div className="min-h-screen flex flex-col items-center justify-center p-4 bg-brand-canvas">
       <div className="w-full max-w-sm flex flex-col items-center gap-10">
         <img src={clientConfig.logo} alt={clientConfig.appName} className="w-150 h-auto" />
 
@@ -60,7 +59,7 @@ export default function Login() {
           </div>
 
           {error && (
-            <div className="flex items-center gap-2 text-base px-2" style={{ color: COLORS.accent }}>
+            <div className="flex items-center gap-2 text-base px-2 text-brand">
               <AlertCircle className="w-4 h-4 shrink-0" />
               {error}
             </div>
@@ -69,8 +68,7 @@ export default function Login() {
           <Button
             type="submit"
             disabled={loading}
-            className="w-full h-12 rounded-full hover:opacity-80 transition-opacity font-sans mt-1 disabled:opacity-50"
-            style={{ backgroundColor: COLORS.text, color: COLORS.primary }}
+            className="w-full h-12 rounded-full hover:opacity-80 transition-opacity font-sans mt-1 disabled:opacity-50 bg-brand-ink text-brand-canvas"
           >
             {loading ? "Accesso in corso..." : "Accedi"}
           </Button>

@@ -9,11 +9,11 @@ export function applyTheme(config: ClientConfig) {
   const root = document.documentElement
   const { brand } = config.theme
 
-  root.style.setProperty('--brand-primary', brand.primary)
+  root.style.setProperty('--brand-canvas', brand.primary)
   root.style.setProperty('--brand-surface', brand.secondary)
   root.style.setProperty('--brand', brand.accent)
   root.style.setProperty('--brand-dark', brand.accentDark)
-  root.style.setProperty('--brand-text', brand.text)
+  root.style.setProperty('--brand-ink', brand.text)
 
   document.title = config.appName
 

@@ -1,5 +1,4 @@
 import { CARATTERISTICHE, ALLERGENI } from '@/modules/menu/constants/piatti'
-import { COLORS } from '@/constants'
 import type { Piatto } from '@/modules/menu/types/piatto'
 
 export function AllergenNum({ n, size = 22 }: { n: number; size?: number }) {
@@ -33,7 +32,7 @@ export function PiattoBadges({ piatto }: PiattoBadgesProps) {
                   ? 'inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border text-sm font-medium'
                   : 'inline-flex items-center gap-1.5 px-3 py-0.5 rounded-full border border-black text-black text-sm font-medium bg-white'
               }
-              style={isAccent ? { borderColor: COLORS.accent, color: COLORS.accent, background: '#F7EDEA' } : undefined}
+              style={isAccent ? { borderColor: 'var(--brand)', color: 'var(--brand)', background: 'color-mix(in srgb, var(--brand) 9%, white)' } : undefined}
             >
               {label}
             </span>

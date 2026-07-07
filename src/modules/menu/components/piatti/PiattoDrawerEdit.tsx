@@ -2,7 +2,6 @@ import { useState, useEffect, useCallback } from 'react'
 import { Sheet, SheetContent, SheetFooter } from '@/core/ui/sheet'
 import { Button } from '@/core/ui/button'
 import { Trash2 } from 'lucide-react'
-import { COLORS } from '@/constants'
 import { TIPO_LABEL, CODE_TO_TIPO, EMPTY_FORM } from '@/modules/menu/constants/piatti'
 import { PiattoFormFields } from './PiattoFormFields'
 import type { Piatto, PiattoForm } from '@/modules/menu/types/piatto'
@@ -54,7 +53,7 @@ export function PiattoDrawerEdit({ piatto, open, onClose, onSave, onDelete }: Pi
             <Button
               variant="outline"
               className="flex items-center h-10"
-              style={{ borderColor: COLORS.accent, color: COLORS.accent }}
+              style={{ borderColor: 'var(--brand)', color: 'var(--brand)' }}
               onClick={() => piatto && onDelete(piatto.id)}
             >
               <Trash2 className="w-4 h-4 mr-2" /> Elimina
@@ -62,14 +61,14 @@ export function PiattoDrawerEdit({ piatto, open, onClose, onSave, onDelete }: Pi
             <div className="flex gap-4">
               <button
                 className="h-10 px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-base font-medium transition-colors"
-                style={{ color: COLORS.text }}
+                style={{ color: 'var(--brand-ink)' }}
                 onClick={onClose}
               >
                 Annulla
               </button>
               <Button
                 className="text-white h-10 hover:opacity-80"
-                style={{ backgroundColor: COLORS.text }}
+                style={{ backgroundColor: 'var(--brand-ink)' }}
                 onClick={handleSave}
                 disabled={saving}
               >

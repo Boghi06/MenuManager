@@ -3,6 +3,7 @@ import {
   Nut, Shell, Wheat, Egg, Milk, Fish, Bean, Sprout, FlaskConical,
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
+import { clientConfig } from '@/config/clients'
 import type { PiattoForm, TranslationField } from '@/modules/menu/types/piatto'
 
 export const TIPO_LABEL: Record<string, string> = {
@@ -25,9 +26,14 @@ export const SEZIONI_MAX: Record<string, number> = {
   ant: 1, pr: 3, se: 3, des: 1,
 }
 
-// barra-tipo in scala di grigi (mini-bar a sinistra di un piatto)
-export const TIPO_BAR: Record<string, string> = {
+// barra-tipo in scala di grigi (mini-bar a sinistra di un piatto);
+// personalizzabile per cliente via config.modules.menu.tipoBar
+const DEFAULT_TIPO_BAR: Record<string, string> = {
   ant: '#000000', pr: '#1F1F1F', se: '#3D3D3D', con: '#737373', des: '#9E9E9E',
+}
+export const TIPO_BAR: Record<string, string> = {
+  ...DEFAULT_TIPO_BAR,
+  ...clientConfig.modules?.menu?.tipoBar,
 }
 
 // variante usata dalle card piatto in Dashboard (era TIPO_BAR in src/constants.ts)

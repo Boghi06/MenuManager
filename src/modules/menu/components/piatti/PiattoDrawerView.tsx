@@ -1,7 +1,6 @@
 import { Sheet, SheetContent, SheetFooter } from '@/core/ui/sheet'
 import { Button } from '@/core/ui/button'
 import { Pencil, Trash2 } from 'lucide-react'
-import { COLORS } from '@/constants'
 import { TIPO_LABEL, CARATTERISTICHE, ALLERGENI, TRANSLATIONS } from '@/modules/menu/constants/piatti'
 import { AllergenNum } from '@/modules/menu/components/piatti/PiattoBadges'
 import type { Piatto } from '@/modules/menu/types/piatto'
@@ -97,7 +96,7 @@ export function PiattoDrawerView({ piatto, open, onClose, onEdit, onDelete }: Pi
             <Button
               variant="outline"
               className="flex items-center h-10"
-              style={{ borderColor: COLORS.accent, color: COLORS.accent }}
+              style={{ borderColor: 'var(--brand)', color: 'var(--brand)' }}
               onClick={() => piatto && onDelete(piatto.id)}
             >
               <Trash2 className="w-4 h-4 mr-2" /> Elimina
@@ -105,14 +104,14 @@ export function PiattoDrawerView({ piatto, open, onClose, onEdit, onDelete }: Pi
             <div className="flex gap-4">
               <button
                 className="h-10 px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-base font-medium transition-colors"
-                style={{ color: COLORS.text }}
+                style={{ color: 'var(--brand-ink)' }}
                 onClick={onClose}
               >
                 Chiudi
               </button>
               <Button
                 className="text-white h-10 hover:opacity-80"
-                style={{ backgroundColor: COLORS.text }}
+                style={{ backgroundColor: 'var(--brand-ink)' }}
                 onClick={() => piatto && onEdit(piatto)}
               >
                 <Pencil className="w-4 h-4 mr-2" /> Modifica

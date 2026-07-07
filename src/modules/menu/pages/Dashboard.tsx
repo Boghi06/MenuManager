@@ -2,7 +2,6 @@ import { useState, useMemo, useCallback, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { Search, Plus } from 'lucide-react'
 import { Input } from '@/core/ui/input'
-import { COLORS } from '@/constants'
 import { usePiatti } from '@/modules/menu/hooks/usePiatti'
 import { AppLayout } from '@/core/layout/AppLayout'
 import { PiattoCard } from '@/modules/menu/components/piatti/PiattoCard'
@@ -74,14 +73,14 @@ export default function Dashboard() {
             Elenco{' '}
             <span
               className="italic font-normal underline decoration-2 underline-offset-4"
-              style={{ textDecorationColor: COLORS.accent }}
+              style={{ textDecorationColor: 'var(--brand)' }}
             >
               Piatti
             </span>
           </h1>
           <div className="flex justify-between items-center">
             <div className="relative w-72">
-              <Search className="absolute left-3 top-3 h-4 w-4" style={{ color: COLORS.text }} />
+              <Search className="absolute left-3 top-3 h-4 w-4 text-brand-ink" />
               <Input
                 type="text"
                 placeholder={`Cerca per nome o ID tra ${piatti.length.toLocaleString('it-IT')} piatti…`}

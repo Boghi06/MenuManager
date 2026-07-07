@@ -1,5 +1,4 @@
 import { CircleDot } from 'lucide-react'
-import { COLORS } from '@/constants'
 import { CATEGORIE } from '@/modules/menu/constants/piatti'
 
 interface CategorieNavProps {
@@ -15,13 +14,12 @@ export function CategorieNav({ activeCategory, onCategoryChange, counts }: Categ
       {CATEGORIE.map(({ label, value }) => (
         <button
           key={value}
-          className="w-full flex items-center text-base rounded px-3 py-1 transition-colors hover:bg-black/10"
-          style={{ color: COLORS.text }}
+          className="w-full flex items-center text-base rounded px-3 py-1 transition-colors hover:bg-black/10 text-brand-ink"
           onClick={() => onCategoryChange?.(value)}
         >
           <CircleDot
             className="w-5 h-5 mr-2"
-            style={{ color: activeCategory === value ? COLORS.accent : 'currentColor' }}
+            style={{ color: activeCategory === value ? 'var(--brand)' : 'currentColor' }}
           />
           <span className="flex-1 text-left">{label}</span>
           {counts && (
