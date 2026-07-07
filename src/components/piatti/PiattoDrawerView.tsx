@@ -1,5 +1,5 @@
-import { Sheet, SheetContent, SheetFooter } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetFooter } from '@/core/ui/sheet'
+import { Button } from '@/core/ui/button'
 import { Pencil, Trash2 } from 'lucide-react'
 import { COLORS } from '@/constants'
 import { TIPO_LABEL, CARATTERISTICHE, ALLERGENI, TRANSLATIONS } from '@/constants/piatti'

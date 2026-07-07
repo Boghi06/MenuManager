@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
-import { clearCache } from '@/lib/cache'
+import { supabase } from '@/core/lib/supabase'
+import { clearCache } from '@/core/lib/cache'
 import type { MenuVoce } from '@/types/menuVoce'
 
 /** Riferimento a una settimana (7 giorni) all'interno di una bisettimana. */

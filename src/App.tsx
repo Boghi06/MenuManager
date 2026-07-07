@@ -1,11 +1,11 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom"
-import Login from "./pages/Login"
+import Login from "@/core/auth/Login"
 import Dashboard from "./pages/Dashboard"
 import MenuPlanner from "./pages/MenuPlanner"
 import MenuComposer from "./pages/MenuComposer"
 import Impostazioni from "./pages/Impostazioni"
 import GestioneEventi from "./pages/GestioneEventi"
-import { ProtectedRoute } from "./components/ProtectedRoute"
+import { ProtectedRoute } from "@/core/auth/ProtectedRoute"
 
 function App() {
   return (

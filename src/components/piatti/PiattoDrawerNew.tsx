@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react'
-import { Sheet, SheetContent, SheetFooter } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetFooter } from '@/core/ui/sheet'
+import { Button } from '@/core/ui/button'
 import { COLORS } from '@/constants'
 import { EMPTY_FORM } from '@/constants/piatti'
 import { PiattoFormFields } from './PiattoFormFields'

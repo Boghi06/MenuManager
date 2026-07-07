@@ -1,6 +1,6 @@
 import { useState, useMemo } from 'react'
 import { Check, Plus, X, GripVertical, Info, Search, Salad, Leaf, MilkOff, ChefHat } from 'lucide-react'
-import { AppLayout } from '@/components/layout/AppLayout'
+import { AppLayout } from '@/core/layout/AppLayout'
 import { useFooterConfig } from '@/hooks/useFooterConfig'
 import { usePiatti } from '@/hooks/usePiatti'
 import { formatPrezzo, parsePrezzo, SUPPL_PREFIX, wrapPiatti } from '@/lib/footer'

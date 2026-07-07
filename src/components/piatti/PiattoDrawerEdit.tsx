@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { Sheet, SheetContent, SheetFooter } from '@/components/ui/sheet'
-import { Button } from '@/components/ui/button'
+import { Sheet, SheetContent, SheetFooter } from '@/core/ui/sheet'
+import { Button } from '@/core/ui/button'
 import { Trash2 } from 'lucide-react'
 import { COLORS } from '@/constants'
 import { TIPO_LABEL, CODE_TO_TIPO, EMPTY_FORM } from '@/constants/piatti'

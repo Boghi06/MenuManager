@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/core/lib/supabase'
 import type { FlagKey, MenuFlag, Servizio } from '@/types/menuVoce'
 
 const mk = (giorno: number, servizio: Servizio) => `${giorno}:${servizio}`

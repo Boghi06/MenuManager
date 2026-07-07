@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from 'react'
-import { supabase } from '@/lib/supabase'
-import { getCache, setCache } from '@/lib/cache'
+import { supabase } from '@/core/lib/supabase'
+import { getCache, setCache } from '@/core/lib/cache'
 
 export type StatoBisettimana = 'full' | 'partial' | 'empty'
 export type TipoOperazione = 'inizializza' | 'copia' | null

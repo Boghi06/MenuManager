@@ -1,6 +1,6 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import { Plus, Pencil, Trash2, Copy, Calendar, Image as ImageIcon, ChevronDown, Upload } from 'lucide-react'
-import { AppLayout } from '@/components/layout/AppLayout'
+import { AppLayout } from '@/core/layout/AppLayout'
 import { useEventi } from '@/hooks/useEventi'
 import type { Evento } from '@/types/evento'
 

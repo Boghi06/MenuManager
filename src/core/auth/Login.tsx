@@ -1,10 +1,11 @@
 import { useState } from "react"
-import { Input } from "@/components/ui/input"
-import { Button } from "@/components/ui/button"
+import { Input } from "@/core/ui/input"
+import { Button } from "@/core/ui/button"
 import { User, Lock, AlertCircle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
-import { COLORS } from "../constants"
-import { supabase } from "@/lib/supabase"
+import { COLORS } from "@/constants"
+import { clientConfig } from "@/config/clients"
+import { supabase } from "@/core/lib/supabase"
 
 export default function Login() {
   const navigate = useNavigate()
@@ -32,7 +33,7 @@ export default function Login() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4" style={{ backgroundColor: COLORS.primary }}>
       <div className="w-full max-w-sm flex flex-col items-center gap-10">
-        <img src="/LOGO.svg" alt="Hotel Garden Terme" className="w-150 h-auto" />
+        <img src={clientConfig.logo} alt={clientConfig.appName} className="w-150 h-auto" />
 
         <form className="w-full flex flex-col gap-3" onSubmit={handleLogin}>
           <div className="relative">

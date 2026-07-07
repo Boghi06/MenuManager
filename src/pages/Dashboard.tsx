@@ -1,15 +1,15 @@
 import { useState, useMemo, useCallback, useRef } from 'react'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { Search, Plus } from 'lucide-react'
-import { Input } from '@/components/ui/input'
+import { Input } from '@/core/ui/input'
 import { COLORS } from '@/constants'
 import { usePiatti } from '@/hooks/usePiatti'
-import { AppLayout } from '@/components/layout/AppLayout'
+import { AppLayout } from '@/core/layout/AppLayout'
 import { PiattoCard } from '@/components/piatti/PiattoCard'
 import { PiattoDrawerView } from '@/components/piatti/PiattoDrawerView'
 import { PiattoDrawerEdit } from '@/components/piatti/PiattoDrawerEdit'
 import { PiattoDrawerNew } from '@/components/piatti/PiattoDrawerNew'
-import { ConfirmDeleteDialog } from '@/components/shared/ConfirmDeleteDialog'
+import { ConfirmDeleteDialog } from '@/core/components/ConfirmDeleteDialog'
 import type { Piatto } from '@/types/piatto'
 
 export default function Dashboard() {

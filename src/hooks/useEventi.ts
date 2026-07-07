@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/core/lib/supabase'
 import type { Evento } from '@/types/evento'
 
 /** Ricava il path nel bucket da una public URL (…/eventi-images/<path>). */

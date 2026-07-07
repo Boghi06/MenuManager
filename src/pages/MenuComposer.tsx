@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
-import { AppLayout } from '@/components/layout/AppLayout'
+import { AppLayout } from '@/core/layout/AppLayout'
 import { MenuComposerGrid } from '@/components/menu/MenuComposerGrid'
 import { SelettorePiatto } from '@/components/menu/SelettorePiatto'
 import { StampaPreview } from '@/components/menu/StampaPreview'

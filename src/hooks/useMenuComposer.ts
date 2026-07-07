@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
-import { getCache, setCache } from '@/lib/cache'
+import { supabase } from '@/core/lib/supabase'
+import { getCache, setCache } from '@/core/lib/cache'
 import type { MenuVoce, Servizio, SezioneTipo } from '@/types/menuVoce'
 
 const MAX_ALTERNATIVE = 3

@@ -1,9 +1,9 @@
 import { useNavigate, useLocation } from 'react-router-dom'
 import { ConciergeBell, FileText, CircleDot, LogOut, Settings, CalendarHeart } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '@/core/lib/utils'
 import { COLORS } from '@/constants'
 import { CATEGORIE } from '@/constants/piatti'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/core/lib/supabase'
 
 interface AppSidebarProps {
   showCategorie?: boolean

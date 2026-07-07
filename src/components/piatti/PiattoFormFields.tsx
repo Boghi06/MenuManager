@@ -1,8 +1,8 @@
 import { memo } from 'react'
-import { Input } from '@/components/ui/input'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
+import { Input } from '@/core/ui/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/core/ui/select'
+import { Textarea } from '@/core/ui/textarea'
+import { Checkbox } from '@/core/ui/checkbox'
 import { CARATTERISTICHE, ALLERGENI, TRANSLATIONS } from '@/constants/piatti'
 import type { PiattoForm } from '@/types/piatto'
 

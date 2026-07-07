@@ -3,7 +3,7 @@ import { MoreVertical, ExternalLink, Pencil, Trash2 } from 'lucide-react'
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger, DropdownMenuGroup,
-} from '@/components/ui/dropdown-menu'
+} from '@/core/ui/dropdown-menu'
 import { COLORS, TIPO_BAR } from '@/constants'
 import { TIPO_LABEL } from '@/constants/piatti'
 import { PiattoBadges } from './PiattoBadges'

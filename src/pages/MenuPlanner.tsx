@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Copy } from 'lucide-react'
-import { AppLayout } from '@/components/layout/AppLayout'
+import { AppLayout } from '@/core/layout/AppLayout'
 import { BisettimanaCard } from '@/components/menu/BisettimanaCard'
 import { DuplicaSettimanaDialog } from '@/components/menu/DuplicaSettimanaDialog'
 import { useBisettimane } from '@/hooks/useBisettimane'

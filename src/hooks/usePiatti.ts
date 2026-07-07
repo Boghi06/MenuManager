@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { supabase } from '@/lib/supabase'
-import { getCache, setCache } from '@/lib/cache'
+import { supabase } from '@/core/lib/supabase'
+import { getCache, setCache } from '@/core/lib/cache'
 import { TIPO_TO_CODE } from '@/constants/piatti'
 import type { Piatto, PiattoForm } from '@/types/piatto'
 

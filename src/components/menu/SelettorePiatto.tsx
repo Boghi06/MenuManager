@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 import { Search } from 'lucide-react'
 import {
   Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription,
-} from '@/components/ui/sheet'
-import { Input } from '@/components/ui/input'
+} from '@/core/ui/sheet'
+import { Input } from '@/core/ui/input'
 import { usePiatti } from '@/hooks/usePiatti'
 import { TIPO_BAR, TIPO_LABEL } from '@/constants/piatti'
 

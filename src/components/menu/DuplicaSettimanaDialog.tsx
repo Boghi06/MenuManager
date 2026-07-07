@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Dialog } from '@base-ui/react/dialog'
 import { ArrowRight, AlertTriangle } from 'lucide-react'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/core/ui/select'
 import { MESI } from '@/constants/mesi'
 import { getBisettimanaRange, formatBisettimanaRange } from '@/lib/bisettimane'
 import { useDuplicaSettimana, type SettimanaRef } from '@/hooks/useDuplicaSettimana'

@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
-import { supabase } from '@/lib/supabase'
+import { supabase } from '@/core/lib/supabase'
 import type { FooterRiga } from '@/types/footerRiga'
 import type { FooterSupplemento } from '@/types/footerSupplemento'
 
