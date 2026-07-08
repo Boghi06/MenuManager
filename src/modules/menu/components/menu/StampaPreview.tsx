@@ -39,7 +39,7 @@ const T = {
     sempreR1: 'Pennette al pomodoro Siciliano o al ragù bolognese, Omelette alle erbe dei Colli Euganei',
     sempreR2: 'Petti di pollo,  Finissima di manzo,  Escaloppe di maiale alla griglia',
     sempreSuppl: 'Con supplemento:  Entrecôte di manzo € 7,00  –  Costolette di agnello € 7,00  –  Filetto di manzo € 10,00',
-    veg: 'vegetariano', vgn: 'vegano', nl: 'no lattosio', loc: 'veneziano',
+    veg: 'vegetariano', vgn: 'vegano', nl: 'no lattosio', loc: 'KM0',
     allergen: 'A richiesta singola ricetta con relativi allergeni',
     settimana1: 'Settimana 1', settimana2: 'Settimana 2',
     antLabel: 'Antipasto', prLabel: 'Primi', seLabel: 'Secondi', desLabel: 'Dessert',
@@ -56,7 +56,7 @@ const T = {
     sempreR1: 'Penne with Sicilian tomato sauce or Bolognese ragù, Herb omelette from the Euganean Hills',
     sempreR2: 'Chicken breast,  Lean beef,  Grilled pork escalope',
     sempreSuppl: 'With supplement:  Beef entrecôte € 7.00  –  Lamb chops € 7.00  –  Beef fillet € 10.00',
-    veg: 'vegetarian', vgn: 'vegan', nl: 'lactose-free', loc: 'venetian',
+    veg: 'vegetarian', vgn: 'vegan', nl: 'lactose-free', loc: 'KM0',
     allergen: 'Allergen information available on request',
     settimana1: 'Week 1', settimana2: 'Week 2',
     antLabel: 'Starter', prLabel: 'First courses', seLabel: 'Main courses', desLabel: 'Dessert',
@@ -73,7 +73,7 @@ const T = {
     sempreR1: 'Penne mit sizilianischer Tomatensauce oder Bolognese, Kräuteromelett aus den Euganäischen Hügeln',
     sempreR2: 'Hühnerbrust,  Rinderfilet fein,  Gegrillte Schweineeschnitzel',
     sempreSuppl: 'Mit Aufpreis:  Rinderentrecôte € 7,00  –  Lammkoteletts € 7,00  –  Rinderfilet € 10,00',
-    veg: 'vegetarisch', vgn: 'vegan', nl: 'laktosefrei', loc: 'venezianisch',
+    veg: 'vegetarisch', vgn: 'vegan', nl: 'laktosefrei', loc: 'KM0',
     allergen: 'Auf Anfrage Einzelrezept mit Allergenenangaben',
     settimana1: 'Woche 1', settimana2: 'Woche 2',
     antLabel: 'Vorspeise', prLabel: 'Erste Gänge', seLabel: 'Hauptgänge', desLabel: 'Dessert',
@@ -90,7 +90,7 @@ const T = {
     sempreR1: 'Pennette à la tomate sicilienne ou au ragù bolognaise, Omelette aux herbes des Collines Euganéennes',
     sempreR2: 'Blanc de poulet,  Filet de bœuf haché,  Escalope de porc grillée',
     sempreSuppl: 'Avec supplément :  Entrecôte de bœuf € 7,00  –  Côtelettes d\'agneau € 7,00  –  Filet de bœuf € 10,00',
-    veg: 'végétarien', vgn: 'vegan', nl: 'sans lactose', loc: 'vénitien',
+    veg: 'végétarien', vgn: 'vegan', nl: 'sans lactose', loc: 'KM0',
     allergen: 'Recette détaillée avec allergènes sur demande',
     settimana1: 'Semaine 1', settimana2: 'Semaine 2',
     antLabel: 'Entrée', prLabel: 'Premiers plats', seLabel: 'Plats principaux', desLabel: 'Dessert',
@@ -131,7 +131,7 @@ function BadgeRow({ p, lingua }: { p: Piatto; lingua: Lingua }) {
   return (
     <span style={{ marginLeft: 4, display: 'inline-flex', gap: 2, verticalAlign: 'middle' }}>
       {items.map((b, i) => (
-        <b.Icon key={i} size={10} strokeWidth={2} color="#444" />
+        <b.Icon key={i} size={14} strokeWidth={2} color="#444" />
       ))}
     </span>
   )
@@ -373,7 +373,7 @@ function A4Page({ giorno, data, lingua, voci, piattoMap, flagsPranzo, flagsCena,
   return (
     <div style={pageStyle}>
       {/* ── Page header ──────────────────────────────── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
         <div style={headerLabelStyle}>
           {t.lunch} {t.lunchTime}
         </div>
@@ -460,10 +460,10 @@ function A4Page({ giorno, data, lingua, voci, piattoMap, flagsPranzo, flagsCena,
         color: '#333',
       }}>
         <div style={{ display: 'flex', gap: 14 }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Salad size={13} strokeWidth={2} color="#333" /> {t.veg}</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Leaf size={13} strokeWidth={2} color="#333" /> {t.vgn}</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><MilkOff size={13} strokeWidth={2} color="#333" /> {t.nl}</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ChefHat size={13} strokeWidth={2} color="#333" /> {t.loc}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Salad size={16} strokeWidth={2} color="#333" /> {t.veg}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Leaf size={16} strokeWidth={2} color="#333" /> {t.vgn}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><MilkOff size={16} strokeWidth={2} color="#333" /> {t.nl}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ChefHat size={16} strokeWidth={2} color="#333" /> {t.loc}</span>
         </div>
         <div style={{ fontStyle: 'italic', textAlign: 'right' }}>{t.allergen}</div>
       </div>

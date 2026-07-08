@@ -22,10 +22,10 @@ const LINGUE: { value: Lingua; label: string }[] = [
 
 // Etichette statiche dell'anteprima stampata (replica del footer A4)
 const PREVIEW_T: Record<Lingua, { sempre: string; allergen: string; veg: string; vgn: string; nl: string; loc: string }> = {
-  it: { sempre: 'Sempre a Vostra scelta:', allergen: 'A richiesta singola ricetta con relativi allergeni', veg: 'vegetariano', vgn: 'vegano', nl: 'no lattosio', loc: 'veneziano' },
-  en: { sempre: 'Always available:', allergen: 'Allergen information available on request', veg: 'vegetarian', vgn: 'vegan', nl: 'lactose-free', loc: 'venetian' },
-  de: { sempre: 'Immer verfügbar:', allergen: 'Auf Anfrage Einzelrezept mit Allergenenangaben', veg: 'vegetarisch', vgn: 'vegan', nl: 'laktosefrei', loc: 'venezianisch' },
-  fr: { sempre: 'Toujours disponible :', allergen: 'Recette détaillée avec allergènes sur demande', veg: 'végétarien', vgn: 'vegan', nl: 'sans lattose', loc: 'vénitien' },
+  it: { sempre: 'Sempre a Vostra scelta:', allergen: 'A richiesta singola ricetta con relativi allergeni', veg: 'vegetariano', vgn: 'vegano', nl: 'no lattosio', loc: 'KM0' },
+  en: { sempre: 'Always available:', allergen: 'Allergen information available on request', veg: 'vegetarian', vgn: 'vegan', nl: 'lactose-free', loc: 'KM0' },
+  de: { sempre: 'Immer verfügbar:', allergen: 'Auf Anfrage Einzelrezept mit Allergenenangaben', veg: 'vegetarisch', vgn: 'vegan', nl: 'laktosefrei', loc: 'KM0' },
+  fr: { sempre: 'Toujours disponible :', allergen: 'Recette détaillée avec allergènes sur demande', veg: 'végétarien', vgn: 'vegan', nl: 'sans lattose', loc: 'KM0' },
 }
 
 interface SupplLocal { piatto_id: number | null; prezzo: string }
@@ -202,10 +202,10 @@ function StampaFooterPreview({ lingua, righe, supplementi }: { lingua: Lingua; r
       <hr style={{ borderColor: '#bbb', borderWidth: '0 0 1px', margin: '12px 0 8px' }} />
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', fontFamily: 'system-ui, Arial, sans-serif', fontSize: 11, color: '#333' }}>
         <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Salad size={13} strokeWidth={2} color="#333" /> {t.veg}</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Leaf size={13} strokeWidth={2} color="#333" /> {t.vgn}</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><MilkOff size={13} strokeWidth={2} color="#333" /> {t.nl}</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ChefHat size={13} strokeWidth={2} color="#333" /> {t.loc}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Salad size={16} strokeWidth={2} color="#333" /> {t.veg}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Leaf size={16} strokeWidth={2} color="#333" /> {t.vgn}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><MilkOff size={16} strokeWidth={2} color="#333" /> {t.nl}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ChefHat size={16} strokeWidth={2} color="#333" /> {t.loc}</span>
         </div>
         <div style={{ fontStyle: 'italic', textAlign: 'right' }}>{t.allergen}</div>
       </div>
