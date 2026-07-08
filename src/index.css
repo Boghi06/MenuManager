@@ -8,6 +8,12 @@
 @custom-variant dark (&:is(.dark *));
 
 @theme inline {
+    /* Token brand del cliente: i valori vengono iniettati a runtime da applyTheme() */
+    --color-brand: var(--brand);
+    --color-brand-dark: var(--brand-dark);
+    --color-brand-surface: var(--brand-surface);
+    --color-brand-canvas: var(--brand-canvas);
+    --color-brand-ink: var(--brand-ink);
     --font-heading: var(--font-sans);
     --font-sans: 'Geist Variable', sans-serif;
     --font-serif: 'Fraunces Variable', serif;
@@ -54,6 +60,12 @@
 }
 
 :root {
+    /* Fallback brand (Hotel Garden); sovrascritti a runtime da applyTheme() */
+    --brand: #B23A1F;
+    --brand-dark: #75160D;
+    --brand-surface: #D9D9D9;
+    --brand-canvas: #FFFFFF;
+    --brand-ink: #000000;
     --background: oklch(1 0 0);
     --foreground: oklch(0.145 0 0);
     --card: oklch(1 0 0);
