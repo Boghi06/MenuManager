@@ -373,7 +373,7 @@ function A4Page({ giorno, data, lingua, voci, piattoMap, flagsPranzo, flagsCena,
   return (
     <div style={pageStyle}>
       {/* ── Page header ──────────────────────────────── */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
         <div style={headerLabelStyle}>
           {t.lunch} {t.lunchTime}
         </div>
@@ -388,7 +388,7 @@ function A4Page({ giorno, data, lingua, voci, piattoMap, flagsPranzo, flagsCena,
       <hr style={{ borderColor: '#ccc', borderWidth: '0 0 1px', margin: '0 0 10px' }} />
 
       {/* ── Two columns ─────────────────────────────── */}
-      <div style={{ display: 'flex', gap: 28, flex: 1 }}>
+      <div style={{ display: 'flex', gap: 28, flex: 1, paddingTop: 22 }}>
         <Colonna
           servizio="pranzo"
           giorno={giorno}
