@@ -13,6 +13,8 @@ interface MenuComposerGridProps {
   servizio: Servizio
   giorniLabels: string[]
   nomePiatto: (id: number | null) => string
+  /** Sola visualizzazione (ruolo cucina): nessuna azione di modifica. */
+  readOnly?: boolean
   onAdd: (giorno: number, tipo: SezioneTipo) => void
   onRemove: (voceId: number) => void
   onAddContorno: (secondoVoceId: number) => void
@@ -32,11 +34,12 @@ interface ToggleRowProps {
   chipText: string
   flagKey: FlagKey
   giorni: number[]
+  readOnly?: boolean
   getFlag: (giorno: number, key: FlagKey) => boolean
   onToggleFlag: (giorno: number, key: FlagKey) => void
 }
 
-function ToggleRow({ label, barColor, chipText, flagKey, giorni, getFlag, onToggleFlag }: ToggleRowProps) {
+function ToggleRow({ label, barColor, chipText, flagKey, giorni, readOnly = false, getFlag, onToggleFlag }: ToggleRowProps) {
   const tdCell = 'p-1.5 align-top border-b border-[#E5E5E5] border-r border-r-[#E5E5E5] first:border-l first:border-l-[#E5E5E5]'
 
   return (
@@ -55,15 +58,19 @@ function ToggleRow({ label, barColor, chipText, flagKey, giorni, getFlag, onTogg
               <div className="group/slot w-full flex items-center gap-1.5 border border-[#D4D4D4] bg-white rounded px-2 py-1.5">
                 <div className="shrink-0 rounded-sm" style={{ width: 3, height: 16, background: barColor }} />
                 <span className="font-fraunces text-sm text-gray-600 flex-1 leading-tight truncate">{chipText}</span>
-                <button
-                  type="button"
-                  title="Nascondi"
-                  onClick={() => onToggleFlag(giorno, flagKey)}
-                  className="shrink-0 p-0.5 text-gray-400 opacity-0 group-hover/slot:opacity-60 hover:!opacity-100 hover:text-black transition-opacity"
-                >
-                  <X className="w-3.5 h-3.5" />
-                </button>
+                {!readOnly && (
+                  <button
+                    type="button"
+                    title="Nascondi"
+                    onClick={() => onToggleFlag(giorno, flagKey)}
+                    className="shrink-0 p-0.5 text-gray-400 opacity-0 group-hover/slot:opacity-60 hover:!opacity-100 hover:text-black transition-opacity"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
               </div>
+            ) : readOnly ? (
+              <div className="w-full px-3 py-2 text-sm text-gray-300">—</div>
             ) : (
               <button
                 type="button"
@@ -84,9 +91,10 @@ function ToggleRow({ label, barColor, chipText, flagKey, giorni, getFlag, onTogg
 
 // ─── Helper: cella evento (chip o select) ─────────────────────────────────────
 
-function EventoCell({ eventoId, eventi, onSelect }: {
+function EventoCell({ eventoId, eventi, readOnly = false, onSelect }: {
   eventoId: string | null
   eventi: Evento[]
+  readOnly?: boolean
   onSelect: (id: string | null) => void
 }) {
   const evento = eventi.find(e => e.id === eventoId)
@@ -95,16 +103,22 @@ function EventoCell({ eventoId, eventi, onSelect }: {
     return (
       <div className="group/slot w-full flex items-center gap-1.5 border border-amber-200 bg-amber-50 rounded px-2 py-1.5">
         <span className="font-fraunces text-sm text-amber-800 flex-1 leading-tight truncate">{evento.nome}</span>
-        <button
-          type="button"
-          title="Rimuovi evento"
-          onClick={() => onSelect(null)}
-          className="shrink-0 p-0.5 text-amber-400 opacity-0 group-hover/slot:opacity-60 hover:!opacity-100 hover:text-amber-800 transition-opacity"
-        >
-          <X className="w-3.5 h-3.5" />
-        </button>
+        {!readOnly && (
+          <button
+            type="button"
+            title="Rimuovi evento"
+            onClick={() => onSelect(null)}
+            className="shrink-0 p-0.5 text-amber-400 opacity-0 group-hover/slot:opacity-60 hover:!opacity-100 hover:text-amber-800 transition-opacity"
+          >
+            <X className="w-3.5 h-3.5" />
+          </button>
+        )}
       </div>
     )
+  }
+
+  if (readOnly) {
+    return <div className="w-full px-2 py-1.5 text-xs text-gray-300">—</div>
   }
 
   return (
@@ -125,7 +139,7 @@ function EventoCell({ eventoId, eventi, onSelect }: {
 // ─── Main grid ────────────────────────────────────────────────────────────────
 
 export function MenuComposerGrid({
-  voci, settimana, servizio, giorniLabels, nomePiatto,
+  voci, settimana, servizio, giorniLabels, nomePiatto, readOnly = false,
   onAdd, onRemove, onAddContorno, onRemoveContorno,
   getFlag, onToggleFlag, getEventoId, onSetEventoId, eventi,
 }: MenuComposerGridProps) {
@@ -186,6 +200,7 @@ export function MenuComposerGrid({
               <EventoCell
                 eventoId={getEventoId(giorno)}
                 eventi={eventi}
+                readOnly={readOnly}
                 onSelect={(id) => onSetEventoId(giorno, id)}
               />
             </td>
@@ -213,12 +228,13 @@ export function MenuComposerGrid({
                             nome={nomePiatto(v.piatto_id)}
                             piattoId={v.piatto_id}
                             contornoNome={v.contorno_id != null ? nomePiatto(v.contorno_id) : null}
+                            readOnly={readOnly}
                             onRemove={() => onRemove(v.id)}
                             onAddContorno={() => onAddContorno(v.id)}
                             onRemoveContorno={() => onRemoveContorno(v.id)}
                           />
                         ))}
-                        {vs.length < SEZIONI_MAX[tipo] && (
+                        {!readOnly && vs.length < SEZIONI_MAX[tipo] && (
                           <PiattoSlot tipo="se" addLabel="Aggiungi secondo" onClick={() => onAdd(giorno, 'se')} />
                         )}
                       </div>
@@ -227,6 +243,7 @@ export function MenuComposerGrid({
                         alternative={toAlternative(vs)}
                         tipo={tipo}
                         maxAlternative={SEZIONI_MAX[tipo]}
+                        readOnly={readOnly}
                         onAdd={() => onAdd(giorno, tipo)}
                         onRemove={onRemove}
                       />
@@ -244,6 +261,7 @@ export function MenuComposerGrid({
                 chipText="Succhi di frutta"
                 flagKey="show_succhi"
                 giorni={giorni}
+                readOnly={readOnly}
                 getFlag={getFlag}
                 onToggleFlag={onToggleFlag}
               />
@@ -258,6 +276,7 @@ export function MenuComposerGrid({
                   chipText="Insalate miste dal buffet"
                   flagKey="show_insalate"
                   giorni={giorni}
+                  readOnly={readOnly}
                   getFlag={getFlag}
                   onToggleFlag={onToggleFlag}
                 />
@@ -268,6 +287,7 @@ export function MenuComposerGrid({
                   chipText="Scelta di formaggi tradizionali"
                   flagKey="show_formaggi"
                   giorni={giorni}
+                  readOnly={readOnly}
                   getFlag={getFlag}
                   onToggleFlag={onToggleFlag}
                 />
@@ -282,6 +302,7 @@ export function MenuComposerGrid({
                 chipText="Buffet di dessert"
                 flagKey="show_buffet_dessert"
                 giorni={giorni}
+                readOnly={readOnly}
                 getFlag={getFlag}
                 onToggleFlag={onToggleFlag}
               />

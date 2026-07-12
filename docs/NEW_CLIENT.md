@@ -49,8 +49,11 @@ scripts/apply-migrations.sh --mark-applied "$HOTEL_GARDEN_DB_URL" menu
    - Applicare le migrazioni: `scripts/apply-migrations.sh "$DB_URL" <moduli...>`.
    - Creare il bucket storage `eventi-images` (pubblico in lettura) se il modulo
      menu è attivo.
-   - Creare il primo utente: Authentication → Users → "Add user" (email+password,
-     confermare l'email manualmente).
+   - Creare il primo utente **admin**: Authentication → Users → "Add user" con
+     email `<nome>@utenti.local`, una password e **Auto Confirm User** attivo
+     (il login avviene per nome utente, vedi CLAUDE.md § Ruoli utente). Poi
+     Table Editor → `user_roles` → riga con `user_id` dell'utente e `role = admin`.
+     Da quel momento l'admin può creare gli altri utenti dalla UI (Gestione utenti).
 
 3. **Vercel**
    - "Add New Project" → importare **questa stessa repo GitHub**.
@@ -58,7 +61,11 @@ scripts/apply-migrations.sh --mark-applied "$HOTEL_GARDEN_DB_URL" menu
      - `VITE_SUPABASE_URL` = Project URL del punto 2
      - `VITE_SUPABASE_ANON_KEY` = anon key del punto 2
      - `VITE_CLIENT` = id del cliente (es. `hotel-garden`)
-   - Deploy. `vercel.json` (rewrite SPA + security headers) si applica da solo.
+     - `SUPABASE_URL` = stesso Project URL (serve alla serverless function, senza prefisso VITE)
+     - `SUPABASE_SERVICE_ROLE_KEY` = **service_role** key (Project Settings → API).
+       ⚠️ Solo lato server: la usa `api/create-user.ts` per creare utenti; non
+       ha prefisso `VITE_`, quindi non finisce mai nel bundle client. Non condividerla.
+   - Deploy. `vercel.json` (rewrite SPA con esclusione `/api` + security headers) si applica da solo.
    - Settings → Domains: collegare il dominio del cliente.
 
 4. **Smoke test**

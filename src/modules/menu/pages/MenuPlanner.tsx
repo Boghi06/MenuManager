@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Copy } from 'lucide-react'
 import { AppLayout } from '@/core/layout/AppLayout'
+import { useRole } from '@/core/auth/roles'
 import { BisettimanaCard } from '@/modules/menu/components/menu/BisettimanaCard'
 import { DuplicaSettimanaDialog } from '@/modules/menu/components/menu/DuplicaSettimanaDialog'
 import { useBisettimane } from '@/modules/menu/hooks/useBisettimane'
@@ -16,6 +17,9 @@ export default function MenuPlanner() {
   const { mappa, anniEsistenti, maxAnnoEsistente, loading, operazione, inizializzaAnno, copiaAnno, refresh, error } = useBisettimane(anno)
 
   const [duplicaOpen, setDuplicaOpen] = useState(false)
+
+  // La cucina consulta soltanto: niente inizializza/copia anno né duplica settimana
+  const readOnly = useRole() === 'cucina'
 
   const operando = operazione !== null
   const canGoBack = !loading && !operando && anniEsistenti.has(anno - 1)
@@ -53,8 +57,8 @@ export default function MenuPlanner() {
             >
               {anno + 1} →
             </button>
-            <div className="w-px h-6 bg-gray-300 mx-2" />
-            {annoNonEsiste ? (
+            {!readOnly && <div className="w-px h-6 bg-gray-300 mx-2" />}
+            {readOnly ? null : annoNonEsiste ? (
               <>
                 <button
                   onClick={() => inizializzaAnno(anno)}
@@ -107,13 +111,19 @@ export default function MenuPlanner() {
         {loading ? (
           <div className="px-8 py-8 text-sm text-gray-400">Caricamento…</div>
         ) : annoNonEsiste ? (
-          <EmptyStateAnno
-            anno={anno}
-            puoCopiareDaPrecedente={puoCopiareDaPrecedente}
-            operazione={operazione}
-            onInizializza={() => inizializzaAnno(anno)}
-            onCopia={() => copiaAnno(anno - 1, anno)}
-          />
+          readOnly ? (
+            <div className="px-8 py-12 text-center text-sm text-gray-500">
+              L'anno <span className="font-semibold text-black">{anno}</span> non è ancora stato inizializzato.
+            </div>
+          ) : (
+            <EmptyStateAnno
+              anno={anno}
+              puoCopiareDaPrecedente={puoCopiareDaPrecedente}
+              operazione={operazione}
+              onInizializza={() => inizializzaAnno(anno)}
+              onCopia={() => copiaAnno(anno - 1, anno)}
+            />
+          )
         ) : (
           <>
             {error && (
