@@ -2,9 +2,11 @@ import { useMemo, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { ArrowLeft } from 'lucide-react'
 import { AppLayout } from '@/core/layout/AppLayout'
+import { useRole } from '@/core/auth/roles'
 import { MenuComposerGrid } from '@/modules/menu/components/menu/MenuComposerGrid'
 import { SelettorePiatto } from '@/modules/menu/components/menu/SelettorePiatto'
 import { StampaPreview } from '@/modules/menu/components/menu/StampaPreview'
+import { StampaRicette } from '@/modules/menu/components/menu/StampaRicette'
 import { useMenuComposer } from '@/modules/menu/hooks/useMenuComposer'
 import { useMenuFlags } from '@/modules/menu/hooks/useMenuFlags'
 import { usePiatti } from '@/modules/menu/hooks/usePiatti'
@@ -30,6 +32,12 @@ export default function MenuComposer() {
   const [servizio, setServizio] = useState<Servizio>('pranzo')
   const [target, setTarget] = useState<SelectorTarget | null>(null)
   const [stampaOpen, setStampaOpen] = useState(false)
+  const [ricetteOpen, setRicetteOpen] = useState(false)
+
+  // receptionist: stampa menù clienti · cucina: sola lettura + stampa ricette
+  // admin: modifica + entrambe le stampe
+  const role = useRole()
+  const readOnly = role === 'cucina'
 
   const { bisettimanaId, voci, loading, error, aggiungiPiatto, setContorno, rimuoviPiatto } =
     useMenuComposer(anno, mese, idx)
@@ -115,12 +123,22 @@ export default function MenuComposer() {
               ))}
             </div>
 
-            <button
-              onClick={() => setStampaOpen(true)}
-              className="h-9 px-3 border border-gray-900 rounded-md bg-gray-900 text-white text-sm hover:bg-gray-700 transition-colors"
-            >
-              Stampa
-            </button>
+            {role !== 'cucina' && (
+              <button
+                onClick={() => setStampaOpen(true)}
+                className="h-9 px-3 border border-gray-900 rounded-md bg-gray-900 text-white text-sm hover:bg-gray-700 transition-colors"
+              >
+                {role === 'admin' ? 'Stampa menù' : 'Stampa'}
+              </button>
+            )}
+            {role !== 'receptionist' && (
+              <button
+                onClick={() => setRicetteOpen(true)}
+                className="h-9 px-3 border border-gray-900 rounded-md bg-gray-900 text-white text-sm hover:bg-gray-700 transition-colors"
+              >
+                {role === 'admin' ? 'Stampa ricette' : 'Stampa'}
+              </button>
+            )}
           </div>
         </div>
       </div>
@@ -141,6 +159,7 @@ export default function MenuComposer() {
             servizio={servizio}
             giorniLabels={giorniLabels}
             nomePiatto={nomePiatto}
+            readOnly={readOnly}
             onAdd={(giorno, tipo) => setTarget({ kind: 'sezione', giorno, tipo })}
             onRemove={(voceId) => void rimuoviPiatto(voceId)}
             onAddContorno={(secondoVoceId) => setTarget({ kind: 'contorno', secondoVoceId })}
@@ -161,18 +180,32 @@ export default function MenuComposer() {
         onPick={handlePick}
       />
 
-      <StampaPreview
-        open={stampaOpen}
-        onClose={() => setStampaOpen(false)}
-        voci={voci}
-        piatti={piatti}
-        anno={anno}
-        mese={mese}
-        bisettimanaIdx={idx}
-        getFlag={getFlag}
-        getEvento={getEvento}
-        eventi={eventi}
-      />
+      {role !== 'cucina' && (
+        <StampaPreview
+          open={stampaOpen}
+          onClose={() => setStampaOpen(false)}
+          voci={voci}
+          piatti={piatti}
+          anno={anno}
+          mese={mese}
+          bisettimanaIdx={idx}
+          getFlag={getFlag}
+          getEvento={getEvento}
+          eventi={eventi}
+        />
+      )}
+
+      {role !== 'receptionist' && (
+        <StampaRicette
+          open={ricetteOpen}
+          onClose={() => setRicetteOpen(false)}
+          voci={voci}
+          piatti={piatti}
+          anno={anno}
+          mese={mese}
+          bisettimanaIdx={idx}
+        />
+      )}
     </AppLayout>
   )
 }

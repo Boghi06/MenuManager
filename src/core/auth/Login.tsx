@@ -5,10 +5,11 @@ import { User, Lock, AlertCircle } from "lucide-react"
 import { useNavigate } from "react-router-dom"
 import { clientConfig } from "@/config/clients"
 import { supabase } from "@/core/lib/supabase"
+import { loginInputToEmail } from "./username"
 
 export default function Login() {
   const navigate = useNavigate()
-  const [email, setEmail] = useState("")
+  const [username, setUsername] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
@@ -18,7 +19,10 @@ export default function Login() {
     setLoading(true)
     setError(null)
 
-    const { error } = await supabase.auth.signInWithPassword({ email, password })
+    const { error } = await supabase.auth.signInWithPassword({
+      email: loginInputToEmail(username),
+      password,
+    })
 
     if (error) {
       setError("Credenziali non valide. Riprova.")
@@ -38,10 +42,12 @@ export default function Login() {
           <div className="relative">
             <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
             <Input
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              type="text"
+              autoComplete="username"
+              autoCapitalize="none"
+              placeholder="Nome utente"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
               required
               className="pl-11 h-12 rounded-full border-gray-300 font-sans bg-white"
             />

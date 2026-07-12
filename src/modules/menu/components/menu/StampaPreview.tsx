@@ -131,7 +131,7 @@ function BadgeRow({ p, lingua }: { p: Piatto; lingua: Lingua }) {
   return (
     <span style={{ marginLeft: 4, display: 'inline-flex', gap: 2, verticalAlign: 'middle' }}>
       {items.map((b, i) => (
-        <b.Icon key={i} size={14} strokeWidth={2} color="#444" />
+        <b.Icon key={i} size={20} strokeWidth={2} color="#444" />
       ))}
     </span>
   )
@@ -460,10 +460,10 @@ function A4Page({ giorno, data, lingua, voci, piattoMap, flagsPranzo, flagsCena,
         color: '#333',
       }}>
         <div style={{ display: 'flex', gap: 14 }}>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Salad size={16} strokeWidth={2} color="#333" /> {t.veg}</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Leaf size={16} strokeWidth={2} color="#333" /> {t.vgn}</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><MilkOff size={16} strokeWidth={2} color="#333" /> {t.nl}</span>
-          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ChefHat size={16} strokeWidth={2} color="#333" /> {t.loc}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Salad size={20} strokeWidth={2} color="#333" /> {t.veg}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><Leaf size={20} strokeWidth={2} color="#333" /> {t.vgn}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><MilkOff size={20} strokeWidth={2} color="#333" /> {t.nl}</span>
+          <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ChefHat size={20} strokeWidth={2} color="#333" /> {t.loc}</span>
         </div>
         <div style={{ fontStyle: 'italic', textAlign: 'right' }}>{t.allergen}</div>
       </div>
@@ -476,7 +476,9 @@ function A4Page({ giorno, data, lingua, voci, piattoMap, flagsPranzo, flagsCena,
 export function StampaPreview({ open, onClose, voci, piatti, anno, mese, bisettimanaIdx, getFlag, getEvento, eventi }: StampaPreviewProps) {
   const [lingua, setLingua] = useState<Lingua>('it')
   const [giorno, setGiorno] = useState<number>(0)
-  const printRef = useRef<HTMLDivElement>(null)
+  // printAllRef contiene le 4 pagine (una per lingua) del giorno selezionato,
+  // renderizzate fuori schermo: è la sorgente per la stampa unica multilingua.
+  const printAllRef = useRef<HTMLDivElement>(null)
   const { righe, supplementi } = useFooterConfig()
 
   const eventoMap = useMemo(() => {
@@ -505,22 +507,46 @@ export function StampaPreview({ open, onClose, voci, piatti, anno, mese, bisetti
     })
   }, [anno, mese, bisettimanaIdx])
 
+  // Stampa unica: un solo PDF con 4 pagine (it/en/de/fr) dello stesso giorno.
+  // La sorgente è printAllRef, che contiene già una pagina per lingua separata
+  // da un page-break; la preview a singola lingua resta indipendente.
   const handlePrint = () => {
-    const el = printRef.current
+    const el = printAllRef.current
     if (!el) return
     const html = el.innerHTML
     const win = window.open('', '_blank', 'width=1200,height=860')
     if (!win) return
     win.document.write(`<!DOCTYPE html>
-<html lang="${lingua}">
+<html lang="it">
 <head>
   <meta charset="UTF-8">
   <title>Menu ${formatDateHeader(giorni[giorno])}</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
     body { background: white; }
+    /* Orizzontale di default + nessun margine di pagina del browser. */
     @page { size: A4 landscape; margin: 0; }
-    @media print { html, body { width: 297mm; height: 210mm; } }
+    .print-page { page-break-after: always; break-after: page; }
+    .print-page:last-child { page-break-after: auto; break-after: auto; }
+    @media print {
+      html, body { width: 297mm; height: 210mm; }
+      /* Ogni pagina occupa esattamente un A4 orizzontale e centra il
+         contenuto; lo scale <1 lascia un margine di sicurezza così il
+         menu si adatta alla pagina senza traboccare su un secondo foglio
+         (bordo non stampabile di alcune stampanti). */
+      .print-page {
+        width: 297mm;
+        height: 210mm;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        overflow: hidden;
+      }
+      .print-page > div {
+        transform: scale(0.97);
+        transform-origin: center center;
+      }
+    }
   </style>
 </head>
 <body>${html}</body>
@@ -532,19 +558,55 @@ export function StampaPreview({ open, onClose, voci, piatti, anno, mese, bisetti
   if (!open) return null
 
   const selectedDate = giorni[giorno]
-  const nomiSempre = righe
-    .map(r => piattoMap.get(r.piatto_id))
-    .filter((p): p is Piatto => !!p)
-    .map(p => nomePiatto(p, lingua))
 
-  const footer: FooterResolved = {
-    righe: wrapPiatti(nomiSempre).map((testo, i) => ({ id: String(i), testo })),
-    supplementi: supplementi.reduce<{ id: string; piatto: string; prezzo: number }[]>((acc, s) => {
-      const p = piattoMap.get(s.piatto_id)
-      if (p) acc.push({ id: s.id, piatto: nomePiatto(p, lingua), prezzo: s.prezzo })
-      return acc
-    }, []),
+  // Il footer dipende dalla lingua (nomi piatti + supplementi tradotti):
+  // funzione così da poterlo ricalcolare per ciascuna delle 4 pagine di stampa.
+  const buildFooter = (l: Lingua): FooterResolved => {
+    const nomiSempre = righe
+      .map(r => piattoMap.get(r.piatto_id))
+      .filter((p): p is Piatto => !!p)
+      .map(p => nomePiatto(p, l))
+    return {
+      righe: wrapPiatti(nomiSempre).map((testo, i) => ({ id: String(i), testo })),
+      supplementi: supplementi.reduce<{ id: string; piatto: string; prezzo: number }[]>((acc, s) => {
+        const p = piattoMap.get(s.piatto_id)
+        if (p) acc.push({ id: s.id, piatto: nomePiatto(p, l), prezzo: s.prezzo })
+        return acc
+      }, []),
+    }
   }
+
+  // Flag ed eventi non dipendono dalla lingua: calcolati una volta e condivisi
+  // tra la preview e tutte le pagine di stampa.
+  const flagsPranzo = {
+    succhi:        getFlag(giorno, 'pranzo', 'show_succhi'),
+    insalate:      getFlag(giorno, 'pranzo', 'show_insalate'),
+    formaggi:      getFlag(giorno, 'pranzo', 'show_formaggi'),
+    buffetDessert: getFlag(giorno, 'pranzo', 'show_buffet_dessert'),
+  }
+  const flagsCena = {
+    succhi:        getFlag(giorno, 'cena', 'show_succhi'),
+    insalate:      getFlag(giorno, 'cena', 'show_insalate'),
+    formaggi:      getFlag(giorno, 'cena', 'show_formaggi'),
+    buffetDessert: getFlag(giorno, 'cena', 'show_buffet_dessert'),
+  }
+  const eventoPranzo = resolveEvento(giorno, 'pranzo')
+  const eventoCena = resolveEvento(giorno, 'cena')
+
+  const renderPage = (l: Lingua) => (
+    <A4Page
+      giorno={giorno}
+      data={selectedDate}
+      lingua={l}
+      voci={voci}
+      piattoMap={piattoMap}
+      flagsPranzo={flagsPranzo}
+      flagsCena={flagsCena}
+      eventoPranzo={eventoPranzo}
+      eventoCena={eventoCena}
+      footer={buildFooter(l)}
+    />
+  )
 
   const overlayStyle: CSSProperties = {
     position: 'fixed', inset: 0, zIndex: 50,
@@ -644,32 +706,20 @@ export function StampaPreview({ open, onClose, voci, piatti, anno, mese, bisetti
                 boxShadow: '0 4px 24px rgba(0,0,0,0.18)',
               }}
             >
-              <div ref={printRef}>
-                <A4Page
-                  giorno={giorno}
-                  data={selectedDate}
-                  lingua={lingua}
-                  voci={voci}
-                  piattoMap={piattoMap}
-                  flagsPranzo={{
-                    succhi:        getFlag(giorno, 'pranzo', 'show_succhi'),
-                    insalate:      getFlag(giorno, 'pranzo', 'show_insalate'),
-                    formaggi:      getFlag(giorno, 'pranzo', 'show_formaggi'),
-                    buffetDessert: getFlag(giorno, 'pranzo', 'show_buffet_dessert'),
-                  }}
-                  flagsCena={{
-                    succhi:        getFlag(giorno, 'cena', 'show_succhi'),
-                    insalate:      getFlag(giorno, 'cena', 'show_insalate'),
-                    formaggi:      getFlag(giorno, 'cena', 'show_formaggi'),
-                    buffetDessert: getFlag(giorno, 'cena', 'show_buffet_dessert'),
-                  }}
-                  eventoPranzo={resolveEvento(giorno, 'pranzo')}
-                  eventoCena={resolveEvento(giorno, 'cena')}
-                  footer={footer}
-                />
+              <div>
+                {renderPage(lingua)}
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Sorgente di stampa: 4 pagine (una per lingua) fuori schermo. */}
+        <div ref={printAllRef} aria-hidden style={{ position: 'absolute', left: -99999, top: 0, pointerEvents: 'none' }}>
+          {(['it', 'en', 'de', 'fr'] as Lingua[]).map(l => (
+            <div key={l} className="print-page">
+              {renderPage(l)}
+            </div>
+          ))}
         </div>
       </div>
     </div>

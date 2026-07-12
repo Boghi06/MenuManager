@@ -1,14 +1,22 @@
-import type { RouteObject } from 'react-router-dom'
+import type { ReactNode } from 'react'
 import type { LucideIcon } from 'lucide-react'
 import type { ModuleId } from '@/config/types'
+import type { UserRole } from '@/core/auth/roles'
 import { menuModule } from '@/modules/menu'
 
 export interface NavItem {
   label: string
   path: string
   icon: LucideIcon
-  /** Predisposto per la futura gestione ruoli: se assente, visibile a tutti */
-  requiredRole?: string
+  /** Ruoli che vedono la voce: se assente, visibile a tutti */
+  roles?: UserRole[]
+}
+
+export interface ModuleRoute {
+  path: string
+  element: ReactNode
+  /** Ruoli ammessi alla route: se assente, accessibile a tutti gli autenticati */
+  roles?: UserRole[]
 }
 
 export interface ModuleDefinition {
@@ -16,7 +24,7 @@ export interface ModuleDefinition {
   label: string
   /** Route di atterraggio del modulo (target del redirect da "/") */
   defaultPath: string
-  routes: RouteObject[]
+  routes: ModuleRoute[]
   navItems: NavItem[]
 }
 

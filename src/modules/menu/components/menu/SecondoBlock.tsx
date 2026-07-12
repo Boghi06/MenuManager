@@ -6,6 +6,8 @@ interface SecondoBlockProps {
   piattoId: number
   /** Nome del contorno assegnato, o null se assente. */
   contornoNome: string | null
+  /** Sola visualizzazione: niente rimozione né slot contorno vuoto. */
+  readOnly?: boolean
   onRemove: () => void
   onAddContorno: () => void
   onRemoveContorno: () => void
@@ -16,16 +18,21 @@ interface SecondoBlockProps {
  * card secondo + sotto, indentato, lo slot contorno.
  */
 export function SecondoBlock({
-  nome, piattoId, contornoNome, onRemove, onAddContorno, onRemoveContorno,
+  nome, piattoId, contornoNome, readOnly = false, onRemove, onAddContorno, onRemoveContorno,
 }: SecondoBlockProps) {
+  // in sola lettura senza contorno non serve mostrare lo slot vuoto
+  if (readOnly && !contornoNome) {
+    return <PiattoSlot nome={nome} piattoId={piattoId} tipo="se" />
+  }
+
   return (
     <div className="flex flex-col gap-1">
-      <PiattoSlot nome={nome} piattoId={piattoId} tipo="se" onRemove={onRemove} />
+      <PiattoSlot nome={nome} piattoId={piattoId} tipo="se" onRemove={readOnly ? undefined : onRemove} />
 
       {/* contorno annidato — esattamente 0 o 1 per secondo */}
       <div className="ml-3.5 pl-2.5 border-l border-[#D4D4D4]">
         {contornoNome ? (
-          <PiattoSlot nome={contornoNome} tipo="con" compact onRemove={onRemoveContorno} />
+          <PiattoSlot nome={contornoNome} tipo="con" compact onRemove={readOnly ? undefined : onRemoveContorno} />
         ) : (
           <button
             type="button"

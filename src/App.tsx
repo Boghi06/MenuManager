@@ -2,6 +2,7 @@ import { Suspense } from "react"
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom"
 import Login from "@/core/auth/Login"
 import { ProtectedRoute } from "@/core/auth/ProtectedRoute"
+import { RequireRole } from "@/core/auth/RequireRole"
 import { clientConfig } from "@/config/clients"
 import { getEnabledModules } from "@/modules/registry"
 
@@ -25,7 +26,13 @@ function App() {
         <Route path="/login" element={<Login />} />
         <Route element={<ProtectedLayout />}>
           {enabledModules.flatMap((mod) => mod.routes).map((route) => (
-            <Route key={route.path} path={route.path} element={route.element} />
+            <Route
+              key={route.path}
+              path={route.path}
+              element={route.roles
+                ? <RequireRole roles={route.roles}>{route.element}</RequireRole>
+                : route.element}
+            />
           ))}
           <Route path="/" element={<Navigate to={homePath} replace />} />
           <Route path="/dashboard" element={<Navigate to={homePath} replace />} />

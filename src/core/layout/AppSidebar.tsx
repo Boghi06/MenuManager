@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { LogOut } from 'lucide-react'
 import { cn } from '@/core/lib/utils'
 import { supabase } from '@/core/lib/supabase'
+import { useRole } from '@/core/auth/roles'
 import { clientConfig } from '@/config/clients'
 import { getEnabledModules } from '@/modules/registry'
 
@@ -11,11 +12,14 @@ interface AppSidebarProps {
   extra?: ReactNode
 }
 
-const navItems = getEnabledModules(clientConfig.enabledModules).flatMap((mod) => mod.navItems)
+const allNavItems = getEnabledModules(clientConfig.enabledModules).flatMap((mod) => mod.navItems)
 
 export function AppSidebar({ extra }: AppSidebarProps) {
   const navigate = useNavigate()
   const location = useLocation()
+  const role = useRole()
+
+  const navItems = allNavItems.filter((item) => !item.roles || item.roles.includes(role))
 
   const isActive = (path: string) =>
     location.pathname === path || location.pathname.startsWith(path + '/')
