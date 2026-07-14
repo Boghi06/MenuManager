@@ -1,5 +1,5 @@
-import { useState, useMemo } from 'react'
-import { Check, Plus, X, GripVertical, Info, Search, Salad, Leaf, MilkOff, ChefHat } from 'lucide-react'
+import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
+import { Check, Plus, X, GripVertical, Info, Search, Salad, Leaf, MilkOff, ChefHat, Loader2 } from 'lucide-react'
 import { AppLayout } from '@/core/layout/AppLayout'
 import { PageHeader } from '@/core/layout/PageHeader'
 import { useFooterConfig } from '@/modules/menu/hooks/useFooterConfig'
@@ -76,6 +76,10 @@ function PiattoSelect({ piattoId, onChange, piatti }: {
             <button
               key={p.id}
               type="button"
+              // preventDefault: evita che il click tolga il focus all'input (su
+              // Safari/Firefox i button non ricevono focus) facendo scattare l'onBlur
+              // del contenitore, che chiuderebbe il menu prima dell'onClick.
+              onMouseDown={e => e.preventDefault()}
               onClick={() => { onChange(p.id); setOpen(false); setQuery('') }}
               className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-gray-50 ${p.id === piattoId ? 'text-gray-900 font-medium' : 'text-gray-700'}`}
             >
@@ -144,6 +148,9 @@ function PiattiMultiSelect({ piattoIds, onChange, piatti }: {
             <button
               key={p.id}
               type="button"
+              // preventDefault: vedi PiattoSelect — tiene il focus sull'input così
+              // l'onBlur non chiude il menu prima che scatti l'onClick di aggiunta.
+              onMouseDown={e => e.preventDefault()}
               onClick={() => add(p.id)}
               className="w-full text-left px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50"
             >
@@ -223,6 +230,13 @@ export default function Impostazioni() {
   const [righe, setRighe] = useState<number[]>([])
   const [supplementi, setSupplementi] = useState<SupplLocal[]>([])
   const [saved, setSaved] = useState(false)
+  const [errore, setErrore] = useState<string | null>(null)
+  // Drag&drop supplementi (HTML5 nativo, niente librerie):
+  //  · dragRow: riga che si sta trascinando (draggable attivo solo su questa,
+  //    per non intercettare la selezione del testo negli input)
+  //  · overRow: riga sotto il cursore, per l'evidenziazione del punto di rilascio
+  const [dragRow, setDragRow] = useState<number | null>(null)
+  const [overRow, setOverRow] = useState<number | null>(null)
 
   // snapshot salvato (per dirty-check)
   const baseRighe = useMemo<number[]>(() => righeDb.map(r => r.piatto_id), [righeDb])
@@ -239,26 +253,64 @@ export default function Impostazioni() {
     setSupplementi(baseSuppl)
   }
 
-  const dirty = useMemo(
-    () => JSON.stringify({ righe, supplementi }) !== JSON.stringify({ righe: baseRighe, supplementi: baseSuppl }),
-    [righe, supplementi, baseRighe, baseSuppl],
+  // Chiave sulla forma *canonica* (quella che verrà persistita): le righe di
+  // supplemento senza piatto scelto non si salvano, quindi non contano come
+  // modifica — altrimenti l'autosave ripartirebbe all'infinito su una riga
+  // vuota. I prezzi si confrontano come numeri, non come testo.
+  const localKey = useMemo(
+    () => JSON.stringify({
+      righe,
+      suppl: supplementi
+        .filter(s => s.piatto_id != null)
+        .map(s => ({ piatto_id: s.piatto_id, prezzo: parsePrezzo(s.prezzo) })),
+    }),
+    [righe, supplementi],
   )
+  const baseKey = useMemo(
+    () => JSON.stringify({ righe: baseRighe, suppl: supplDb.map(s => ({ piatto_id: s.piatto_id, prezzo: s.prezzo })) }),
+    [baseRighe, supplDb],
+  )
+  const needsSave = localKey !== baseKey
 
-  const handleSave = async () => {
-    const ok = await saveFooter(
+  // payload che ha già fallito: evita che l'autosave ritenti a ciclo lo stesso
+  // contenuto (es. permessi mancanti). Riparte non appena il contenuto cambia.
+  const lastFailedRef = useRef<string | null>(null)
+
+  const salva = useCallback(async (key: string) => {
+    setErrore(null)
+    const err = await saveFooter(
       righe.map(piatto_id => ({ piatto_id })),
       supplementi
         .filter((s): s is { piatto_id: number; prezzo: string } => s.piatto_id != null)
         .map(s => ({ piatto_id: s.piatto_id, prezzo: parsePrezzo(s.prezzo) })),
     )
-    if (ok) { setSaved(true); setTimeout(() => setSaved(false), 2000) }
-  }
+    if (err) { setErrore(err); lastFailedRef.current = key; return }
+    lastFailedRef.current = null
+    setSaved(true); setTimeout(() => setSaved(false), 1500)
+  }, [righe, supplementi, saveFooter])
+
+  // Salvataggio automatico: dopo ogni modifica (con debounce) persiste da solo,
+  // niente pulsante manuale.
+  useEffect(() => {
+    if (!loaded || !needsSave || saving) return
+    if (lastFailedRef.current === localKey) return
+    const t = setTimeout(() => { void salva(localKey) }, 700)
+    return () => clearTimeout(t)
+  }, [loaded, needsSave, saving, localKey, salva])
 
   // mutators supplementi
   const addSuppl = () => setSupplementi(s => [...s, { piatto_id: null, prezzo: '' }])
   const setSuppl = (i: number, patch: Partial<SupplLocal>) =>
     setSupplementi(s => s.map((x, idx) => idx === i ? { ...x, ...patch } : x))
   const delSuppl = (i: number) => setSupplementi(s => s.filter((_, idx) => idx !== i))
+  const moveSuppl = (from: number, to: number) => setSupplementi(s => {
+    if (from === to || to < 0 || to >= s.length) return s
+    const next = s.slice()
+    const [m] = next.splice(from, 1)
+    next.splice(to, 0, m)
+    return next
+  })
+  const endDrag = () => { setDragRow(null); setOverRow(null) }
 
   const inputCls = 'h-10 px-3 rounded-[9px] border border-[#DEDEDE] text-sm text-gray-800 outline-none focus:border-gray-400 transition-colors'
   const dashedBtn = 'inline-flex items-center gap-1.5 h-[38px] px-3.5 rounded-[9px] border border-dashed border-[#D4D4D4] text-gray-500 text-[13.5px] font-medium hover:border-gray-400 hover:text-gray-700 transition-colors self-start'
@@ -283,16 +335,29 @@ export default function Impostazioni() {
         title="Footer menù"
         subtitle="Il blocco «Sempre a Vostra scelta» in fondo a ogni pagina stampata — stessi piatti, tradotti in 4 lingue"
         actions={
-          <button
-            onClick={handleSave}
-            disabled={!dirty || saving}
-            className="inline-flex items-center gap-2 h-[42px] px-[18px] rounded-[10px] bg-gray-900 text-white text-[14.5px] font-medium hover:bg-gray-700 disabled:opacity-50 transition-colors whitespace-nowrap"
-          >
-            <Check className="w-[17px] h-[17px]" />
-            {saved ? 'Salvato' : saving ? 'Salvataggio…' : 'Salva'}
-          </button>
+          <div className="inline-flex items-center gap-2 h-[42px] text-[13.5px] font-medium whitespace-nowrap select-none">
+            {saving ? (
+              <span className="inline-flex items-center gap-2 text-gray-500">
+                <Loader2 className="w-4 h-4 animate-spin" /> Salvataggio…
+              </span>
+            ) : needsSave ? (
+              <span className="inline-flex items-center gap-2 text-amber-600">
+                <span className="w-2 h-2 rounded-full bg-amber-400" /> Modifiche non salvate
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-2 text-gray-500">
+                <Check className="w-4 h-4 text-green-600" /> {saved ? 'Salvato' : 'Salvataggio automatico'}
+              </span>
+            )}
+          </div>
         }
       />
+
+      {errore && (
+        <div className="mx-9 mt-4 rounded-[10px] px-4 py-3 text-[13px] leading-snug bg-red-50 border border-red-200 text-red-700">
+          Salvataggio non riuscito: {errore}
+        </div>
+      )}
 
       {loading ? (
         <div className="flex-1 p-10 text-sm text-gray-400">Caricamento…</div>
@@ -328,8 +393,22 @@ export default function Impostazioni() {
 
               <div className="flex flex-col gap-2">
                 {supplementi.map((s, i) => (
-                  <div key={i} className="flex items-center gap-2">
-                    <GripVertical className="w-[18px] h-[18px] text-gray-300 shrink-0" />
+                  <div
+                    key={i}
+                    draggable={dragRow === i}
+                    onDragStart={e => { setDragRow(i); e.dataTransfer.effectAllowed = 'move' }}
+                    onDragOver={e => { if (dragRow !== null) { e.preventDefault(); setOverRow(i) } }}
+                    onDrop={e => { e.preventDefault(); if (dragRow !== null) moveSuppl(dragRow, i); endDrag() }}
+                    onDragEnd={endDrag}
+                    className={`flex items-center gap-2 rounded-[9px] transition-colors ${dragRow === i ? 'opacity-50' : ''} ${overRow === i && dragRow !== null && dragRow !== i ? 'ring-2 ring-gray-300' : ''}`}
+                  >
+                    <GripVertical
+                      // draggable si attiva solo mentre si tiene la maniglia, così
+                      // il resto della riga (input) resta selezionabile col mouse
+                      onMouseDown={() => setDragRow(i)}
+                      onMouseUp={() => { if (overRow === null) setDragRow(null) }}
+                      className="w-[18px] h-[18px] text-gray-300 shrink-0 cursor-grab active:cursor-grabbing"
+                    />
                     <PiattoSelect
                       piattoId={s.piatto_id}
                       onChange={id => setSuppl(i, { piatto_id: id })}
