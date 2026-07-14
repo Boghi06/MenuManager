@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import { Copy } from 'lucide-react'
 import { AppLayout } from '@/core/layout/AppLayout'
+import { PageHeader } from '@/core/layout/PageHeader'
 import { useRole } from '@/core/auth/roles'
 import { BisettimanaCard } from '@/modules/menu/components/menu/BisettimanaCard'
 import { DuplicaSettimanaDialog } from '@/modules/menu/components/menu/DuplicaSettimanaDialog'
@@ -34,13 +35,11 @@ export default function MenuPlanner() {
   return (
     <AppLayout>
       {/* Header */}
-      <div className="px-8 pt-8 pb-6 border-b border-gray-200">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-500 mb-2">
-          Pianificazione menù
-        </p>
-        <div className="flex items-baseline gap-4">
-          <h1 className="text-6xl font-light font-fraunces leading-none">{anno}</h1>
-          <div className="flex items-center gap-2 ml-4">
+      <PageHeader
+        eyebrow="Pianificazione menù"
+        title={anno}
+        actions={
+          <div className="flex items-center gap-2">
             <button
               onClick={() => setAnno(a => a - 1)}
               disabled={!canGoBack}
@@ -87,8 +86,8 @@ export default function MenuPlanner() {
               </button>
             )}
           </div>
-        </div>
-      </div>
+        }
+      />
 
       {/* Legenda */}
       <div className="px-8 py-4 flex gap-5 items-center text-xs text-gray-500 border-b border-gray-100">

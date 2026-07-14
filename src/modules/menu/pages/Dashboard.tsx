@@ -4,6 +4,7 @@ import { Search, Plus } from 'lucide-react'
 import { Input } from '@/core/ui/input'
 import { usePiatti } from '@/modules/menu/hooks/usePiatti'
 import { AppLayout } from '@/core/layout/AppLayout'
+import { PageHeader } from '@/core/layout/PageHeader'
 import { PiattoCard } from '@/modules/menu/components/piatti/PiattoCard'
 import { CategorieNav } from '@/modules/menu/components/piatti/CategorieNav'
 import { PiattoDrawerView } from '@/modules/menu/components/piatti/PiattoDrawerView'
@@ -66,39 +67,30 @@ export default function Dashboard() {
 
   return (
     <AppLayout sidebarExtra={<CategorieNav activeCategory={activeCategory} onCategoryChange={setActiveCategory} counts={counts} />}>
-      <div className="w-full pt-8 shrink-0">
-        <div className="flex flex-col gap-4 px-8 pb-4 border-b border-gray-200">
-          <div className="text-lg font-geist">{filteredPiatti.length} Piatti</div>
-          <h1 className="text-6xl font-light font-fraunces">
-            Elenco{' '}
-            <span
-              className="italic font-normal underline decoration-2 underline-offset-4"
-              style={{ textDecorationColor: 'var(--brand)' }}
-            >
-              Piatti
-            </span>
-          </h1>
-          <div className="flex justify-between items-center">
-            <div className="relative w-72">
-              <Search className="absolute left-3 top-3 h-4 w-4 text-brand-ink" />
-              <Input
-                type="text"
-                placeholder={`Cerca per nome o ID tra ${piatti.length.toLocaleString('it-IT')} piatti…`}
-                className="pl-9 h-10 border-gray-300 rounded-lg"
-                value={search}
-                onChange={e => setSearch(e.target.value)}
-              />
-            </div>
-            <button
-              className="h-10 px-4 py-2 rounded-lg flex items-center bg-black text-white text-base font-medium hover:bg-neutral-800 transition-colors"
-              onClick={() => setNuovoOpen(true)}
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Nuovo piatto
-            </button>
+      <PageHeader
+        eyebrow={`${filteredPiatti.length.toLocaleString('it-IT')} piatti`}
+        title="Elenco piatti"
+      >
+        <div className="flex justify-between items-center mt-6">
+          <div className="relative w-72">
+            <Search className="absolute left-3 top-3 h-4 w-4 text-brand-ink" />
+            <Input
+              type="text"
+              placeholder={`Cerca per nome o ID tra ${piatti.length.toLocaleString('it-IT')} piatti…`}
+              className="pl-9 h-10 border-gray-300 rounded-lg"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
           </div>
+          <button
+            className="h-10 px-4 py-2 rounded-lg flex items-center bg-black text-white text-base font-medium hover:bg-neutral-800 transition-colors"
+            onClick={() => setNuovoOpen(true)}
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Nuovo piatto
+          </button>
         </div>
-      </div>
+      </PageHeader>
 
       <div className="grid grid-cols-[4px_1fr_320px_32px] gap-5 px-8 py-2.5 text-xs font-semibold uppercase tracking-wider text-gray-500 border-b border-gray-100 bg-gray-50 shrink-0">
         <span />
