@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import { UserPlus, Check, AlertCircle, Copy } from 'lucide-react'
+import { UserPlus, Check, AlertCircle, Copy, Printer } from 'lucide-react'
 import { AppLayout } from '@/core/layout/AppLayout'
+import { PageHeader } from '@/core/layout/PageHeader'
 import { Input } from '@/core/ui/input'
 import { Button } from '@/core/ui/button'
+import { clientConfig } from '@/config/clients'
 import { createUser } from '@/core/auth/adminUsers'
 import { USER_ROLES, type UserRole } from '@/core/auth/roles'
 
@@ -64,21 +66,61 @@ export default function GestioneUtenti() {
     setTimeout(() => setCopiato(false), 2000)
   }
 
+  const stampaCredenziali = () => {
+    if (!creato) return
+    const win = window.open('', '_blank', 'width=800,height=600')
+    if (!win) return
+    const origin = window.location.origin
+    // Valori sicuri da interpolare: username è validato [a-z0-9._-], password
+    // è alfanumerica generata dal server, ruolo da enum, resto da config.
+    win.document.write(`<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <title>Credenziali ${creato.username}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    @page { size: A4 portrait; margin: 24mm; }
+    body { font-family: system-ui, Arial, sans-serif; color: #111; }
+    .sheet { max-width: 540px; margin: 0 auto; }
+    .logo { height: 56px; margin-bottom: 36px; }
+    h1 { font-size: 24px; font-weight: 700; margin-bottom: 6px; }
+    .sub { color: #555; font-size: 14px; margin-bottom: 28px; }
+    .box { border: 1px solid #ccc; border-radius: 10px; padding: 6px 24px; }
+    .row { display: flex; justify-content: space-between; align-items: baseline; padding: 14px 0; border-bottom: 1px solid #eee; }
+    .row:last-child { border-bottom: none; }
+    .label { color: #666; font-size: 13px; }
+    .value { font-weight: 700; font-size: 16px; text-align: right; }
+    .mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; letter-spacing: 1px; }
+    .note { margin-top: 26px; font-size: 12px; color: #555; line-height: 1.6; }
+  </style>
+</head>
+<body>
+  <div class="sheet">
+    <img class="logo" src="${origin}${clientConfig.logo}" alt="${clientConfig.appName}">
+    <h1>Credenziali di accesso</h1>
+    <div class="sub">${clientConfig.appName}</div>
+    <div class="box">
+      <div class="row"><span class="label">Indirizzo</span><span class="value">${origin}</span></div>
+      <div class="row"><span class="label">Nome utente</span><span class="value">${creato.username}</span></div>
+      <div class="row"><span class="label">Password iniziale</span><span class="value mono">${creato.password}</span></div>
+      <div class="row"><span class="label">Ruolo</span><span class="value">${ROLE_INFO[creato.role].label}</span></div>
+    </div>
+    <div class="note">
+      Al primo accesso ti verrà chiesto di sostituire la password iniziale con una password personale.
+      Conserva questo foglio in un luogo sicuro e non condividerlo.
+    </div>
+  </div>
+</body>
+</html>`)
+    win.document.close()
+    setTimeout(() => win.print(), 300)
+  }
+
   return (
     <AppLayout>
       {/* Header */}
-      <div className="px-8 pt-8 pb-6 border-b border-gray-200">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-500 mb-2">
-          Amministrazione
-        </p>
-        <h1 className="text-4xl font-light font-fraunces leading-none">
-          Gestione{' '}
-          <span className="italic font-normal underline decoration-2 underline-offset-4"
-                style={{ textDecorationColor: 'var(--brand)' }}>
-            utenti
-          </span>
-        </h1>
-      </div>
+      <PageHeader eyebrow="Amministrazione" title="Gestione utenti" />
 
       {/* Contenuto */}
       <div className="flex-1 overflow-y-auto p-8">
@@ -154,14 +196,24 @@ export default function GestioneUtenti() {
                   <div><span className="text-gray-500">Utente:</span> <strong>{creato.username}</strong></div>
                   <div><span className="text-gray-500">Password:</span> <strong className="font-mono">{creato.password}</strong></div>
                 </div>
-                <button
-                  type="button"
-                  onClick={copiaCredenziali}
-                  className="shrink-0 inline-flex items-center gap-1.5 h-9 px-3 border border-gray-300 rounded-md bg-white text-sm hover:bg-gray-50 transition-colors"
-                >
-                  {copiato ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
-                  {copiato ? 'Copiato' : 'Copia'}
-                </button>
+                <div className="shrink-0 flex items-center gap-2">
+                  <button
+                    type="button"
+                    onClick={copiaCredenziali}
+                    className="inline-flex items-center gap-1.5 h-9 px-3 border border-gray-300 rounded-md bg-white text-sm hover:bg-gray-50 transition-colors"
+                  >
+                    {copiato ? <Check className="w-4 h-4 text-green-600" /> : <Copy className="w-4 h-4" />}
+                    {copiato ? 'Copiato' : 'Copia'}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={stampaCredenziali}
+                    className="inline-flex items-center gap-1.5 h-9 px-3 border border-gray-300 rounded-md bg-white text-sm hover:bg-gray-50 transition-colors"
+                  >
+                    <Printer className="w-4 h-4" />
+                    Stampa
+                  </button>
+                </div>
               </div>
             </div>
           )}

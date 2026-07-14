@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { Check, Plus, X, GripVertical, Info, Search, Salad, Leaf, MilkOff, ChefHat } from 'lucide-react'
 import { AppLayout } from '@/core/layout/AppLayout'
+import { PageHeader } from '@/core/layout/PageHeader'
 import { useFooterConfig } from '@/modules/menu/hooks/useFooterConfig'
 import { usePiatti } from '@/modules/menu/hooks/usePiatti'
 import { formatPrezzo, parsePrezzo, SUPPL_PREFIX, wrapPiatti } from '@/modules/menu/lib/footer'
@@ -277,13 +278,11 @@ export default function Impostazioni() {
 
   return (
     <AppLayout>
-      <div className="px-10 pt-[34px] pb-[26px] border-b border-gray-200">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500 mb-2">Configurazione</p>
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h1 className="font-fraunces font-light text-[44px] leading-none">Footer menù</h1>
-            <p className="text-sm text-gray-500 mt-3">Il blocco «Sempre a Vostra scelta» in fondo a ogni pagina stampata — stessi piatti, tradotti in 4 lingue</p>
-          </div>
+      <PageHeader
+        eyebrow="Configurazione"
+        title="Footer menù"
+        subtitle="Il blocco «Sempre a Vostra scelta» in fondo a ogni pagina stampata — stessi piatti, tradotti in 4 lingue"
+        actions={
           <button
             onClick={handleSave}
             disabled={!dirty || saving}
@@ -292,8 +291,8 @@ export default function Impostazioni() {
             <Check className="w-[17px] h-[17px]" />
             {saved ? 'Salvato' : saving ? 'Salvataggio…' : 'Salva'}
           </button>
-        </div>
-      </div>
+        }
+      />
 
       {loading ? (
         <div className="flex-1 p-10 text-sm text-gray-400">Caricamento…</div>

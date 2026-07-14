@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
 import { RefreshCw, Plus, Pencil, Trash2 } from 'lucide-react'
 import { AppLayout } from '@/core/layout/AppLayout'
+import { PageHeader } from '@/core/layout/PageHeader'
 import { useActivityLog } from '@/modules/menu/hooks/useActivityLog'
 import type { ActivityLog } from '@/modules/menu/types/activityLog'
 
@@ -101,19 +102,11 @@ export default function Auditing() {
   return (
     <AppLayout>
       {/* Header */}
-      <div className="px-8 pt-8 pb-6 border-b border-gray-200">
-        <p className="text-[11px] font-semibold uppercase tracking-widest text-gray-500 mb-2">
-          Amministrazione
-        </p>
-        <div className="flex items-end justify-between gap-4 flex-wrap">
-          <h1 className="text-4xl font-light font-fraunces leading-none">
-            Registro{' '}
-            <span className="italic font-normal underline decoration-2 underline-offset-4"
-                  style={{ textDecorationColor: 'var(--brand)' }}>
-              attività
-            </span>
-          </h1>
-          <div className="flex items-center gap-2">
+      <PageHeader
+        eyebrow="Amministrazione"
+        title="Registro attività"
+        actions={
+          <>
             <select value={filtroTabella} onChange={e => setFiltroTabella(e.target.value)} className={selectClass}>
               <option value="all">Tutte le entità</option>
               {tabelle.map(t => <option key={t} value={t}>{tableLabel(t)}</option>)}
@@ -132,9 +125,9 @@ export default function Auditing() {
               <RefreshCw className="w-4 h-4" />
               Aggiorna
             </button>
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Colonne */}
       <div className="grid grid-cols-[150px_140px_130px_1fr] gap-3 px-8 py-2.5 text-xs font-semibold uppercase tracking-wider text-gray-500 border-b border-gray-100 bg-gray-50 shrink-0">

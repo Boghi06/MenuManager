@@ -1,7 +1,7 @@
 import { useMemo, useState, useCallback } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
-import { ArrowLeft } from 'lucide-react'
 import { AppLayout } from '@/core/layout/AppLayout'
+import { PageHeader } from '@/core/layout/PageHeader'
 import { useRole } from '@/core/auth/roles'
 import { MenuComposerGrid } from '@/modules/menu/components/menu/MenuComposerGrid'
 import { SelettorePiatto } from '@/modules/menu/components/menu/SelettorePiatto'
@@ -75,26 +75,13 @@ export default function MenuComposer() {
   return (
     <AppLayout>
       {/* Header */}
-      <div className="px-8 pt-8 pb-6 border-b border-gray-200">
-        <button
-          onClick={() => navigate(`/menu?anno=${anno}`)}
-          className="inline-flex items-center gap-1.5 text-[13px] text-gray-500 mb-3 transition-colors hover:text-black"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Tutti i mesi
-        </button>
-        <p className="text-[11px] font-semibold uppercase tracking-[0.1em] text-gray-500 mb-2">
-          Composizione menù
-        </p>
-        <div className="flex items-end justify-between gap-4 flex-wrap">
-          <div>
-            <h1 className="text-4xl font-light font-fraunces leading-none">
-              {MESI[mese - 1]} {anno} · Bisettimana {idx === 1 ? 'A' : 'B'}
-            </h1>
-            <p className="text-sm text-gray-500 mt-2">{formatBisettimanaRange(range)}</p>
-          </div>
-
-          <div className="flex items-center gap-2">
+      <PageHeader
+        back={{ label: 'Tutti i mesi', onClick: () => navigate(`/menu?anno=${anno}`) }}
+        eyebrow="Composizione menù"
+        title={`${MESI[mese - 1]} ${anno} · Bisettimana ${idx === 1 ? 'A' : 'B'}`}
+        subtitle={formatBisettimanaRange(range)}
+        actions={
+          <>
             {/* Toggle settimana 1/2 */}
             <div className="flex h-9 border border-gray-300 rounded-md overflow-hidden">
               {([0, 1] as const).map(w => (
@@ -139,9 +126,9 @@ export default function MenuComposer() {
                 {role === 'admin' ? 'Stampa ricette' : 'Stampa'}
               </button>
             )}
-          </div>
-        </div>
-      </div>
+          </>
+        }
+      />
 
       {/* Body */}
       <div className="flex-1 overflow-auto p-8">

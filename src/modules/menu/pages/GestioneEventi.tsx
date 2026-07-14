@@ -1,6 +1,7 @@
 import { useState, useRef, useMemo, useEffect } from 'react'
 import { Plus, Pencil, Trash2, Copy, Calendar, Image as ImageIcon, ChevronDown, Upload } from 'lucide-react'
 import { AppLayout } from '@/core/layout/AppLayout'
+import { PageHeader } from '@/core/layout/PageHeader'
 import { useEventi } from '@/modules/menu/hooks/useEventi'
 import type { Evento } from '@/modules/menu/types/evento'
 
@@ -262,26 +263,20 @@ export default function GestioneEventi() {
 
   return (
     <AppLayout>
-      <div className="px-10 pt-[34px] pb-[26px] border-b border-gray-200">
-        <p className="text-[11px] font-semibold uppercase tracking-[0.12em] text-gray-500 mb-2">
-          Configurazione
-        </p>
-        <div className="flex items-end justify-between gap-4">
-          <div>
-            <h1 className="font-fraunces font-light text-[44px] leading-none">Gestione eventi</h1>
-            <p className="text-sm text-gray-500 mt-3">Libreria di eventi riutilizzabili nei menù stampati</p>
-          </div>
-          {form.mode === 'none' && (
-            <button
-              onClick={() => setForm({ mode: 'new' })}
-              className="inline-flex items-center gap-2 h-[42px] px-[18px] rounded-[10px] bg-gray-900 text-white text-[14.5px] font-medium hover:bg-gray-700 transition-colors whitespace-nowrap"
-            >
-              <Plus className="w-[18px] h-[18px]" />
-              Nuovo evento
-            </button>
-          )}
-        </div>
-      </div>
+      <PageHeader
+        eyebrow="Configurazione"
+        title="Gestione eventi"
+        subtitle="Libreria di eventi riutilizzabili nei menù stampati"
+        actions={form.mode === 'none' && (
+          <button
+            onClick={() => setForm({ mode: 'new' })}
+            className="inline-flex items-center gap-2 h-[42px] px-[18px] rounded-[10px] bg-gray-900 text-white text-[14.5px] font-medium hover:bg-gray-700 transition-colors whitespace-nowrap"
+          >
+            <Plus className="w-[18px] h-[18px]" />
+            Nuovo evento
+          </button>
+        )}
+      />
 
       <div className="flex-1 overflow-auto p-10 bg-gray-50">
         <div className="flex flex-col gap-[14px]">
