@@ -33,6 +33,44 @@ export function getBisettimanaRange(anno: number, mese: number, idx: 1 | 2): Bis
   return { start, end }
 }
 
+/** Differenza in giorni interi tra due date, ignorando l'orario. */
+function daysBetween(a: Date, b: Date): number {
+  const ma = new Date(a.getFullYear(), a.getMonth(), a.getDate()).getTime()
+  const mb = new Date(b.getFullYear(), b.getMonth(), b.getDate()).getTime()
+  return Math.round((mb - ma) / 86400000)
+}
+
+export interface BisettimanaCoords {
+  anno: number
+  mese: number
+  idx: 1 | 2
+  giorno: number
+}
+
+/**
+ * Individua la bisettimana (anno/mese/idx) e il giorno 0–13 che contiene `date`.
+ * Le bisettimane di mesi consecutivi possono sfasarsi ai bordi (i mesi hanno
+ * lunghezze diverse), quindi si provano in ordine: A e B del mese di `date`,
+ * poi la A del mese successivo — i giorni di fine mese ricadono nella prima
+ * bisettimana del mese dopo. Ritorna null se nessuna bisettimana copre la data
+ * (non dovrebbe accadere per date valide).
+ */
+export function findBisettimanaForDate(date: Date): BisettimanaCoords | null {
+  const anno = date.getFullYear()
+  const mese = date.getMonth() + 1
+  const candidati: Array<{ anno: number; mese: number; idx: 1 | 2 }> = [
+    { anno, mese, idx: 1 },
+    { anno, mese, idx: 2 },
+    mese === 12 ? { anno: anno + 1, mese: 1, idx: 1 } : { anno, mese: mese + 1, idx: 1 },
+  ]
+  for (const c of candidati) {
+    const { start } = getBisettimanaRange(c.anno, c.mese, c.idx)
+    const giorno = daysBetween(start, date)
+    if (giorno >= 0 && giorno <= 13) return { ...c, giorno }
+  }
+  return null
+}
+
 /** Formatta un range in stile "30 mar – 12 apr" o "11 – 24 mag" se stesso mese. */
 export function formatBisettimanaRange({ start, end }: BisettimanaRange): string {
   const sd = start.getDate()

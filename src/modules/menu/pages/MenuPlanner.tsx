@@ -1,12 +1,14 @@
-import { useState } from 'react'
+import { useState, useMemo, useCallback } from 'react'
 import { useSearchParams } from 'react-router-dom'
-import { Copy } from 'lucide-react'
+import { Copy, Printer } from 'lucide-react'
 import { AppLayout } from '@/core/layout/AppLayout'
 import { PageHeader } from '@/core/layout/PageHeader'
 import { useRole } from '@/core/auth/roles'
 import { BisettimanaCard } from '@/modules/menu/components/menu/BisettimanaCard'
 import { DuplicaSettimanaDialog } from '@/modules/menu/components/menu/DuplicaSettimanaDialog'
+import { StampaOggi, type TipoStampaOggi } from '@/modules/menu/components/menu/StampaOggi'
 import { useBisettimane } from '@/modules/menu/hooks/useBisettimane'
+import { findBisettimanaForDate } from '@/modules/menu/lib/bisettimane'
 import { MESI } from '@/modules/menu/constants/mesi'
 import type { StatoBisettimana } from '@/modules/menu/hooks/useBisettimane'
 
@@ -20,7 +22,19 @@ export default function MenuPlanner() {
   const [duplicaOpen, setDuplicaOpen] = useState(false)
 
   // La cucina consulta soltanto: niente inizializza/copia anno né duplica settimana
-  const readOnly = useRole() === 'cucina'
+  const role = useRole()
+  const readOnly = role === 'cucina'
+
+  // Stampa diretta del foglio di oggi: individua la bisettimana corrente (a
+  // prescindere dall'anno mostrato). receptionist → menù clienti, cucina →
+  // ricette, admin → entrambe (due tasti).
+  const targetOggi = useMemo(() => findBisettimanaForDate(new Date()), [])
+  // Stampa diretta del foglio di oggi: la stampa avviene in un iframe nascosto
+  // (nessuna nuova scheda/finestra), gestito da StampaOggi.
+  const [stampaOggi, setStampaOggi] = useState<TipoStampaOggi | null>(null)
+  const chiudiStampa = useCallback(() => setStampaOggi(null), [])
+  const canStampaMenu = role !== 'cucina'
+  const canStampaRicette = role !== 'receptionist'
 
   const operando = operazione !== null
   const canGoBack = !loading && !operando && anniEsistenti.has(anno - 1)
@@ -89,7 +103,7 @@ export default function MenuPlanner() {
         }
       />
 
-      {/* Legenda */}
+      {/* Legenda + stampa diretta del foglio di oggi (a destra) */}
       <div className="px-8 py-4 flex gap-5 items-center text-xs text-gray-500 border-b border-gray-100">
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 bg-black" />
@@ -102,6 +116,31 @@ export default function MenuPlanner() {
         <div className="flex items-center gap-1.5">
           <div className="w-3 h-3 bg-white border border-gray-300" />
           Vuota
+        </div>
+
+        <div className="ml-auto flex items-center gap-2">
+          {canStampaMenu && (
+            <button
+              onClick={() => setStampaOggi('menu')}
+              disabled={targetOggi === null || stampaOggi !== null}
+              className="h-8 px-3 inline-flex items-center gap-1.5 border border-gray-900 rounded-md bg-gray-900 text-white text-xs transition-colors
+                         enabled:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              {stampaOggi === 'menu' ? 'Preparazione…' : 'Menù di oggi'}
+            </button>
+          )}
+          {canStampaRicette && (
+            <button
+              onClick={() => setStampaOggi('ricette')}
+              disabled={targetOggi === null || stampaOggi !== null}
+              className="h-8 px-3 inline-flex items-center gap-1.5 border border-gray-900 rounded-md bg-gray-900 text-white text-xs transition-colors
+                         enabled:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Printer className="w-3.5 h-3.5" />
+              {stampaOggi === 'ricette' ? 'Preparazione…' : 'Ricette di oggi'}
+            </button>
+          )}
         </div>
       </div>
 
@@ -164,6 +203,10 @@ export default function MenuPlanner() {
         anniDisponibili={[...anniEsistenti].sort((a, b) => b - a)}
         onDone={refresh}
       />
+
+      {stampaOggi && targetOggi && (
+        <StampaOggi target={targetOggi} tipo={stampaOggi} onDone={chiudiStampa} />
+      )}
     </AppLayout>
   )
 }
