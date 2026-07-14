@@ -7,6 +7,10 @@ const mk = (giorno: number, servizio: Servizio) => `${giorno}:${servizio}`
 export function useMenuFlags(bisettimanaId: string | null) {
   // Map<"giorno:servizio", MenuFlag> → lookup O(1) invece di find() O(n)
   const [flagsMap, setFlagsMap] = useState<Map<string, MenuFlag>>(new Map())
+  // true finché la fetch dei flag non è completata: serve alla stampa diretta
+  // per non stampare con i default (tutto true) prima del caricamento reale.
+  // Resta true finché bisettimanaId è null (nulla ancora da caricare).
+  const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     if (!bisettimanaId) return
@@ -16,10 +20,11 @@ export function useMenuFlags(bisettimanaId: string | null) {
         .from('menu_flags')
         .select('*')
         .eq('bisettimana_id', bisettimanaId)
-      if (cancelled || !data) return
+      if (cancelled) return
       const m = new Map<string, MenuFlag>()
-      for (const f of data as MenuFlag[]) m.set(mk(f.giorno, f.servizio), f)
+      for (const f of (data ?? []) as MenuFlag[]) m.set(mk(f.giorno, f.servizio), f)
       setFlagsMap(m)
+      setLoading(false)
     })()
     return () => { cancelled = true }
   }, [bisettimanaId])
@@ -78,5 +83,5 @@ export function useMenuFlags(bisettimanaId: string | null) {
     [bisettimanaId, applyUpdate],
   )
 
-  return { getFlag, toggleFlag, getEvento, setEvento }
+  return { getFlag, toggleFlag, getEvento, setEvento, loading }
 }

@@ -1,6 +1,7 @@
-import { useState, useRef, useMemo, type CSSProperties } from 'react'
+import { useState, useRef, useMemo, useEffect, type CSSProperties } from 'react'
 import { X, Printer, Salad, Leaf, MilkOff, ChefHat, type LucideIcon } from 'lucide-react'
 import { getBisettimanaRange } from '@/modules/menu/lib/bisettimane'
+import { printHtmlDocument } from '@/modules/menu/lib/print'
 import { useFooterConfig } from '@/modules/menu/hooks/useFooterConfig'
 import { formatPrezzo, SUPPL_PREFIX, wrapPiatti } from '@/modules/menu/lib/footer'
 import type { FlagKey, MenuVoce, Servizio } from '@/modules/menu/types/menuVoce'
@@ -22,6 +23,10 @@ interface StampaPreviewProps {
   getFlag: (giorno: number, servizio: Servizio, key: FlagKey) => boolean
   getEvento: (giorno: number, servizio: Servizio) => string | null
   eventi: Evento[]
+  /** Giorno iniziale mostrato (0–13). Default 0. */
+  initialGiorno?: number
+  /** Stampa diretta: nessuna anteprima, lancia la stampa appena i dati sono pronti. */
+  autoPrint?: boolean
 }
 
 // ─── Static translations ────────────────────────────────────────────────────
@@ -473,13 +478,13 @@ function A4Page({ giorno, data, lingua, voci, piattoMap, flagsPranzo, flagsCena,
 
 // ─── Main export ─────────────────────────────────────────────────────────────
 
-export function StampaPreview({ open, onClose, voci, piatti, anno, mese, bisettimanaIdx, getFlag, getEvento, eventi }: StampaPreviewProps) {
+export function StampaPreview({ open, onClose, voci, piatti, anno, mese, bisettimanaIdx, getFlag, getEvento, eventi, initialGiorno = 0, autoPrint = false }: StampaPreviewProps) {
   const [lingua, setLingua] = useState<Lingua>('it')
-  const [giorno, setGiorno] = useState<number>(0)
+  const [giorno, setGiorno] = useState<number>(initialGiorno)
   // printAllRef contiene le 4 pagine (una per lingua) del giorno selezionato,
   // renderizzate fuori schermo: è la sorgente per la stampa unica multilingua.
   const printAllRef = useRef<HTMLDivElement>(null)
-  const { righe, supplementi } = useFooterConfig()
+  const { righe, supplementi, loading: footerLoading } = useFooterConfig()
 
   const eventoMap = useMemo(() => {
     const m = new Map<string, Evento>()
@@ -514,9 +519,7 @@ export function StampaPreview({ open, onClose, voci, piatti, anno, mese, bisetti
     const el = printAllRef.current
     if (!el) return
     const html = el.innerHTML
-    const win = window.open('', '_blank', 'width=1200,height=860')
-    if (!win) return
-    win.document.write(`<!DOCTYPE html>
+    const doc = `<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -550,10 +553,28 @@ export function StampaPreview({ open, onClose, voci, piatti, anno, mese, bisetti
   </style>
 </head>
 <body>${html}</body>
-</html>`)
+</html>`
+    // Stampa diretta (autoPrint): iframe nascosto, così non apre una nuova
+    // scheda/finestra. Anteprima manuale: window.open come da sempre.
+    if (autoPrint) { printHtmlDocument(doc); return }
+    const win = window.open('', '_blank', 'width=1200,height=860')
+    if (!win) return
+    win.document.write(doc)
     win.document.close()
     setTimeout(() => { win.print(); }, 400)
   }
+
+  // Stampa diretta ("Stampa oggi"): appena il componente è aperto e il footer è
+  // caricato, lancia una sola volta la stampa e chiude, senza mostrare l'anteprima.
+  const autoPrintedRef = useRef(false)
+  useEffect(() => {
+    if (!open) { autoPrintedRef.current = false; return }
+    if (!autoPrint || footerLoading || autoPrintedRef.current) return
+    autoPrintedRef.current = true
+    // breve attesa per il render della sorgente di stampa off-screen
+    const id = setTimeout(() => { handlePrint(); onClose() }, 60)
+    return () => clearTimeout(id)
+  }, [open, autoPrint, footerLoading]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!open) return null
 
@@ -607,6 +628,20 @@ export function StampaPreview({ open, onClose, voci, piatti, anno, mese, bisetti
       footer={buildFooter(l)}
     />
   )
+
+  // Modalità stampa diretta: renderizza solo la sorgente off-screen (4 lingue),
+  // senza anteprima. L'effetto autoPrint sopra si occupa di stampare e chiudere.
+  if (autoPrint) {
+    return (
+      <div ref={printAllRef} aria-hidden style={{ position: 'fixed', left: -99999, top: 0, pointerEvents: 'none' }}>
+        {(['it', 'en', 'de', 'fr'] as Lingua[]).map(l => (
+          <div key={l} className="print-page">
+            {renderPage(l)}
+          </div>
+        ))}
+      </div>
+    )
+  }
 
   const overlayStyle: CSSProperties = {
     position: 'fixed', inset: 0, zIndex: 50,

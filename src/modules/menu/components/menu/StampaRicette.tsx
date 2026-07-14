@@ -1,6 +1,7 @@
-import { useState, useRef, useMemo, type CSSProperties } from 'react'
+import { useState, useRef, useMemo, useEffect, type CSSProperties } from 'react'
 import { X, Printer } from 'lucide-react'
 import { getBisettimanaRange } from '@/modules/menu/lib/bisettimane'
+import { printHtmlDocument } from '@/modules/menu/lib/print'
 import { ALLERGENI } from '@/modules/menu/constants/piatti'
 import type { MenuVoce, Servizio } from '@/modules/menu/types/menuVoce'
 import type { Piatto } from '@/modules/menu/types/piatto'
@@ -15,6 +16,10 @@ interface StampaRicetteProps {
   anno: number
   mese: number
   bisettimanaIdx: 1 | 2
+  /** Giorno iniziale mostrato (0–13). Default 0. */
+  initialGiorno?: number
+  /** Stampa diretta: nessuna anteprima, lancia la stampa appena montato. */
+  autoPrint?: boolean
 }
 
 const GIORNI_IT = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom']
@@ -188,8 +193,8 @@ function SezioneServizio({ titolo, data, righe }: { titolo: string; data: Date; 
  * multipagina (A4 verticale, solo italiano) con RICETTE PRANZO e RICETTE
  * CENA, incluse le colonne caratteristiche e gli allergeni per piatto.
  */
-export function StampaRicette({ open, onClose, voci, piatti, anno, mese, bisettimanaIdx }: StampaRicetteProps) {
-  const [giorno, setGiorno] = useState<number>(0)
+export function StampaRicette({ open, onClose, voci, piatti, anno, mese, bisettimanaIdx, initialGiorno = 0, autoPrint = false }: StampaRicetteProps) {
+  const [giorno, setGiorno] = useState<number>(initialGiorno)
   const printRef = useRef<HTMLDivElement>(null)
 
   const piattoMap = useMemo(() => {
@@ -211,9 +216,7 @@ export function StampaRicette({ open, onClose, voci, piatti, anno, mese, bisetti
     const el = printRef.current
     if (!el) return
     const html = el.innerHTML
-    const win = window.open('', '_blank', 'width=900,height=1000')
-    if (!win) return
-    win.document.write(`<!DOCTYPE html>
+    const doc = `<!DOCTYPE html>
 <html lang="it">
 <head>
   <meta charset="UTF-8">
@@ -231,10 +234,28 @@ export function StampaRicette({ open, onClose, voci, piatti, anno, mese, bisetti
   </style>
 </head>
 <body>${html}</body>
-</html>`)
+</html>`
+    // Stampa diretta (autoPrint): iframe nascosto, così non apre una nuova
+    // scheda/finestra. Anteprima manuale: window.open come da sempre.
+    if (autoPrint) { printHtmlDocument(doc); return }
+    const win = window.open('', '_blank', 'width=900,height=1000')
+    if (!win) return
+    win.document.write(doc)
     win.document.close()
     setTimeout(() => { win.print() }, 400)
   }
+
+  // Stampa diretta ("Stampa oggi"): appena montato lancia una sola volta la
+  // stampa e chiude, senza mostrare l'anteprima.
+  const autoPrintedRef = useRef(false)
+  useEffect(() => {
+    if (!open) { autoPrintedRef.current = false; return }
+    if (!autoPrint || autoPrintedRef.current) return
+    autoPrintedRef.current = true
+    // breve attesa per il render della sorgente di stampa off-screen
+    const id = setTimeout(() => { handlePrint(); onClose() }, 60)
+    return () => clearTimeout(id)
+  }, [open, autoPrint]) // eslint-disable-line react-hooks/exhaustive-deps
 
   if (!open) return null
 
@@ -273,6 +294,20 @@ export function StampaRicette({ open, onClose, voci, piatti, anno, mese, bisetti
       />
     </div>
   )
+
+  // Modalità stampa diretta: solo la sorgente off-screen, senza anteprima.
+  if (autoPrint) {
+    return (
+      <div
+        ref={printRef}
+        aria-hidden
+        style={{ position: 'fixed', left: -99999, top: 0, pointerEvents: 'none', display: 'flex', flexDirection: 'column', gap: 24 }}
+      >
+        {renderSheet('pranzo')}
+        {renderSheet('cena')}
+      </div>
+    )
+  }
 
   return (
     <div style={overlayStyle} onClick={e => e.target === e.currentTarget && onClose()}>
