@@ -1,4 +1,5 @@
 import { useState, useMemo, useCallback, useRef } from 'react'
+import { useSearchParams } from 'react-router-dom'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { Search, Plus } from 'lucide-react'
 import { Input } from '@/core/ui/input'
@@ -29,6 +30,45 @@ export default function Dashboard() {
   const [nuovoOpen, setNuovoOpen] = useState(false)
   const [eliminaId, setEliminaId] = useState<number | null>(null)
 
+  // Arrivo da un link esterno (click su un piatto nella composizione menù):
+  // `?piatto=<id>` apre la sua scheda in sola lettura.
+  //
+  // Lo stato si aggiusta durante il render e non dentro un useEffect: l'elenco
+  // piatti arriva in modo asincrono, così la scheda si apre nel primo render in
+  // cui il piatto esiste davvero, senza un frame di drawer vuoto. `paramAperto`
+  // ricorda quale id è già stato consumato, altrimenti chiudendo il drawer si
+  // riaprirebbe da solo al render successivo.
+  const [searchParams, setSearchParams] = useSearchParams()
+  const piattoParam = searchParams.get('piatto')
+  const [paramAperto, setParamAperto] = useState<string | null>(null)
+
+  if (piattoParam !== null && piattoParam !== paramAperto) {
+    const daAprire = piatti.find(p => p.id === Number(piattoParam))
+    if (daAprire) {
+      setParamAperto(piattoParam)
+      setDrawerModo('view')
+      setDrawerPiatto(daAprire)
+      setDrawerOpen(true)
+    }
+  }
+
+  // `?piatto` va tolto appena il drawer smette di mostrare quel piatto: senza,
+  // un refresh riaprirebbe una scheda chiusa, o ne aprirebbe una diversa da
+  // quella a schermo se nel frattempo se n'è aperta un'altra dalla lista.
+  const pulisciParamPiatto = useCallback(() => {
+    if (piattoParam === null) return
+    setSearchParams(prev => {
+      const next = new URLSearchParams(prev)
+      next.delete('piatto')
+      return next
+    }, { replace: true })
+  }, [piattoParam, setSearchParams])
+
+  const chiudiDrawer = useCallback(() => {
+    setDrawerOpen(false)
+    pulisciParamPiatto()
+  }, [pulisciParamPiatto])
+
   const counts = useMemo(() => ({
     all: piatti.length,
     antipasti: piatti.filter(p => p.tipo === 'antipasti').length,
@@ -54,21 +94,23 @@ export default function Dashboard() {
   })
 
   const openScheda = useCallback((piatto: Piatto) => {
+    pulisciParamPiatto()
     setDrawerModo('view')
     setDrawerPiatto(piatto)
     setDrawerOpen(true)
-  }, [])
+  }, [pulisciParamPiatto])
 
   const openEdit = useCallback((piatto: Piatto) => {
+    pulisciParamPiatto()
     setDrawerModo('edit')
     setDrawerPiatto(piatto)
     setDrawerOpen(true)
-  }, [])
+  }, [pulisciParamPiatto])
 
   const openElimina = useCallback((id: number) => {
-    setDrawerOpen(false)
+    chiudiDrawer()
     setTimeout(() => setEliminaId(id), 0)
-  }, [])
+  }, [chiudiDrawer])
 
   const handleDelete = async () => {
     if (!eliminaId) return
@@ -151,7 +193,7 @@ export default function Dashboard() {
         piatto={drawerPiatto}
         modo={drawerModo}
         open={drawerOpen}
-        onClose={() => setDrawerOpen(false)}
+        onClose={chiudiDrawer}
         onModifica={() => setDrawerModo('edit')}
         onSave={updatePiatto}
         onDelete={openElimina}
