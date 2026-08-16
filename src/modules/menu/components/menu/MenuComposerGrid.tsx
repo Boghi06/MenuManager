@@ -291,21 +291,20 @@ export function MenuComposerGrid({
                   getFlag={getFlag}
                   onToggleFlag={onToggleFlag}
                 />
+                {/* Il dessert non è più una sezione di piatti: chiude il pasto
+                    come semplice riga di buffet, attivabile per giorno/servizio. */}
+                <ToggleRow
+                  key="buffet-dessert"
+                  label="Buf. dessert"
+                  barColor="#9E9E9E"
+                  chipText="Buffet di dessert"
+                  flagKey="show_buffet_dessert"
+                  giorni={giorni}
+                  readOnly={readOnly}
+                  getFlag={getFlag}
+                  onToggleFlag={onToggleFlag}
+                />
               </>
-            )}
-
-            {tipo === 'des' && (
-              <ToggleRow
-                key="buffet-dessert"
-                label="Buf. dessert"
-                barColor="#9E9E9E"
-                chipText="Buffet di dessert"
-                flagKey="show_buffet_dessert"
-                giorni={giorni}
-                readOnly={readOnly}
-                getFlag={getFlag}
-                onToggleFlag={onToggleFlag}
-              />
             )}
           </>
         ))}

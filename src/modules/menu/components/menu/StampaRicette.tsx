@@ -54,7 +54,8 @@ function AllergenoBadge({ Icon, number }: { Icon: typeof ALLERGENI[number]['Icon
 
 /**
  * Piatti del giorno/servizio in ordine di lettura per la cucina:
- * antipasti, primi, secondi (ognuno seguito dal suo contorno), dessert.
+ * antipasti, primi, secondi (ognuno seguito dal suo contorno).
+ * Niente dessert: il buffet non ha ricette per piatto.
  * Deduplicati per id (es. lo stesso contorno usato da più secondi).
  */
 function piattiServizio(
@@ -73,7 +74,7 @@ function piattiServizio(
     visti.add(id)
     out.push(p)
   }
-  for (const tipo of ['ant', 'pr', 'se', 'des'] as const) {
+  for (const tipo of ['ant', 'pr', 'se'] as const) {
     const sezione = delGiorno.filter(v => v.tipo === tipo).sort((a, b) => a.posizione - b.posizione)
     for (const v of sezione) {
       push(v.piatto_id)

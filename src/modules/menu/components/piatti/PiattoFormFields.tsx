@@ -54,8 +54,8 @@ export const PiattoFormFields = memo(function PiattoFormFields({ form, onChange 
             <SelectItem value="antipasto" className="hover:bg-gray-300 focus:bg-gray-300 cursor-pointer px-4 py-2">Antipasto</SelectItem>
             <SelectItem value="primo"    className="hover:bg-gray-300 focus:bg-gray-300 cursor-pointer px-4 py-2">Primo</SelectItem>
             <SelectItem value="secondo"  className="hover:bg-gray-300 focus:bg-gray-300 cursor-pointer px-4 py-2">Secondo</SelectItem>
+            {/* Niente dessert: il menù chiude sempre con il buffet, non con un piatto. */}
             <SelectItem value="contorno" className="hover:bg-gray-300 focus:bg-gray-300 cursor-pointer px-4 py-2">Contorno</SelectItem>
-            <SelectItem value="dessert"  className="hover:bg-gray-300 focus:bg-gray-300 cursor-pointer px-4 py-2">Dessert</SelectItem>
           </SelectContent>
         </Select>
       </div>

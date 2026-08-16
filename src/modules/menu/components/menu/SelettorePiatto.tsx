@@ -10,7 +10,7 @@ import { TIPO_BAR, TIPO_LABEL } from '@/modules/menu/constants/piatti'
 interface SelettorePiattoProps {
   open: boolean
   onOpenChange: (open: boolean) => void
-  /** Codice tipo da filtrare nella libreria (ant|pr|se|con|des). */
+  /** Codice tipo da filtrare nella libreria (ant|pr|se|con). */
   filtroTipo: string
   onPick: (piattoId: number) => void
 }

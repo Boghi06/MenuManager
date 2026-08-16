@@ -17,7 +17,7 @@ interface MenuCellaProps {
   onRemove: (voceId: number) => void
 }
 
-/** Contenuto di una cella di sezione principale (ant/pr/des). */
+/** Contenuto di una cella di sezione principale (ant/pr/se). */
 export function MenuCella({ alternative, tipo, maxAlternative = 3, readOnly = false, onAdd, onRemove }: MenuCellaProps) {
   return (
     <div className="flex flex-col gap-1.5">

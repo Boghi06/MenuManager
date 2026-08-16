@@ -172,15 +172,19 @@ dall'email sintetica (vedi login per nome utente).
 ## Dominio (modulo menu)
 
 - **Piatto** (`types/piatto.ts`): nomi in 4 lingue (`nome_it` obbligatorio, max 55 char),
-  `tipo` a codici brevi **`ant | pr | se | con | des`** (mapping label↔codice in
+  `tipo` a codici brevi **`ant | pr | se | con`** (mapping label↔codice in
   `constants/piatti.ts`), 4 caratteristiche (vegetariano/vegano/no lattosio/locale)
   e 14 allergeni booleani `all_*` numerati secondo la normativa UE.
+  **Il dessert non esiste come tipo di piatto**: il pasto chiude sempre con il
+  "Buffet di dessert", che è un flag (vedi MenuFlag). Il codice `des` e i relativi
+  piatti sono stati rimossi da UI e DB con la migrazione `019_rimozione_dessert.sql`.
 - **Bisettimana**: unità di pianificazione di 14 giorni (`giorno` 0–13, 0 = lunedì
   settimana 1). Due per mese (A/B), range calcolato in `lib/bisettimane.ts`.
 - **MenuVoce** (`types/menuVoce.ts`): una cella = (bisettimana, giorno, servizio
-  `pranzo|cena`, sezione `ant|pr|se|des`, posizione 0–2). Il **contorno non è una
+  `pranzo|cena`, sezione `ant|pr|se`, posizione 0–2). Il **contorno non è una
   sezione**: è l'attributo opzionale `contorno_id` di un secondo. Max alternative:
-  1 antipasto, 3 primi, 3 secondi, 1 dessert (`SEZIONI_MAX`).
+  1 antipasto, 3 primi, 3 secondi (`SEZIONI_MAX`). La vista
+  `bisettimane_with_stato` considera "full" 14 giorni × 2 servizi × **3** sezioni.
 - **MenuFlag**: visibilità per giorno/servizio di elementi opzionali (succhi,
   insalate, formaggi, buffet dessert); se la riga non esiste in DB, default tutti `true`.
 - **Eventi**: serate a tema collegate a giorno/servizio, con immagini nel bucket

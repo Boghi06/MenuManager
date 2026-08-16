@@ -6,30 +6,32 @@ import type { LucideIcon } from 'lucide-react'
 import { clientConfig } from '@/config/clients'
 import type { PiattoForm, TranslationField } from '@/modules/menu/types/piatto'
 
+// Niente dessert: a fine pasto c'è sempre e solo il "Buffet di dessert",
+// gestito come flag per giorno/servizio (show_buffet_dessert), non come piatto.
 export const TIPO_LABEL: Record<string, string> = {
-  ant: 'Antipasto', pr: 'Primo', se: 'Secondo', con: 'Contorno', des: 'Dessert',
+  ant: 'Antipasto', pr: 'Primo', se: 'Secondo', con: 'Contorno',
 }
 
 export const TIPO_TO_CODE: Record<string, string> = {
-  antipasto: 'ant', primo: 'pr', secondo: 'se', contorno: 'con', dessert: 'des',
+  antipasto: 'ant', primo: 'pr', secondo: 'se', contorno: 'con',
 }
 
 export const CODE_TO_TIPO: Record<string, string> = {
-  ant: 'antipasto', pr: 'primo', se: 'secondo', con: 'contorno', des: 'dessert',
+  ant: 'antipasto', pr: 'primo', se: 'secondo', con: 'contorno',
 }
 
 // righe (sezioni) della griglia composizione — il contorno NON è una riga
-export const SEZIONI_ORDER = ['ant', 'pr', 'se', 'des'] as const
+export const SEZIONI_ORDER = ['ant', 'pr', 'se'] as const
 
-// numero massimo di alternative per sezione: 1 antipasto, 3 primi, 3 secondi, 1 dessert
+// numero massimo di alternative per sezione: 1 antipasto, 3 primi, 3 secondi
 export const SEZIONI_MAX: Record<string, number> = {
-  ant: 1, pr: 3, se: 3, des: 1,
+  ant: 1, pr: 3, se: 3,
 }
 
 // barra-tipo in scala di grigi (mini-bar a sinistra di un piatto);
 // personalizzabile per cliente via config.modules.menu.tipoBar
 const DEFAULT_TIPO_BAR: Record<string, string> = {
-  ant: '#000000', pr: '#1F1F1F', se: '#3D3D3D', con: '#737373', des: '#9E9E9E',
+  ant: '#000000', pr: '#1F1F1F', se: '#3D3D3D', con: '#737373',
 }
 export const TIPO_BAR: Record<string, string> = {
   ...DEFAULT_TIPO_BAR,
@@ -41,7 +43,6 @@ export const TIPO_BAR_CARD: Record<string, string> = {
   pr:  '#000000',
   se:  '#3D3D3D',
   con: '#737373',
-  des: '#9E9E9E',
 }
 
 export const EMPTY_FORM: PiattoForm = {
@@ -107,5 +108,4 @@ export const CATEGORIE = [
   { label: 'Primi',          value: 'pr' },
   { label: 'Secondi',        value: 'se' },
   { label: 'Contorni',       value: 'con' },
-  { label: 'Dessert',        value: 'des' },
 ] as const
