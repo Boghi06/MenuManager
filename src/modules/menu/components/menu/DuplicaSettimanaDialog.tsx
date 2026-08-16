@@ -3,6 +3,13 @@ import { Dialog } from '@base-ui/react/dialog'
 import { ArrowRight, AlertTriangle } from 'lucide-react'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/core/ui/select'
 import { MESI } from '@/modules/menu/constants/mesi'
+
+// Base UI mostra il valore grezzo del Select ("3") finché la tendina non viene
+// aperta almeno una volta: `items` gli dà la mappa valore→etichetta ("Marzo")
+// anche a tendina chiusa. Serve solo dove valore ed etichetta differiscono.
+const MESI_ITEMS: Record<string, string> = Object.fromEntries(MESI.map((m, i) => [String(i + 1), m]))
+const BISETTIMANA_ITEMS: Record<string, string> = { '1': 'A', '2': 'B' }
+const SETTIMANA_ITEMS: Record<string, string> = { '1': 'Sett. 1', '2': 'Sett. 2' }
 import { getBisettimanaRange, formatBisettimanaRange } from '@/modules/menu/lib/bisettimane'
 import { useDuplicaSettimana, type SettimanaRef } from '@/modules/menu/hooks/useDuplicaSettimana'
 
@@ -110,7 +117,7 @@ export function DuplicaSettimanaDialog({
                   </Select>
                 </Field>
                 <Field label="Mese">
-                  <Select value={String(src.mese)} onValueChange={v => setSrc(s => ({ ...s, mese: Number(v) }))}>
+                  <Select items={MESI_ITEMS} value={String(src.mese)} onValueChange={v => setSrc(s => ({ ...s, mese: Number(v) }))}>
                     <SelectTrigger className={triggerCls}><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {MESI.map((m, i) => <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>)}
@@ -119,7 +126,7 @@ export function DuplicaSettimanaDialog({
                 </Field>
                 <div className="grid grid-cols-2 gap-2">
                   <Field label="Bisettimana">
-                    <Select value={String(src.idx)} onValueChange={v => setSrc(s => ({ ...s, idx: Number(v) as 1 | 2 }))}>
+                    <Select items={BISETTIMANA_ITEMS} value={String(src.idx)} onValueChange={v => setSrc(s => ({ ...s, idx: Number(v) as 1 | 2 }))}>
                       <SelectTrigger className={triggerCls}><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="1">A</SelectItem>
@@ -128,7 +135,7 @@ export function DuplicaSettimanaDialog({
                     </Select>
                   </Field>
                   <Field label="Settimana">
-                    <Select value={String(src.settimana)} onValueChange={v => setSrc(s => ({ ...s, settimana: Number(v) as 1 | 2 }))}>
+                    <Select items={SETTIMANA_ITEMS} value={String(src.settimana)} onValueChange={v => setSrc(s => ({ ...s, settimana: Number(v) as 1 | 2 }))}>
                       <SelectTrigger className={triggerCls}><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="1">Sett. 1</SelectItem>
@@ -148,7 +155,7 @@ export function DuplicaSettimanaDialog({
                   Destinazione · {annoCorrente}
                 </p>
                 <Field label="Mese">
-                  <Select value={String(dstMese)} onValueChange={v => setDstMese(Number(v))}>
+                  <Select items={MESI_ITEMS} value={String(dstMese)} onValueChange={v => setDstMese(Number(v))}>
                     <SelectTrigger className={triggerCls}><SelectValue /></SelectTrigger>
                     <SelectContent>
                       {MESI.map((m, i) => <SelectItem key={i} value={String(i + 1)}>{m}</SelectItem>)}
@@ -157,7 +164,7 @@ export function DuplicaSettimanaDialog({
                 </Field>
                 <div className="grid grid-cols-2 gap-2">
                   <Field label="Bisettimana">
-                    <Select value={String(dstIdx)} onValueChange={v => setDstIdx(Number(v) as 1 | 2)}>
+                    <Select items={BISETTIMANA_ITEMS} value={String(dstIdx)} onValueChange={v => setDstIdx(Number(v) as 1 | 2)}>
                       <SelectTrigger className={triggerCls}><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="1">A</SelectItem>
@@ -166,7 +173,7 @@ export function DuplicaSettimanaDialog({
                     </Select>
                   </Field>
                   <Field label="Settimana">
-                    <Select value={String(dstSett)} onValueChange={v => setDstSett(Number(v) as 1 | 2)}>
+                    <Select items={SETTIMANA_ITEMS} value={String(dstSett)} onValueChange={v => setDstSett(Number(v) as 1 | 2)}>
                       <SelectTrigger className={triggerCls}><SelectValue /></SelectTrigger>
                       <SelectContent>
                         <SelectItem value="1">Sett. 1</SelectItem>

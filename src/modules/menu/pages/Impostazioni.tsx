@@ -47,8 +47,8 @@ function PiattoSelect({ piattoId, onChange, piatti }: {
     return piatti
       .slice()
       .sort((a, b) => {
-        if (a.tipo === 'se' && b.tipo !== 'se') return -1
-        if (a.tipo !== 'se' && b.tipo === 'se') return 1
+        if (a.tipo === 'secondi' && b.tipo !== 'secondi') return -1
+        if (a.tipo !== 'secondi' && b.tipo === 'secondi') return 1
         return a.nome_it.localeCompare(b.nome_it)
       })
       .filter(p => !q || p.nome_it.toLowerCase().includes(q))

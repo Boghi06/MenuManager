@@ -180,9 +180,9 @@ function Colonna({ servizio, giorno, voci, piattoMap, lingua, showSucchi, showIn
       .filter(v => v.giorno === giorno && v.servizio === servizio && v.tipo === tipo)
       .sort((a, b) => a.posizione - b.posizione)
 
-  const antipasti = filtrati('ant')
-  const primi     = filtrati('pr')
-  const secondi   = filtrati('se')
+  const antipasti = filtrati('antipasti')
+  const primi     = filtrati('primi')
+  const secondi   = filtrati('secondi')
 
   // Column: 5 content blocks separated by space-between.
   // The ornamental Sep sits at the TOP of blocks 2–5 (inside each block)

@@ -147,7 +147,7 @@ export function MenuComposerGrid({
   const giorni = giorniLabels.map((_, c) => giornoDi(c))
 
   // Un solo pass su voci per costruire la mappa "giorno:tipo" → voci ordinate.
-  // Evita 28 chiamate filter() per render (7 giorni × 4 sezioni).
+  // Evita 28 chiamate filter() per render (7 giorni × 3 sezioni).
   const vociMap = useMemo(() => {
     const m = new Map<string, MenuVoce[]>()
     for (const v of voci) {
@@ -220,7 +220,7 @@ export function MenuComposerGrid({
                 const vs = vociCella(giorno, tipo)
                 return (
                   <td key={giorno} className={tdCell}>
-                    {tipo === 'se' ? (
+                    {tipo === 'secondi' ? (
                       <div className="flex flex-col gap-1.5">
                         {vs.map(v => (
                           <SecondoBlock
@@ -235,7 +235,7 @@ export function MenuComposerGrid({
                           />
                         ))}
                         {!readOnly && vs.length < SEZIONI_MAX[tipo] && (
-                          <PiattoSlot tipo="se" addLabel="Aggiungi secondo" onClick={() => onAdd(giorno, 'se')} />
+                          <PiattoSlot tipo="secondi" addLabel="Aggiungi secondo" onClick={() => onAdd(giorno, 'secondi')} />
                         )}
                       </div>
                     ) : (
@@ -253,7 +253,7 @@ export function MenuComposerGrid({
               })}
             </tr>
 
-            {tipo === 'pr' && (
+            {tipo === 'primi' && (
               <ToggleRow
                 key="succhi"
                 label="Succhi"
@@ -267,7 +267,7 @@ export function MenuComposerGrid({
               />
             )}
 
-            {tipo === 'se' && (
+            {tipo === 'secondi' && (
               <>
                 <ToggleRow
                   key="insalate"
