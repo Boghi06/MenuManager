@@ -17,20 +17,6 @@ export const SUPPL_PREFIX: Record<string, string> = {
   fr: 'Avec supplément :',
 }
 
-/** Impagina un elenco di nomi piatto su più righe stampate, senza superare maxChars a riga. */
-export function wrapPiatti(nomi: string[], maxChars = 90): string[] {
-  const righe: string[] = []
-  let corrente = ''
-  for (const nome of nomi) {
-    if (corrente === '') {
-      corrente = nome
-    } else if ((corrente + ', ' + nome).length <= maxChars) {
-      corrente += ', ' + nome
-    } else {
-      righe.push(corrente)
-      corrente = nome
-    }
-  }
-  if (corrente !== '') righe.push(corrente)
-  return righe
-}
+// L'elenco dei piatti "sempre a vostra scelta" non si impagina più qui: sta su
+// una riga sola accanto alla sua etichetta e lo manda a capo il browser, un
+// nome intero alla volta. Vedi components/menu/ElencoInline.tsx.

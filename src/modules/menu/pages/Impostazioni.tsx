@@ -1,10 +1,11 @@
-import { useState, useMemo, useEffect, useCallback, useRef } from 'react'
+import { useState, useMemo, useEffect, useCallback, useRef, Fragment } from 'react'
 import { Check, Plus, X, GripVertical, Info, Search, Salad, Leaf, MilkOff, ChefHat, Loader2 } from 'lucide-react'
 import { AppLayout } from '@/core/layout/AppLayout'
 import { PageHeader } from '@/core/layout/PageHeader'
 import { useFooterConfig } from '@/modules/menu/hooks/useFooterConfig'
 import { usePiatti } from '@/modules/menu/hooks/usePiatti'
-import { formatPrezzo, parsePrezzo, SUPPL_PREFIX, wrapPiatti } from '@/modules/menu/lib/footer'
+import { formatPrezzo, parsePrezzo, SUPPL_PREFIX } from '@/modules/menu/lib/footer'
+import { ElencoInline } from '@/modules/menu/components/menu/ElencoInline'
 import type { Piatto } from '@/modules/menu/types/piatto'
 
 function nomePiatto(p: Piatto, lingua: string): string {
@@ -165,9 +166,8 @@ function PiattiMultiSelect({ piattoIds, onChange, piatti }: {
 
 // ─── Anteprima stampa (foglio bianco, Georgia serif) ──────────────────────────
 
-function StampaFooterPreview({ lingua, righe, supplementi }: { lingua: Lingua; righe: string[]; supplementi: { piatto: string; prezzo: string }[] }) {
+function StampaFooterPreview({ lingua, sempre, supplementi }: { lingua: Lingua; sempre: string[]; supplementi: { piatto: string; prezzo: string }[] }) {
   const t = PREVIEW_T[lingua]
-  const righeVis = righe.filter(r => r.trim() !== '')
   const supplVis = supplementi.filter(s => s.piatto.trim() !== '')
 
   return (
@@ -190,18 +190,20 @@ function StampaFooterPreview({ lingua, righe, supplementi }: { lingua: Lingua; r
       <hr style={{ borderColor: '#bbb', borderWidth: '0 0 1px', margin: '0 0 12px' }} />
 
       <div style={{ textAlign: 'center', fontSize: 13.5, lineHeight: 1.55, color: '#222' }}>
-        <div style={{ fontWeight: 700, marginBottom: 2, fontSize: 14 }}>{t.sempre}</div>
-        {righeVis.length > 0
-          ? righeVis.map((r, i) => <div key={i}>{r}</div>)
-          : <div style={{ color: '#bbb' }}>—</div>}
+        {/* etichetta e piatti sulla stessa riga, come nella stampa */}
+        <div>
+          <span style={{ fontWeight: 700, fontSize: 14 }}>{t.sempre}</span>{' '}
+          {sempre.length > 0 ? <ElencoInline voci={sempre} /> : <span style={{ color: '#bbb' }}>—</span>}
+        </div>
         {supplVis.length > 0 && (
           <div style={{ marginTop: 4 }}>
             <span style={{ fontWeight: 700 }}>{SUPPL_PREFIX[lingua]}</span>{' '}
             {supplVis.map((s, i) => (
-              <span key={i}>
+              <Fragment key={i}>
                 {i > 0 && <span style={{ color: '#aaa' }}>{'  –  '}</span>}
-                {s.piatto} € {formatPrezzo(parsePrezzo(s.prezzo))}
-              </span>
+                {/* nowrap: nome e prezzo restano insieme, l'a capo cade sul trattino */}
+                <span style={{ whiteSpace: 'nowrap' }}>{s.piatto} € {formatPrezzo(parsePrezzo(s.prezzo))}</span>
+              </Fragment>
             ))}
           </div>
         )}
@@ -315,14 +317,13 @@ export default function Impostazioni() {
   const inputCls = 'h-10 px-3 rounded-[9px] border border-[#DEDEDE] text-sm text-gray-800 outline-none focus:border-gray-400 transition-colors'
   const dashedBtn = 'inline-flex items-center gap-1.5 h-[38px] px-3.5 rounded-[9px] border border-dashed border-[#D4D4D4] text-gray-500 text-[13.5px] font-medium hover:border-gray-400 hover:text-gray-700 transition-colors self-start'
 
-  // dati risolti per l'anteprima nella lingua scelta — l'impaginazione su
-  // più righe stampate è automatica, in base alla lunghezza del testo
-  const previewRighe = wrapPiatti(
-    righe
-      .map(id => piatti.find(p => p.id === id))
-      .filter((p): p is Piatto => !!p)
-      .map(p => nomePiatto(p, linguaPreview)),
-  )
+  // dati risolti per l'anteprima nella lingua scelta — i piatti stanno su una
+  // riga sola accanto all'etichetta, l'a capo lo decide la larghezza del box
+  // (qui più stretto della pagina A4 orizzontale, quindi va a capo prima)
+  const previewSempre = righe
+    .map(id => piatti.find(p => p.id === id))
+    .filter((p): p is Piatto => !!p)
+    .map(p => nomePiatto(p, linguaPreview))
   const previewSuppl = supplementi.map(s => {
     const p = s.piatto_id != null ? piatti.find(x => x.id === s.piatto_id) : undefined
     return { piatto: p ? nomePiatto(p, linguaPreview) : '', prezzo: s.prezzo }
@@ -462,7 +463,7 @@ export default function Impostazioni() {
                 ))}
               </div>
             </div>
-            <StampaFooterPreview lingua={linguaPreview} righe={previewRighe} supplementi={previewSuppl} />
+            <StampaFooterPreview lingua={linguaPreview} sempre={previewSempre} supplementi={previewSuppl} />
             <p className="text-[12px] text-gray-500 mt-4 text-center">
               Aggiornato in tutti i menù, in tutte le lingue, al salvataggio
             </p>
