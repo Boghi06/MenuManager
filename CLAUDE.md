@@ -113,6 +113,13 @@ visualizzazione, stampa ricette al posto del menù clienti, niente eventi/footer
   una password iniziale casuale** e la restituisce all'admin (unica volta in cui
   è visibile). Il primo admin va comunque creato a mano in dashboard (vedi
   `docs/NEW_CLIENT.md`).
+- **Elenco ed eliminazione utenti (admin)**: la stessa pagina `/utenti` elenca gli
+  account via `api/list-users.ts` (auth.users non è leggibile dal client e la RLS
+  su `user_roles` espone solo il proprio ruolo) e ne elimina uno via
+  `api/delete-user.ts`. L'eliminazione cancella l'account Auth (la riga in
+  `user_roles` va in cascade) ma **non** tocca `activity_log`, che conserva
+  user_id/email come testo. Il server rifiuta l'auto-eliminazione: così resta
+  sempre almeno un admin.
 - **Cambio password al primo accesso**: gli utenti creati dall'admin hanno
   `user_roles.must_change_password = true` (migrazione `018`). `RoleProvider`
   legge il flag; `PasswordChangeGate` (`ForcePasswordChange.tsx`) sostituisce
@@ -214,7 +221,8 @@ dall'email sintetica (vedi login per nome utente).
   `/api` per lasciar passare le serverless function.
 - **Serverless function** (`api/*.ts`, runtime Node di Vercel): usate per le
   operazioni che richiedono la **service_role key**, che non può stare nel client.
-  Oggi c'è `api/create-user.ts` (creazione utenti, vedi § Ruoli utente). Env server
+  Oggi ci sono `api/create-user.ts`, `api/list-users.ts`, `api/delete-user.ts` e
+  `api/set-password.ts` (vedi § Ruoli utente). Env server
   richieste sul progetto Vercel: `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` (senza
   prefisso `VITE_`, così restano fuori dal bundle). Type-check via `tsconfig.api.json`
   (referenziato dal `tsconfig.json` root); il build Vite non le tocca. In locale
