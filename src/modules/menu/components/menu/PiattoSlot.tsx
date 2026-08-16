@@ -38,8 +38,12 @@ export function PiattoSlot({
   return (
     <div
       onClick={onClick}
+      // hover appena accennato, solo quando lo slot è cliccabile: segnala che
+      // porta alla scheda del piatto senza competere con la X di rimozione,
+      // che compare in group-hover sullo stesso elemento.
       className={`group/slot w-full flex items-start gap-1.5 border border-[#D4D4D4] bg-white rounded
-                  ${onClick ? 'cursor-pointer' : ''} ${compact ? 'px-1.5 py-1' : 'px-2 py-1.5'}`}
+                  ${onClick ? 'cursor-pointer transition-colors hover:bg-gray-50 hover:border-gray-400' : ''}
+                  ${compact ? 'px-1.5 py-1' : 'px-2 py-1.5'}`}
     >
       <div
         className="shrink-0 self-stretch rounded-sm"

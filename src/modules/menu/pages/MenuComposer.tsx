@@ -156,6 +156,9 @@ export default function MenuComposer() {
             getEventoId={(giorno) => getEvento(giorno, servizio)}
             onSetEventoId={(giorno, id) => void setEvento(giorno, servizio, id)}
             eventi={eventi}
+            // la scheda del piatto vive nell'elenco piatti: ci si arriva con
+            // ?piatto=<id>, che là apre il drawer in sola lettura
+            onOpenPiatto={(piattoId) => navigate(`/piatti?piatto=${piattoId}`)}
           />
         )}
       </div>

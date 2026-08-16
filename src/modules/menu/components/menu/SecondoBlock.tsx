@@ -6,11 +6,15 @@ interface SecondoBlockProps {
   piattoId: number
   /** Nome del contorno assegnato, o null se assente. */
   contornoNome: string | null
+  /** Id del contorno: serve ad aprirne la scheda, il nome da solo non basta. */
+  contornoId?: number | null
   /** Sola visualizzazione: niente rimozione né slot contorno vuoto. */
   readOnly?: boolean
   onRemove: () => void
   onAddContorno: () => void
   onRemoveContorno: () => void
+  /** Apre la scheda del piatto (secondo o contorno) nell'elenco piatti. */
+  onOpenPiatto?: (piattoId: number) => void
 }
 
 /**
@@ -18,21 +22,25 @@ interface SecondoBlockProps {
  * card secondo + sotto, indentato, lo slot contorno.
  */
 export function SecondoBlock({
-  nome, piattoId, contornoNome, readOnly = false, onRemove, onAddContorno, onRemoveContorno,
+  nome, piattoId, contornoNome, contornoId, readOnly = false,
+  onRemove, onAddContorno, onRemoveContorno, onOpenPiatto,
 }: SecondoBlockProps) {
+  const apriSecondo = onOpenPiatto ? () => onOpenPiatto(piattoId) : undefined
+  const apriContorno = onOpenPiatto && contornoId != null ? () => onOpenPiatto(contornoId) : undefined
+
   // in sola lettura senza contorno non serve mostrare lo slot vuoto
   if (readOnly && !contornoNome) {
-    return <PiattoSlot nome={nome} piattoId={piattoId} tipo="secondi" />
+    return <PiattoSlot nome={nome} piattoId={piattoId} tipo="secondi" onClick={apriSecondo} />
   }
 
   return (
     <div className="flex flex-col gap-1">
-      <PiattoSlot nome={nome} piattoId={piattoId} tipo="secondi" onRemove={readOnly ? undefined : onRemove} />
+      <PiattoSlot nome={nome} piattoId={piattoId} tipo="secondi" onClick={apriSecondo} onRemove={readOnly ? undefined : onRemove} />
 
       {/* contorno annidato — esattamente 0 o 1 per secondo */}
       <div className="ml-3.5 pl-2.5 border-l border-[#D4D4D4]">
         {contornoNome ? (
-          <PiattoSlot nome={contornoNome} tipo="contorni" compact onRemove={readOnly ? undefined : onRemoveContorno} />
+          <PiattoSlot nome={contornoNome} tipo="contorni" compact onClick={apriContorno} onRemove={readOnly ? undefined : onRemoveContorno} />
         ) : (
           <button
             type="button"

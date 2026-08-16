@@ -1,9 +1,10 @@
-import { useState, useRef, useMemo, useEffect, type CSSProperties } from 'react'
+import { useState, useRef, useMemo, useEffect, Fragment, type CSSProperties } from 'react'
 import { X, Printer, Salad, Leaf, MilkOff, ChefHat, type LucideIcon } from 'lucide-react'
 import { getBisettimanaRange } from '@/modules/menu/lib/bisettimane'
 import { printHtmlDocument } from '@/modules/menu/lib/print'
 import { useFooterConfig } from '@/modules/menu/hooks/useFooterConfig'
-import { formatPrezzo, SUPPL_PREFIX, wrapPiatti } from '@/modules/menu/lib/footer'
+import { formatPrezzo, SUPPL_PREFIX } from '@/modules/menu/lib/footer'
+import { ElencoInline } from '@/modules/menu/components/menu/ElencoInline'
 import type { FlagKey, MenuVoce, Servizio } from '@/modules/menu/types/menuVoce'
 import type { Piatto } from '@/modules/menu/types/piatto'
 import type { Evento } from '@/modules/menu/types/evento'
@@ -41,8 +42,13 @@ const T = {
     formaggi: 'Scelta di formaggi tradizionali',
     buffetDessert: 'Buffet di dessert',
     sempre: 'Sempre a Vostra scelta:',
-    sempreR1: 'Pennette al pomodoro Siciliano o al ragù bolognese, Omelette alle erbe dei Colli Euganei',
-    sempreR2: 'Petti di pollo,  Finissima di manzo,  Escaloppe di maiale alla griglia',
+    sempreFallback: [
+      'Pennette al pomodoro Siciliano o al ragù bolognese',
+      'Omelette alle erbe dei Colli Euganei',
+      'Petti di pollo',
+      'Finissima di manzo',
+      'Escaloppe di maiale alla griglia',
+    ],
     sempreSuppl: 'Con supplemento:  Entrecôte di manzo € 7,00  –  Costolette di agnello € 7,00  –  Filetto di manzo € 10,00',
     veg: 'vegetariano', vgn: 'vegano', nl: 'no lattosio', loc: 'KM0',
     allergen: 'A richiesta singola ricetta con relativi allergeni',
@@ -58,8 +64,13 @@ const T = {
     formaggi: 'Selection of traditional cheeses',
     buffetDessert: 'Dessert buffet',
     sempre: 'Always available:',
-    sempreR1: 'Penne with Sicilian tomato sauce or Bolognese ragù, Herb omelette from the Euganean Hills',
-    sempreR2: 'Chicken breast,  Lean beef,  Grilled pork escalope',
+    sempreFallback: [
+      'Penne with Sicilian tomato sauce or Bolognese ragù',
+      'Herb omelette from the Euganean Hills',
+      'Chicken breast',
+      'Lean beef',
+      'Grilled pork escalope',
+    ],
     sempreSuppl: 'With supplement:  Beef entrecôte € 7.00  –  Lamb chops € 7.00  –  Beef fillet € 10.00',
     veg: 'vegetarian', vgn: 'vegan', nl: 'lactose-free', loc: 'KM0',
     allergen: 'Allergen information available on request',
@@ -75,8 +86,13 @@ const T = {
     formaggi: 'Auswahl an traditionellen Käsesorten',
     buffetDessert: 'Dessertbuffet',
     sempre: 'Immer verfügbar:',
-    sempreR1: 'Penne mit sizilianischer Tomatensauce oder Bolognese, Kräuteromelett aus den Euganäischen Hügeln',
-    sempreR2: 'Hühnerbrust,  Rinderfilet fein,  Gegrillte Schweineeschnitzel',
+    sempreFallback: [
+      'Penne mit sizilianischer Tomatensauce oder Bolognese',
+      'Kräuteromelett aus den Euganäischen Hügeln',
+      'Hühnerbrust',
+      'Rinderfilet fein',
+      'Gegrillte Schweineeschnitzel',
+    ],
     sempreSuppl: 'Mit Aufpreis:  Rinderentrecôte € 7,00  –  Lammkoteletts € 7,00  –  Rinderfilet € 10,00',
     veg: 'vegetarisch', vgn: 'vegan', nl: 'laktosefrei', loc: 'KM0',
     allergen: 'Auf Anfrage Einzelrezept mit Allergenenangaben',
@@ -92,15 +108,22 @@ const T = {
     formaggi: 'Sélection de fromages traditionnels',
     buffetDessert: 'Buffet de desserts',
     sempre: 'Toujours disponible :',
-    sempreR1: 'Pennette à la tomate sicilienne ou au ragù bolognaise, Omelette aux herbes des Collines Euganéennes',
-    sempreR2: 'Blanc de poulet,  Filet de bœuf haché,  Escalope de porc grillée',
+    sempreFallback: [
+      'Pennette à la tomate sicilienne ou au ragù bolognaise',
+      'Omelette aux herbes des Collines Euganéennes',
+      'Blanc de poulet',
+      'Filet de bœuf haché',
+      'Escalope de porc grillée',
+    ],
     sempreSuppl: 'Avec supplément :  Entrecôte de bœuf € 7,00  –  Côtelettes d\'agneau € 7,00  –  Filet de bœuf € 10,00',
     veg: 'végétarien', vgn: 'vegan', nl: 'sans lactose', loc: 'KM0',
     allergen: 'Recette détaillée avec allergènes sur demande',
     settimana1: 'Semaine 1', settimana2: 'Semaine 2',
     antLabel: 'Entrée', prLabel: 'Premiers plats', seLabel: 'Plats principaux',
   },
-} satisfies Record<Lingua, Record<string, string>>
+  // string[] per `sempreFallback`: i piatti sono un elenco, non una riga già
+  // composta, così ElencoInline può tenerne insieme i nomi mandandoli a capo interi.
+} satisfies Record<Lingua, Record<string, string | string[]>>
 
 const GIORNI_IT = ['Lun', 'Mar', 'Mer', 'Gio', 'Ven', 'Sab', 'Dom']
 const MESI_IT = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic']
@@ -153,7 +176,8 @@ function Sep() {
 }
 
 interface FooterResolved {
-  righe: { id: string; testo: string }[]
+  /** Nomi dei piatti "sempre a vostra scelta", uno per elemento. */
+  sempre: string[]
   supplementi: { id: string; piatto: string; prezzo: number }[]
 }
 
@@ -358,11 +382,14 @@ function A4Page({ giorno, data, lingua, voci, piattoMap, flagsPranzo, flagsCena,
     overflow: 'hidden',
   }
 
+  // Header più piccolo dei nomi dei piatti (17px): è un'intestazione di
+  // servizio, non deve competere con le portate. Meno spaziatura fra le
+  // lettere perché al corpo ridotto il maiuscolo risultava tirato.
   const headerLabelStyle: CSSProperties = {
     fontFamily: 'system-ui, Arial, sans-serif',
-    fontSize: 16,
+    fontSize: 13,
     fontWeight: 700,
-    letterSpacing: 1,
+    letterSpacing: 0.8,
     color: '#111',
     textTransform: 'uppercase' as const,
     whiteSpace: 'nowrap' as const,
@@ -375,7 +402,7 @@ function A4Page({ giorno, data, lingua, voci, piattoMap, flagsPranzo, flagsCena,
         <div style={headerLabelStyle}>
           {t.lunch} {t.lunchTime}
         </div>
-        <div style={{ fontFamily: 'system-ui, Arial, sans-serif', fontSize: 17, fontWeight: 700, textAlign: 'center', color: '#111' }}>
+        <div style={{ fontFamily: 'system-ui, Arial, sans-serif', fontSize: 14, fontWeight: 700, textAlign: 'center', color: '#111' }}>
           {t.luogo}, {formatDateHeader(data)}
         </div>
         <div style={headerLabelStyle}>
@@ -427,18 +454,21 @@ function A4Page({ giorno, data, lingua, voci, piattoMap, flagsPranzo, flagsCena,
         color: '#222',
         lineHeight: 1.5,
       }}>
-        <div style={{ fontWeight: 700, marginBottom: 2 }}>{t.sempre}</div>
-        {footer.righe.length > 0
-          ? footer.righe.map(r => <div key={r.id}>{r.testo}</div>)
-          : (<><div>{t.sempreR1}</div><div>{t.sempreR2}</div></>)}
+        {/* Etichetta e piatti sulla stessa riga, come "Con supplemento:"
+            sotto: così il blocco occupa due righe invece di quattro. */}
+        <div>
+          <span style={{ fontWeight: 700 }}>{t.sempre}</span>{' '}
+          <ElencoInline voci={footer.sempre.length > 0 ? footer.sempre : t.sempreFallback} />
+        </div>
         {footer.supplementi.length > 0 ? (
           <div style={{ marginTop: 3 }}>
             <span style={{ fontWeight: 700 }}>{SUPPL_PREFIX[lingua]}</span>{' '}
             {footer.supplementi.map((s, i) => (
-              <span key={s.id}>
+              <Fragment key={s.id}>
                 {i > 0 && <span style={{ color: '#999' }}>{'  –  '}</span>}
-                {s.piatto} € {formatPrezzo(s.prezzo)}
-              </span>
+                {/* nowrap: nome e prezzo restano insieme, l'a capo cade sul trattino */}
+                <span style={{ whiteSpace: 'nowrap' }}>{s.piatto} € {formatPrezzo(s.prezzo)}</span>
+              </Fragment>
             ))}
           </div>
         ) : (
@@ -581,7 +611,7 @@ export function StampaPreview({ open, onClose, voci, piatti, anno, mese, bisetti
       .filter((p): p is Piatto => !!p)
       .map(p => nomePiatto(p, l))
     return {
-      righe: wrapPiatti(nomiSempre).map((testo, i) => ({ id: String(i), testo })),
+      sempre: nomiSempre,
       supplementi: supplementi.reduce<{ id: string; piatto: string; prezzo: number }[]>((acc, s) => {
         const p = piattoMap.get(s.piatto_id)
         if (p) acc.push({ id: s.id, piatto: nomePiatto(p, l), prezzo: s.prezzo })
