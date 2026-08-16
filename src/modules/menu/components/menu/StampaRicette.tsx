@@ -2,7 +2,7 @@ import { useState, useRef, useMemo, useEffect, type CSSProperties } from 'react'
 import { X, Printer } from 'lucide-react'
 import { getBisettimanaRange } from '@/modules/menu/lib/bisettimane'
 import { printHtmlDocument } from '@/modules/menu/lib/print'
-import { ALLERGENI } from '@/modules/menu/constants/piatti'
+import { ALLERGENI, TIPO_ABBR } from '@/modules/menu/constants/piatti'
 import type { MenuVoce, Servizio } from '@/modules/menu/types/menuVoce'
 import type { Piatto } from '@/modules/menu/types/piatto'
 
@@ -54,7 +54,8 @@ function AllergenoBadge({ Icon, number }: { Icon: typeof ALLERGENI[number]['Icon
 
 /**
  * Piatti del giorno/servizio in ordine di lettura per la cucina:
- * antipasti, primi, secondi (ognuno seguito dal suo contorno), dessert.
+ * antipasti, primi, secondi (ognuno seguito dal suo contorno).
+ * Niente dessert: il buffet non ha ricette per piatto.
  * Deduplicati per id (es. lo stesso contorno usato da più secondi).
  */
 function piattiServizio(
@@ -73,11 +74,11 @@ function piattiServizio(
     visti.add(id)
     out.push(p)
   }
-  for (const tipo of ['ant', 'pr', 'se', 'des'] as const) {
+  for (const tipo of ['antipasti', 'primi', 'secondi'] as const) {
     const sezione = delGiorno.filter(v => v.tipo === tipo).sort((a, b) => a.posizione - b.posizione)
     for (const v of sezione) {
       push(v.piatto_id)
-      if (tipo === 'se') push(v.contorno_id)
+      if (tipo === 'secondi') push(v.contorno_id)
     }
   }
   return out
@@ -155,7 +156,7 @@ function SezioneServizio({ titolo, data, righe }: { titolo: string; data: Date; 
               <td style={SI_NO_STYLE}>{p.vegano ? 'si' : 'no'}</td>
               <td style={SI_NO_STYLE}>{p.no_lattosio ? 'si' : 'no'}</td>
               <td style={SI_NO_STYLE}>{p.locale ? 'si' : 'no'}</td>
-              <td style={SI_NO_STYLE}>{p.tipo ?? ''}</td>
+              <td style={SI_NO_STYLE}>{TIPO_ABBR[p.tipo ?? ''] ?? p.tipo ?? ''}</td>
               <td style={{ ...td, fontSize: 10 }}>
                 {allergeniDi(p).length === 0 ? (
                   <span style={{ color: '#999' }}>—</span>

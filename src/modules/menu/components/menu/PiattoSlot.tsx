@@ -6,7 +6,7 @@ interface PiattoSlotProps {
   nome?: string
   /** ID piatto, mostrato in piccolo sotto il nome. */
   piattoId?: number
-  /** Codice tipo per la barra colore (ant|pr|se|con|des). */
+  /** Codice tipo per la barra colore (ant|pr|se|con). */
   tipo: string
   /** Testo dello slot vuoto (default "Aggiungi piatto"). */
   addLabel?: string

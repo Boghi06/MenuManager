@@ -113,6 +113,13 @@ visualizzazione, stampa ricette al posto del menù clienti, niente eventi/footer
   una password iniziale casuale** e la restituisce all'admin (unica volta in cui
   è visibile). Il primo admin va comunque creato a mano in dashboard (vedi
   `docs/NEW_CLIENT.md`).
+- **Elenco ed eliminazione utenti (admin)**: la stessa pagina `/utenti` elenca gli
+  account via `api/list-users.ts` (auth.users non è leggibile dal client e la RLS
+  su `user_roles` espone solo il proprio ruolo) e ne elimina uno via
+  `api/delete-user.ts`. L'eliminazione cancella l'account Auth (la riga in
+  `user_roles` va in cascade) ma **non** tocca `activity_log`, che conserva
+  user_id/email come testo. Il server rifiuta l'auto-eliminazione: così resta
+  sempre almeno un admin.
 - **Cambio password al primo accesso**: gli utenti creati dall'admin hanno
   `user_roles.must_change_password = true` (migrazione `018`). `RoleProvider`
   legge il flag; `PasswordChangeGate` (`ForcePasswordChange.tsx`) sostituisce
@@ -165,15 +172,22 @@ dall'email sintetica (vedi login per nome utente).
 ## Dominio (modulo menu)
 
 - **Piatto** (`types/piatto.ts`): nomi in 4 lingue (`nome_it` obbligatorio, max 55 char),
-  `tipo` a codici brevi **`ant | pr | se | con | des`** (mapping label↔codice in
-  `constants/piatti.ts`), 4 caratteristiche (vegetariano/vegano/no lattosio/locale)
-  e 14 allergeni booleani `all_*` numerati secondo la normativa UE.
+  `tipo` a parole intere **`antipasti | primi | secondi | contorni`** (etichette in
+  `constants/piatti.ts`; niente conversione label↔codice: il valore in DB e quello
+  nel codice coincidono — i vecchi codici brevi `ant/pr/se/con` sono stati rinominati
+  dalla migrazione `020_rinomina_sezioni.sql`), 4 caratteristiche
+  (vegetariano/vegano/no lattosio/locale) e 14 allergeni booleani `all_*`
+  numerati secondo la normativa UE.
+  **Il dessert non esiste come tipo di piatto**: il pasto chiude sempre con il
+  "Buffet di dessert", che è un flag (vedi MenuFlag). Il codice `des` e i relativi
+  piatti sono stati rimossi da UI e DB con la migrazione `019_rimozione_dessert.sql`.
 - **Bisettimana**: unità di pianificazione di 14 giorni (`giorno` 0–13, 0 = lunedì
   settimana 1). Due per mese (A/B), range calcolato in `lib/bisettimane.ts`.
 - **MenuVoce** (`types/menuVoce.ts`): una cella = (bisettimana, giorno, servizio
-  `pranzo|cena`, sezione `ant|pr|se|des`, posizione 0–2). Il **contorno non è una
+  `pranzo|cena`, sezione `antipasti|primi|secondi`, posizione 0–2). Il **contorno non è una
   sezione**: è l'attributo opzionale `contorno_id` di un secondo. Max alternative:
-  1 antipasto, 3 primi, 3 secondi, 1 dessert (`SEZIONI_MAX`).
+  1 antipasto, 3 primi, 3 secondi (`SEZIONI_MAX`). La vista
+  `bisettimane_with_stato` considera "full" 14 giorni × 2 servizi × **3** sezioni.
 - **MenuFlag**: visibilità per giorno/servizio di elementi opzionali (succhi,
   insalate, formaggi, buffet dessert); se la riga non esiste in DB, default tutti `true`.
 - **Eventi**: serate a tema collegate a giorno/servizio, con immagini nel bucket
@@ -214,7 +228,8 @@ dall'email sintetica (vedi login per nome utente).
   `/api` per lasciar passare le serverless function.
 - **Serverless function** (`api/*.ts`, runtime Node di Vercel): usate per le
   operazioni che richiedono la **service_role key**, che non può stare nel client.
-  Oggi c'è `api/create-user.ts` (creazione utenti, vedi § Ruoli utente). Env server
+  Oggi ci sono `api/create-user.ts`, `api/list-users.ts`, `api/delete-user.ts` e
+  `api/set-password.ts` (vedi § Ruoli utente). Env server
   richieste sul progetto Vercel: `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` (senza
   prefisso `VITE_`, così restano fuori dal bundle). Type-check via `tsconfig.api.json`
   (referenziato dal `tsconfig.json` root); il build Vite non le tocca. In locale

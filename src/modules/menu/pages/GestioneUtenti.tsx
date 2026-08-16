@@ -1,27 +1,41 @@
-import { useState } from 'react'
-import { UserPlus, Check, AlertCircle, Copy, Printer } from 'lucide-react'
+import { useCallback, useEffect, useState } from 'react'
+import { UserPlus, Check, AlertCircle, Copy, Printer, Trash2, RefreshCw } from 'lucide-react'
 import { AppLayout } from '@/core/layout/AppLayout'
 import { PageHeader } from '@/core/layout/PageHeader'
 import { Input } from '@/core/ui/input'
 import { Button } from '@/core/ui/button'
+import { ConfirmDeleteDialog } from '@/core/components/ConfirmDeleteDialog'
 import { clientConfig } from '@/config/clients'
-import { createUser } from '@/core/auth/adminUsers'
+import { createUser, deleteUser, listUsers, type UtenteEsistente } from '@/core/auth/adminUsers'
 import { USER_ROLES, type UserRole } from '@/core/auth/roles'
 
 // Descrizione di ciascun ruolo, mostrata sotto il selettore.
-const ROLE_INFO: Record<UserRole, { label: string; descrizione: string }> = {
+const ROLE_INFO: Record<UserRole, { label: string; descrizione: string; badge: string }> = {
   receptionist: {
     label: 'Receptionist',
     descrizione: 'Gestione completa di menù, eventi e footer; stampa dei menù per i clienti.',
+    badge: 'bg-blue-100 text-blue-800 border-blue-200',
   },
   cucina: {
     label: 'Cucina',
     descrizione: 'Consulta piatti e menù (sola lettura) e stampa le ricette del giorno con allergeni.',
+    badge: 'bg-amber-100 text-amber-800 border-amber-200',
   },
   admin: {
     label: 'Amministratore',
     descrizione: 'Accesso completo: tutte le funzioni, il registro attività e la gestione utenti.',
+    badge: 'bg-purple-100 text-purple-800 border-purple-200',
   },
+}
+
+/** Etichetta del ruolo, tollerante a valori non previsti letti dal DB. */
+function roleInfo(role: UserRole) {
+  return ROLE_INFO[role] ?? { label: role, descrizione: '', badge: 'bg-gray-100 text-gray-700 border-gray-200' }
+}
+
+function formatData(iso: string | null): string {
+  if (!iso) return 'mai'
+  return new Date(iso).toLocaleDateString('it-IT', { day: '2-digit', month: '2-digit', year: 'numeric' })
 }
 
 interface UtenteCreato {
@@ -39,6 +53,49 @@ export default function GestioneUtenti() {
   const [creato, setCreato] = useState<UtenteCreato | null>(null)
   const [copiato, setCopiato] = useState(false)
 
+  // Elenco utenti: letto da /api/list-users (auth.users non è leggibile dal client).
+  const [utenti, setUtenti] = useState<UtenteEsistente[]>([])
+  const [utentiLoading, setUtentiLoading] = useState(true)
+  const [utentiError, setUtentiError] = useState<string | null>(null)
+  const [daEliminare, setDaEliminare] = useState<UtenteEsistente | null>(null)
+  const [eliminando, setEliminando] = useState(false)
+  // incrementato da ricaricaUtenti() per ri-lanciare l'effetto di fetch
+  const [utentiNonce, setUtentiNonce] = useState(0)
+
+  // `utentiLoading` viene alzato in ricaricaUtenti(), non qui: evita setState
+  // sincrono nel body dell'effetto (cascading renders), come in useActivityLog.
+  useEffect(() => {
+    let cancelled = false
+    listUsers().then(({ error: err, users }) => {
+      if (cancelled) return
+      setUtentiError(err)
+      setUtenti(users)
+      setUtentiLoading(false)
+    })
+    return () => { cancelled = true }
+  }, [utentiNonce])
+
+  const ricaricaUtenti = useCallback(() => {
+    setUtentiLoading(true)
+    setUtentiNonce(n => n + 1)
+  }, [])
+
+  const confermaEliminazione = async () => {
+    if (!daEliminare) return
+    setEliminando(true)
+    const err = await deleteUser(daEliminare.id)
+    setEliminando(false)
+    setDaEliminare(null)
+    if (err) {
+      setUtentiError(err)
+      return
+    }
+    setUtentiError(null)
+    // Rimozione ottimistica + ricarica, così l'elenco resta allineato al server.
+    setUtenti(prev => prev.filter(u => u.id !== daEliminare.id))
+    ricaricaUtenti()
+  }
+
   const handleSubmit = async (e: React.SyntheticEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -55,6 +112,7 @@ export default function GestioneUtenti() {
       setCreato({ username: nome, password, role })
       setUsername('')
       setRole('receptionist')
+      ricaricaUtenti()
     }
     setLoading(false)
   }
@@ -124,7 +182,8 @@ export default function GestioneUtenti() {
 
       {/* Contenuto */}
       <div className="flex-1 overflow-y-auto p-8">
-        <div className="max-w-lg">
+        <div className="max-w-3xl flex flex-col gap-10">
+        <section className="max-w-lg">
           <h2 className="font-geist text-lg mb-1">Nuovo utente</h2>
           <p className="text-sm text-gray-500 mb-6">
             L'accesso avviene con il <strong>nome utente</strong> (non serve un'email). La password
@@ -217,8 +276,82 @@ export default function GestioneUtenti() {
               </div>
             </div>
           )}
+        </section>
+
+        {/* Elenco utenti + eliminazione */}
+        <section>
+          <div className="flex items-baseline justify-between mb-1">
+            <h2 className="font-geist text-lg">Utenti esistenti</h2>
+            <button
+              type="button"
+              onClick={ricaricaUtenti}
+              disabled={utentiLoading}
+              className="inline-flex items-center gap-1.5 text-sm text-gray-500 hover:text-gray-800 transition-colors disabled:opacity-50"
+            >
+              <RefreshCw className={`w-4 h-4 ${utentiLoading ? 'animate-spin' : ''}`} />
+              Aggiorna
+            </button>
+          </div>
+          <p className="text-sm text-gray-500 mb-4">
+            L'eliminazione è definitiva: l'utente perde subito l'accesso. Le modifiche già
+            registrate nel registro attività restano.
+          </p>
+
+          {utentiError && (
+            <div className="flex items-center gap-2 text-sm px-3 py-2.5 mb-4 rounded-lg bg-red-50 border border-red-200 text-red-700">
+              <AlertCircle className="w-4 h-4 shrink-0" />
+              {utentiError}
+            </div>
+          )}
+
+          <div className="rounded-lg border border-gray-200 bg-white overflow-hidden">
+            {utentiLoading && utenti.length === 0 && (
+              <div className="px-4 py-6 text-sm text-gray-500">Caricamento utenti…</div>
+            )}
+            {!utentiLoading && utenti.length === 0 && !utentiError && (
+              <div className="px-4 py-6 text-sm text-gray-500">Nessun utente da mostrare.</div>
+            )}
+            {utenti.map(u => (
+              <div
+                key={u.id}
+                className="grid grid-cols-[1fr_auto_auto] gap-3 items-center px-4 py-3 border-b border-gray-100 last:border-b-0"
+              >
+                <div className="min-w-0">
+                  <div className="text-sm font-medium text-gray-900 truncate">
+                    {u.username}
+                    {u.isSelf && <span className="ml-2 text-xs font-normal text-gray-400">(tu)</span>}
+                  </div>
+                  <div className="text-xs text-gray-500">
+                    Ultimo accesso: {formatData(u.lastSignInAt)}
+                    {u.mustChangePassword && <span className="text-amber-700"> · password iniziale da cambiare</span>}
+                  </div>
+                </div>
+                <span className={`inline-flex px-2 py-0.5 rounded-full border text-xs font-medium ${roleInfo(u.role).badge}`}>
+                  {roleInfo(u.role).label}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setDaEliminare(u)}
+                  disabled={u.isSelf || eliminando}
+                  title={u.isSelf ? 'Non puoi eliminare il tuo account' : `Elimina ${u.username}`}
+                  className="inline-flex items-center justify-center w-9 h-9 rounded-md border border-gray-300 text-gray-500 hover:bg-red-50 hover:text-red-600 hover:border-red-200 transition-colors disabled:opacity-30 disabled:hover:bg-white disabled:hover:text-gray-500 disabled:hover:border-gray-300 disabled:cursor-not-allowed"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        </section>
         </div>
       </div>
+
+      <ConfirmDeleteDialog
+        open={daEliminare !== null}
+        onClose={() => setDaEliminare(null)}
+        onConfirm={() => void confermaEliminazione()}
+        title={`Eliminare l'utente "${daEliminare?.username ?? ''}"?`}
+        description="Questa azione non è reversibile: l'account viene cancellato e l'utente perde immediatamente l'accesso all'applicazione."
+      />
     </AppLayout>
   )
 }

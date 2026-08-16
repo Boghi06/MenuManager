@@ -7,8 +7,7 @@ import { AppLayout } from '@/core/layout/AppLayout'
 import { PageHeader } from '@/core/layout/PageHeader'
 import { PiattoCard } from '@/modules/menu/components/piatti/PiattoCard'
 import { CategorieNav } from '@/modules/menu/components/piatti/CategorieNav'
-import { PiattoDrawerView } from '@/modules/menu/components/piatti/PiattoDrawerView'
-import { PiattoDrawerEdit } from '@/modules/menu/components/piatti/PiattoDrawerEdit'
+import { PiattoDrawer, type PiattoDrawerModo } from '@/modules/menu/components/piatti/PiattoDrawer'
 import { PiattoDrawerNew } from '@/modules/menu/components/piatti/PiattoDrawerNew'
 import { ConfirmDeleteDialog } from '@/core/components/ConfirmDeleteDialog'
 import type { Piatto } from '@/modules/menu/types/piatto'
@@ -19,17 +18,23 @@ export default function Dashboard() {
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('all')
 
-  const [viewPiatto, setViewPiatto] = useState<Piatto | null>(null)
-  const [editPiatto, setEditPiatto] = useState<Piatto | null>(null)
+  // Un solo drawer per scheda e modifica: il passaggio fra i due è un cambio
+  // di `drawerModo`, così il pannello non si chiude e riapre.
+  // `drawerPiatto` non viene azzerato alla chiusura: resta finché non si apre
+  // un altro piatto, così il contenuto non si svuota durante l'animazione di
+  // uscita del pannello.
+  const [drawerPiatto, setDrawerPiatto] = useState<Piatto | null>(null)
+  const [drawerOpen, setDrawerOpen] = useState(false)
+  const [drawerModo, setDrawerModo] = useState<PiattoDrawerModo>('view')
   const [nuovoOpen, setNuovoOpen] = useState(false)
   const [eliminaId, setEliminaId] = useState<number | null>(null)
 
   const counts = useMemo(() => ({
     all: piatti.length,
-    pr:  piatti.filter(p => p.tipo === 'pr').length,
-    se:  piatti.filter(p => p.tipo === 'se').length,
-    con: piatti.filter(p => p.tipo === 'con').length,
-    des: piatti.filter(p => p.tipo === 'des').length,
+    antipasti: piatti.filter(p => p.tipo === 'antipasti').length,
+    primi:     piatti.filter(p => p.tipo === 'primi').length,
+    secondi:   piatti.filter(p => p.tipo === 'secondi').length,
+    contorni:  piatti.filter(p => p.tipo === 'contorni').length,
   }), [piatti])
 
   const filteredPiatti = useMemo(() => piatti.filter(p => {
@@ -48,14 +53,20 @@ export default function Dashboard() {
     getItemKey: (index) => filteredPiatti[index].id,
   })
 
+  const openScheda = useCallback((piatto: Piatto) => {
+    setDrawerModo('view')
+    setDrawerPiatto(piatto)
+    setDrawerOpen(true)
+  }, [])
+
   const openEdit = useCallback((piatto: Piatto) => {
-    setViewPiatto(null)
-    setTimeout(() => setEditPiatto(piatto), 0)
+    setDrawerModo('edit')
+    setDrawerPiatto(piatto)
+    setDrawerOpen(true)
   }, [])
 
   const openElimina = useCallback((id: number) => {
-    setViewPiatto(null)
-    setEditPiatto(null)
+    setDrawerOpen(false)
     setTimeout(() => setEliminaId(id), 0)
   }, [])
 
@@ -125,7 +136,7 @@ export default function Dashboard() {
                 >
                   <PiattoCard
                     piatto={piatto}
-                    onOpenRicetta={setViewPiatto}
+                    onOpenRicetta={openScheda}
                     onOpenModifica={openEdit}
                     onOpenElimina={openElimina}
                   />
@@ -136,18 +147,12 @@ export default function Dashboard() {
         )}
       </div>
 
-      <PiattoDrawerView
-        piatto={viewPiatto}
-        open={!!viewPiatto}
-        onClose={() => setViewPiatto(null)}
-        onEdit={openEdit}
-        onDelete={openElimina}
-      />
-
-      <PiattoDrawerEdit
-        piatto={editPiatto}
-        open={!!editPiatto}
-        onClose={() => setEditPiatto(null)}
+      <PiattoDrawer
+        piatto={drawerPiatto}
+        modo={drawerModo}
+        open={drawerOpen}
+        onClose={() => setDrawerOpen(false)}
+        onModifica={() => setDrawerModo('edit')}
         onSave={updatePiatto}
         onDelete={openElimina}
       />

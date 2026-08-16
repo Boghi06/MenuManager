@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '@/core/lib/supabase'
 import { getCache, setCache } from '@/core/lib/cache'
-import { TIPO_TO_CODE } from '@/modules/menu/constants/piatti'
 import type { Piatto, PiattoForm } from '@/modules/menu/types/piatto'
 
 const CACHE_KEY = 'piatti'
@@ -35,16 +34,11 @@ export function usePiatti() {
     })
   }, [])
 
-  const toDbForm = (form: PiattoForm) => ({
-    ...form,
-    tipo: TIPO_TO_CODE[form.tipo ?? ''] ?? form.tipo,
-  })
-
   const createPiatto = async (form: PiattoForm): Promise<string | null> => {
     const newId = piatti.length > 0 ? Math.max(...piatti.map(p => p.id)) + 1 : 1
     const { data, error } = await supabase
       .from('piatti')
-      .insert({ id: newId, ...toDbForm(form) })
+      .insert({ id: newId, ...form })
       .select('*')
       .single()
     if (error) {
@@ -58,7 +52,7 @@ export function usePiatti() {
   const updatePiatto = async (id: number, form: PiattoForm): Promise<boolean> => {
     const { data, error } = await supabase
       .from('piatti')
-      .update(toDbForm(form))
+      .update(form)
       .eq('id', id)
       .select()
       .single()

@@ -61,7 +61,7 @@ export default function MenuComposer() {
     })
   }, [range.start, settimana])
 
-  const filtroTipo = target?.kind === 'contorno' ? 'con' : target?.tipo ?? 'pr'
+  const filtroTipo = target?.kind === 'contorno' ? 'contorni' : target?.tipo ?? 'primi'
 
   const handlePick = useCallback((piattoId: number) => {
     if (!target) return

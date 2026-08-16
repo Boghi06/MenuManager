@@ -47,7 +47,7 @@ const T = {
     veg: 'vegetariano', vgn: 'vegano', nl: 'no lattosio', loc: 'KM0',
     allergen: 'A richiesta singola ricetta con relativi allergeni',
     settimana1: 'Settimana 1', settimana2: 'Settimana 2',
-    antLabel: 'Antipasto', prLabel: 'Primi', seLabel: 'Secondi', desLabel: 'Dessert',
+    antLabel: 'Antipasto', prLabel: 'Primi', seLabel: 'Secondi',
   },
   en: {
     lunch: 'LUNCH', lunchTime: '12.40 – 1.30 pm',
@@ -64,7 +64,7 @@ const T = {
     veg: 'vegetarian', vgn: 'vegan', nl: 'lactose-free', loc: 'KM0',
     allergen: 'Allergen information available on request',
     settimana1: 'Week 1', settimana2: 'Week 2',
-    antLabel: 'Starter', prLabel: 'First courses', seLabel: 'Main courses', desLabel: 'Dessert',
+    antLabel: 'Starter', prLabel: 'First courses', seLabel: 'Main courses',
   },
   de: {
     lunch: 'MITTAGESSEN', lunchTime: '12.40 – 13.30 Uhr',
@@ -81,7 +81,7 @@ const T = {
     veg: 'vegetarisch', vgn: 'vegan', nl: 'laktosefrei', loc: 'KM0',
     allergen: 'Auf Anfrage Einzelrezept mit Allergenenangaben',
     settimana1: 'Woche 1', settimana2: 'Woche 2',
-    antLabel: 'Vorspeise', prLabel: 'Erste Gänge', seLabel: 'Hauptgänge', desLabel: 'Dessert',
+    antLabel: 'Vorspeise', prLabel: 'Erste Gänge', seLabel: 'Hauptgänge',
   },
   fr: {
     lunch: 'DÉJEUNER', lunchTime: '12h40 – 13h30',
@@ -98,7 +98,7 @@ const T = {
     veg: 'végétarien', vgn: 'vegan', nl: 'sans lactose', loc: 'KM0',
     allergen: 'Recette détaillée avec allergènes sur demande',
     settimana1: 'Semaine 1', settimana2: 'Semaine 2',
-    antLabel: 'Entrée', prLabel: 'Premiers plats', seLabel: 'Plats principaux', desLabel: 'Dessert',
+    antLabel: 'Entrée', prLabel: 'Premiers plats', seLabel: 'Plats principaux',
   },
 } satisfies Record<Lingua, Record<string, string>>
 
@@ -180,10 +180,9 @@ function Colonna({ servizio, giorno, voci, piattoMap, lingua, showSucchi, showIn
       .filter(v => v.giorno === giorno && v.servizio === servizio && v.tipo === tipo)
       .sort((a, b) => a.posizione - b.posizione)
 
-  const antipasti = filtrati('ant')
-  const primi     = filtrati('pr')
-  const secondi   = filtrati('se')
-  const dessert   = filtrati('des')
+  const antipasti = filtrati('antipasti')
+  const primi     = filtrati('primi')
+  const secondi   = filtrati('secondi')
 
   // Column: 5 content blocks separated by space-between.
   // The ornamental Sep sits at the TOP of blocks 2–5 (inside each block)
@@ -311,20 +310,14 @@ function Colonna({ servizio, giorno, voci, piattoMap, lingua, showSucchi, showIn
           {!showInsalate && !showFormaggi && <div style={{ ...dishStyle, color: '#ddd' }}>—</div>}
         </div>
 
-        {/* ── Block 5: Dessert ─────────────────── */}
+        {/* ── Block 5: Buffet di dessert ────────── */}
+        {/* Non ci sono più dessert come piatti: il pasto chiude sempre con la
+            riga del buffet, mostrata solo se il flag del giorno è attivo. */}
         <div style={blockStyle}>
           <Sep />
-          {dessert.map(v => {
-            const p = piattoMap.get(v.piatto_id)
-            if (!p) return null
-            return (
-              <div key={v.id} style={dishStyle}>
-                {nomePiatto(p, lingua)}<BadgeRow p={p} lingua={lingua} />
-              </div>
-            )
-          })}
-          {showBuffetDessert && <div style={dishStyle}>{t.buffetDessert}</div>}
-          {dessert.length === 0 && !showBuffetDessert && <div style={{ ...dishStyle, color: '#ccc' }}>—</div>}
+          {showBuffetDessert
+            ? <div style={dishStyle}>{t.buffetDessert}</div>
+            : <div style={{ ...dishStyle, color: '#ccc' }}>—</div>}
         </div>
 
       </div>

@@ -1,8 +1,15 @@
 /** Servizio di un menù. */
 export type Servizio = 'pranzo' | 'cena'
 
-/** Sezione (tipo) di una riga della griglia composizione. Il contorno non è una sezione. */
-export type SezioneTipo = 'ant' | 'pr' | 'se' | 'des'
+/**
+ * Sezione (tipo) di una riga della griglia composizione. Il contorno non è una
+ * sezione, e il dessert non esiste più come portata: a fine pasto c'è sempre il
+ * "Buffet di dessert", che è un flag (show_buffet_dessert), non un piatto.
+ *
+ * Sono gli stessi valori salvati in `menu_voci.tipo` (FK su `dish_types.code`):
+ * il DB usa le parole intere, non più i codici brevi ant/pr/se.
+ */
+export type SezioneTipo = 'antipasti' | 'primi' | 'secondi'
 
 /**
  * Una voce di menù = un'alternativa in una cella

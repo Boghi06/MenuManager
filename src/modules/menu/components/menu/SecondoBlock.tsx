@@ -22,17 +22,17 @@ export function SecondoBlock({
 }: SecondoBlockProps) {
   // in sola lettura senza contorno non serve mostrare lo slot vuoto
   if (readOnly && !contornoNome) {
-    return <PiattoSlot nome={nome} piattoId={piattoId} tipo="se" />
+    return <PiattoSlot nome={nome} piattoId={piattoId} tipo="secondi" />
   }
 
   return (
     <div className="flex flex-col gap-1">
-      <PiattoSlot nome={nome} piattoId={piattoId} tipo="se" onRemove={readOnly ? undefined : onRemove} />
+      <PiattoSlot nome={nome} piattoId={piattoId} tipo="secondi" onRemove={readOnly ? undefined : onRemove} />
 
       {/* contorno annidato — esattamente 0 o 1 per secondo */}
       <div className="ml-3.5 pl-2.5 border-l border-[#D4D4D4]">
         {contornoNome ? (
-          <PiattoSlot nome={contornoNome} tipo="con" compact onRemove={readOnly ? undefined : onRemoveContorno} />
+          <PiattoSlot nome={contornoNome} tipo="contorni" compact onRemove={readOnly ? undefined : onRemoveContorno} />
         ) : (
           <button
             type="button"
