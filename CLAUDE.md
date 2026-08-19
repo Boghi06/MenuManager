@@ -98,10 +98,18 @@ costruisce dai `navItems`. Non aggiungere route a mano in `App.tsx`.
 
 ## Ruoli utente
 
-Tre ruoli (`UserRole` in `src/core/auth/roles.ts`): **receptionist** (tutto tranne
-la stampa ricette), **cucina** (piatti in lettura/scrittura, menù in sola
-visualizzazione, stampa ricette al posto del menù clienti, niente eventi/footer),
-**admin** (tutto + entrambe le stampe).
+Tre ruoli (`UserRole` in `src/core/auth/roles.ts`): **receptionist** (sola
+lettura ovunque — piatti e menù si consultano e si stampano, non si modificano;
+stampa menù clienti e settimanale; niente eventi/footer), **cucina** (scrive
+piatti, menù, eventi e footer; stampa ricette e settimanale, non il menù
+clienti), **admin** (tutto + entrambe le stampe). La stampa settimanale è
+l'unica visibile a tutti e tre.
+
+⚠️ I due ruoli operativi sono stati **scambiati** dalla migrazione
+`024_scambio_ruoli.sql`: fino alla `023` era la cucina a consultare soltanto.
+Le policy RLS restrictive ora citano `'receptionist'`, e coprono anche `piatti`,
+che prima non era protetta. Attenzione al default: un utente senza riga in
+`user_roles` è `receptionist`, cioè oggi il ruolo **meno** capace.
 
 - Il ruolo vive in `public.user_roles` (migrazione `016_user_roles.sql`), una riga
   per utente. Senza riga → default `receptionist` (comportamento storico).
@@ -128,12 +136,13 @@ visualizzazione, stampa ricette al posto del menù clienti, niente eventi/footer
   e azzera il flag in modo atomico.
 - Frontend: `ProtectedRoute` monta `RoleProvider` (fetch del ruolo, context);
   `useRole()` nei componenti, `RequireRole` come guardia di route, `roles` su
-  navItems/routes dei moduli. Le pagine menù usano `readOnly = role === 'cucina'`.
-- DB: policy RLS **restrictive** bloccano le scritture della cucina su menù,
-  bisettimane, flag, eventi, footer e sul bucket `eventi-images` (difesa in
-  profondità: la UI nasconde, la RLS impone).
+  navItems/routes dei moduli. Le pagine menù e l'elenco piatti usano
+  `readOnly = role === 'receptionist'`.
+- DB: policy RLS **restrictive** bloccano le scritture del receptionist su
+  piatti, menù, bisettimane, flag, eventi, footer e sul bucket `eventi-images`
+  (difesa in profondità: la UI nasconde, la RLS impone).
 - Nuove tabelle con scritture riservate: aggiungere le policy restrictive
-  anti-cucina come in `016_user_roles.sql` (helper SQL `public.app_role()`).
+  anti-receptionist come in `024_scambio_ruoli.sql` (helper SQL `public.app_role()`).
 
 **Auditing (solo admin)**: pagina `/auditing` ("Registro attività",
 `pages/Auditing.tsx` + `hooks/useActivityLog.ts`) che legge `public.activity_log`.
@@ -178,15 +187,23 @@ dall'email sintetica (vedi login per nome utente).
   dalla migrazione `020_rinomina_sezioni.sql`), 4 caratteristiche
   (vegetariano/vegano/no lattosio/locale) e 14 allergeni booleani `all_*`
   numerati secondo la normativa UE.
+  Il campo **`categoria`** (`carne | pesce | vegetariano`, nullable, migrazione
+  `021_categoria_piatto.sql`) è un asse indipendente da `tipo`: dice di cosa è
+  fatto il piatto e colora la barra verticale che lo precede nell'elenco piatti,
+  nella composizione menù e nel selettore (rosso/blu/verde, `CATEGORIA_BAR`).
+  Se è `null` la barra resta il grigio storico per portata (`TIPO_BAR`): i piatti
+  in archivio non vanno classificati d'ufficio, li aggiorna l'utente dal form.
   **Il dessert non esiste come tipo di piatto**: il pasto chiude sempre con il
   "Buffet di dessert", che è un flag (vedi MenuFlag). Il codice `des` e i relativi
   piatti sono stati rimossi da UI e DB con la migrazione `019_rimozione_dessert.sql`.
 - **Bisettimana**: unità di pianificazione di 14 giorni (`giorno` 0–13, 0 = lunedì
   settimana 1). Due per mese (A/B), range calcolato in `lib/bisettimane.ts`.
 - **MenuVoce** (`types/menuVoce.ts`): una cella = (bisettimana, giorno, servizio
-  `pranzo|cena`, sezione `antipasti|primi|secondi`, posizione 0–2). Il **contorno non è una
+  `pranzo|cena`, sezione `antipasti|primi|secondi`, posizione 0–3). Il **contorno non è una
   sezione**: è l'attributo opzionale `contorno_id` di un secondo. Max alternative:
-  1 antipasto, 3 primi, 3 secondi (`SEZIONI_MAX`). La vista
+  1 antipasto, 3 primi, 4 secondi (`SEZIONI_MAX`); il **quarto secondo
+  (posizione 3) non ammette contorno** — `secondoHaContorno()` lato client e
+  CHECK a DB dalla migrazione `023_quarto_secondo.sql`. La vista
   `bisettimane_with_stato` considera "full" 14 giorni × 2 servizi × **3** sezioni.
 - **MenuFlag**: visibilità per giorno/servizio di elementi opzionali (succhi,
   insalate, formaggi, buffet dessert); se la riga non esiste in DB, default tutti `true`.
@@ -197,6 +214,11 @@ dall'email sintetica (vedi login per nome utente).
 - **Stampa**: `components/menu/StampaPreview.tsx` (~680 righe) genera l'anteprima
   di stampa multilingua con CSS print inline. È il componente più delicato: le
   modifiche di layout stampa vanno verificate visivamente con l'anteprima.
+- **Stampa settimanale** (tutti i ruoli): `components/menu/StampaSettimana.tsx` —
+  A4 orizzontale, una pagina per servizio, i 7 giorni della settimana in colonna
+  con antipasto, primi e i secondi ognuno col proprio contorno. Sostituisce il
+  foglio Excel usato in cucina; il nome del piatto prende il colore della sua
+  `categoria` (stessa legenda della barra a schermo).
 - **Stampa ricette** (cucina/admin): `components/menu/StampaRicette.tsx` — PDF
   unico A4 verticale, solo italiano, con le tabelle RICETTE PRANZO e RICETTE CENA
   del giorno (codice = id piatto, caratteristiche, tipo, allergeni UE numerati dai

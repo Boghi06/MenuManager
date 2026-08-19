@@ -4,7 +4,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger, DropdownMenuGroup,
 } from '@/core/ui/dropdown-menu'
-import { TIPO_LABEL, TIPO_BAR_CARD as TIPO_BAR } from '@/modules/menu/constants/piatti'
+import { TIPO_LABEL, TIPO_BAR_CARD as TIPO_BAR, CATEGORIA_LABEL, coloreBarraPiatto } from '@/modules/menu/constants/piatti'
 import { PiattoBadges } from './PiattoBadges'
 import type { Piatto } from '@/modules/menu/types/piatto'
 
@@ -13,10 +13,12 @@ interface PiattoCardProps {
   onOpenRicetta: (p: Piatto) => void
   onOpenModifica: (p: Piatto) => void
   onOpenElimina: (id: number) => void
+  /** Sola consultazione: resta la sola voce "Vedi ricetta". */
+  readOnly?: boolean
 }
 
 export const PiattoCard = memo(function PiattoCard({
-  piatto, onOpenRicetta, onOpenModifica, onOpenElimina,
+  piatto, onOpenRicetta, onOpenModifica, onOpenElimina, readOnly = false,
 }: PiattoCardProps) {
   return (
     <div
@@ -25,7 +27,8 @@ export const PiattoCard = memo(function PiattoCard({
     >
       <div
         className="self-stretch rounded-full"
-        style={{ backgroundColor: TIPO_BAR[piatto.tipo ?? ''] ?? 'var(--brand-ink)' }}
+        title={piatto.categoria ? CATEGORIA_LABEL[piatto.categoria] : 'Categoria non specificata'}
+        style={{ backgroundColor: coloreBarraPiatto(piatto.categoria, TIPO_BAR[piatto.tipo ?? ''] ?? 'var(--brand-ink)') }}
       />
 
       <div>
@@ -57,9 +60,12 @@ export const PiattoCard = memo(function PiattoCard({
               <DropdownMenuItem className="cursor-pointer" onClick={() => onOpenRicetta(piatto)}>
                 <ExternalLink className="mr-2 h-4 w-4" /><span>Vedi ricetta</span>
               </DropdownMenuItem>
+              {!readOnly && (
               <DropdownMenuItem className="cursor-pointer" onClick={() => onOpenModifica(piatto)}>
                 <Pencil className="mr-2 h-4 w-4" /><span>Modifica</span>
               </DropdownMenuItem>
+              )}
+              {!readOnly && (
               <DropdownMenuItem
                 className="cursor-pointer focus:bg-[color-mix(in_srgb,var(--accent-color)_10%,transparent)]"
                 style={{ color: 'var(--brand)', '--accent-color': 'var(--brand)' } as React.CSSProperties}
@@ -67,6 +73,7 @@ export const PiattoCard = memo(function PiattoCard({
               >
                 <Trash2 className="mr-2 h-4 w-4 text-brand" /><span>Elimina</span>
               </DropdownMenuItem>
+              )}
             </DropdownMenuGroup>
           </DropdownMenuContent>
         </DropdownMenu>

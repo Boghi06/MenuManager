@@ -5,9 +5,11 @@ import { Search, Plus } from 'lucide-react'
 import { Input } from '@/core/ui/input'
 import { usePiatti } from '@/modules/menu/hooks/usePiatti'
 import { AppLayout } from '@/core/layout/AppLayout'
+import { useRole } from '@/core/auth/roles'
 import { PageHeader } from '@/core/layout/PageHeader'
 import { PiattoCard } from '@/modules/menu/components/piatti/PiattoCard'
 import { CategorieNav } from '@/modules/menu/components/piatti/CategorieNav'
+import { LegendaCategorie } from '@/modules/menu/components/piatti/LegendaCategorie'
 import { PiattoDrawer, type PiattoDrawerModo } from '@/modules/menu/components/piatti/PiattoDrawer'
 import { PiattoDrawerNew } from '@/modules/menu/components/piatti/PiattoDrawerNew'
 import { ConfirmDeleteDialog } from '@/core/components/ConfirmDeleteDialog'
@@ -15,6 +17,10 @@ import type { Piatto } from '@/modules/menu/types/piatto'
 
 export default function Dashboard() {
   const { piatti, loading, error, createPiatto, updatePiatto, deletePiatto } = usePiatti()
+
+  // Il receptionist consulta la libreria e la stampa, non la modifica:
+  // la scrittura è di cucina e admin (e la RLS la impone comunque).
+  const readOnly = useRole() === 'receptionist'
 
   const [search, setSearch] = useState('')
   const [activeCategory, setActiveCategory] = useState('all')
@@ -125,6 +131,7 @@ export default function Dashboard() {
         title="Elenco piatti"
       >
         <div className="flex justify-between items-center mt-6">
+          <div className="flex items-center gap-6">
           <div className="relative w-72">
             <Search className="absolute left-3 top-3 h-4 w-4 text-brand-ink" />
             <Input
@@ -135,13 +142,18 @@ export default function Dashboard() {
               onChange={e => setSearch(e.target.value)}
             />
           </div>
-          <button
-            className="h-10 px-4 py-2 rounded-lg flex items-center bg-black text-white text-base font-medium hover:bg-neutral-800 transition-colors"
-            onClick={() => setNuovoOpen(true)}
-          >
-            <Plus className="w-4 h-4 mr-2" />
-            Nuovo piatto
-          </button>
+          {/* leggenda del colore della barra a sinistra di ogni piatto */}
+          <LegendaCategorie />
+          </div>
+          {!readOnly && (
+            <button
+              className="h-10 px-4 py-2 rounded-lg flex items-center bg-black text-white text-base font-medium hover:bg-neutral-800 transition-colors"
+              onClick={() => setNuovoOpen(true)}
+            >
+              <Plus className="w-4 h-4 mr-2" />
+              Nuovo piatto
+            </button>
+          )}
         </div>
       </PageHeader>
 
@@ -181,6 +193,7 @@ export default function Dashboard() {
                     onOpenRicetta={openScheda}
                     onOpenModifica={openEdit}
                     onOpenElimina={openElimina}
+                    readOnly={readOnly}
                   />
                 </div>
               )
@@ -197,13 +210,16 @@ export default function Dashboard() {
         onModifica={() => setDrawerModo('edit')}
         onSave={updatePiatto}
         onDelete={openElimina}
+        readOnly={readOnly}
       />
 
-      <PiattoDrawerNew
-        open={nuovoOpen}
-        onClose={() => setNuovoOpen(false)}
-        onSave={createPiatto}
-      />
+      {!readOnly && (
+        <PiattoDrawerNew
+          open={nuovoOpen}
+          onClose={() => setNuovoOpen(false)}
+          onSave={createPiatto}
+        />
+      )}
 
       <ConfirmDeleteDialog
         open={!!eliminaId}

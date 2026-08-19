@@ -1,3 +1,9 @@
+/**
+ * Categoria merceologica del piatto: asse indipendente dalla portata
+ * (`tipo`). Determina il colore della barra verticale del piatto in UI.
+ */
+export type CategoriaPiatto = 'carne' | 'pesce' | 'vegetariano'
+
 export interface Piatto {
   id: number
   nome_it: string
@@ -5,6 +11,8 @@ export interface Piatto {
   nome_fr: string | null
   nome_de: string | null
   tipo: string | null
+  /** null = non specificata: barra grigia come prima dell'introduzione del campo. */
+  categoria: CategoriaPiatto | null
   vegetariano: boolean
   vegano: boolean
   no_lattosio: boolean

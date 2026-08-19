@@ -5,7 +5,8 @@ import {
 } from '@/core/ui/sheet'
 import { Input } from '@/core/ui/input'
 import { usePiatti } from '@/modules/menu/hooks/usePiatti'
-import { TIPO_BAR, TIPO_LABEL } from '@/modules/menu/constants/piatti'
+import { TIPO_BAR, TIPO_LABEL, CATEGORIA_LABEL, coloreBarraPiatto } from '@/modules/menu/constants/piatti'
+import { LegendaCategorie } from '@/modules/menu/components/piatti/LegendaCategorie'
 
 interface SelettorePiattoProps {
   open: boolean
@@ -55,6 +56,7 @@ export function SelettorePiatto({ open, onOpenChange, filtroTipo, onPick }: Sele
               className="pl-8 text-sm"
             />
           </div>
+          <LegendaCategorie className="mt-3" />
         </SheetHeader>
 
         <div className="flex-1 overflow-y-auto">
@@ -73,7 +75,8 @@ export function SelettorePiatto({ open, onOpenChange, filtroTipo, onPick }: Sele
               >
                 <div
                   className="shrink-0 rounded-sm"
-                  style={{ width: 4, height: 28, background: TIPO_BAR[filtroTipo] ?? '#000000' }}
+                  title={p.categoria ? CATEGORIA_LABEL[p.categoria] : undefined}
+                  style={{ width: 4, height: 28, background: coloreBarraPiatto(p.categoria, TIPO_BAR[filtroTipo] ?? '#000000') }}
                 />
                 <div className="flex-1 min-w-0">
                   <div className="font-fraunces text-base text-black truncate">{p.nome_it}</div>

@@ -15,6 +15,8 @@ interface PiattoDrawerProps {
   onModifica: () => void
   onSave: (id: number, form: PiattoForm) => Promise<boolean>
   onDelete: (id: number) => void
+  /** Sola consultazione (ruolo receptionist): niente modifica né eliminazione. */
+  readOnly?: boolean
 }
 
 /**
@@ -22,16 +24,19 @@ interface PiattoDrawerProps {
  * il contenuto e basta. Con due Sheet separati il pannello si chiudeva e
  * riapriva, con l'animazione di slide a ogni passaggio.
  */
-export function PiattoDrawer({ piatto, modo, open, onClose, onModifica, onSave, onDelete }: PiattoDrawerProps) {
+export function PiattoDrawer({ piatto, modo, open, onClose, onModifica, onSave, onDelete, readOnly = false }: PiattoDrawerProps) {
+  // In sola lettura il form di modifica non si monta nemmeno: `modo` potrebbe
+  // arrivare a 'edit' da uno stato rimasto in pagina.
   return (
     <Sheet open={open} onOpenChange={(isOpen) => { if (!isOpen) onClose() }}>
       <SheetContent className="overflow-hidden bg-white p-0 flex flex-col" style={{ width: '70vw', maxWidth: '70vw' }}>
-        {modo === 'view' ? (
+        {readOnly || modo === 'view' ? (
           <PiattoViewContent
             piatto={piatto}
             onClose={onClose}
             onEdit={onModifica}
             onDelete={onDelete}
+            readOnly={readOnly}
           />
         ) : (
           // key sull'id: cambiando piatto il form riparte pulito invece di

@@ -14,22 +14,23 @@ export const menuModule: ModuleDefinition = {
   id: 'menu',
   label: 'Menù',
   defaultPath: '/piatti',
-  // La cucina consulta piatti e menù (sola lettura, gestita nelle pagine);
-  // eventi e footer restano a receptionist e admin; l'audit è solo admin.
+  // Il receptionist consulta piatti e menù (sola lettura, gestita nelle
+  // pagine) e li stampa; eventi e footer seguono la cucina, che compone il
+  // menù; l'audit è solo admin.
   routes: [
     { path: '/piatti', element: <Dashboard /> },
     { path: '/menu', element: <MenuPlanner /> },
     { path: '/menu/:anno/:mese/:bisett', element: <MenuComposer /> },
-    { path: '/eventi', element: <GestioneEventi />, roles: ['receptionist', 'admin'] },
-    { path: '/impostazioni', element: <Impostazioni />, roles: ['receptionist', 'admin'] },
+    { path: '/eventi', element: <GestioneEventi />, roles: ['cucina', 'admin'] },
+    { path: '/impostazioni', element: <Impostazioni />, roles: ['cucina', 'admin'] },
     { path: '/auditing', element: <Auditing />, roles: ['admin'] },
     { path: '/utenti', element: <GestioneUtenti />, roles: ['admin'] },
   ],
   navItems: [
     { label: 'Elenco piatti', path: '/piatti', icon: ConciergeBell },
     { label: 'Pianificazione menù', path: '/menu', icon: FileText },
-    { label: 'Gestione eventi', path: '/eventi', icon: CalendarHeart, roles: ['receptionist', 'admin'] },
-    { label: 'Footer menù', path: '/impostazioni', icon: Settings, roles: ['receptionist', 'admin'] },
+    { label: 'Gestione eventi', path: '/eventi', icon: CalendarHeart, roles: ['cucina', 'admin'] },
+    { label: 'Footer menù', path: '/impostazioni', icon: Settings, roles: ['cucina', 'admin'] },
     { label: 'Registro attività', path: '/auditing', icon: ScrollText, roles: ['admin'] },
     { label: 'Gestione utenti', path: '/utenti', icon: Users, roles: ['admin'] },
   ],

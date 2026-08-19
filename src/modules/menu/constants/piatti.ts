@@ -4,7 +4,7 @@ import {
 } from 'lucide-react'
 import type { LucideIcon } from 'lucide-react'
 import { clientConfig } from '@/config/clients'
-import type { PiattoForm, TranslationField } from '@/modules/menu/types/piatto'
+import type { CategoriaPiatto, PiattoForm, TranslationField } from '@/modules/menu/types/piatto'
 
 // I tipi di piatto sono le parole intere `antipasti | primi | secondi | contorni`:
 // sono gli stessi valori salvati in DB (dish_types.code, piatti.tipo,
@@ -27,10 +27,16 @@ export const TIPO_ABBR: Record<string, string> = {
 // righe (sezioni) della griglia composizione — il contorno NON è una riga
 export const SEZIONI_ORDER = ['antipasti', 'primi', 'secondi'] as const
 
-// numero massimo di alternative per sezione: 1 antipasto, 3 primi, 3 secondi
+// numero massimo di alternative per sezione: 1 antipasto, 3 primi, 4 secondi
 export const SEZIONI_MAX: Record<string, number> = {
-  antipasti: 1, primi: 3, secondi: 3,
+  antipasti: 1, primi: 3, secondi: 4,
 }
+
+// Il quarto secondo è l'alternativa libera in fondo alla colonna (nel foglio
+// della cucina è il piatto vegetariano): sta da solo, senza contorno, in
+// griglia come in stampa. Il vincolo è anche a DB (migrazione 023).
+export const SECONDI_CON_CONTORNO = 3
+export const secondoHaContorno = (posizione: number) => posizione < SECONDI_CON_CONTORNO
 
 // barra-tipo in scala di grigi (mini-bar a sinistra di un piatto);
 // personalizzabile per cliente via config.modules.menu.tipoBar
@@ -49,9 +55,39 @@ export const TIPO_BAR_CARD: Record<string, string> = {
   contorni: '#737373',
 }
 
+// ─── Categoria merceologica (carne | pesce | vegetariano) ────────────────────
+// Asse indipendente dalla portata (`tipo`): dice di cosa è fatto il piatto.
+// Da non confondere con `CATEGORIE` in fondo al file, che è il filtro per
+// portata della sidebar dell'elenco piatti.
+
+export const CATEGORIE_PIATTO = ['carne', 'pesce', 'vegetariano'] as const
+
+export const CATEGORIA_LABEL: Record<CategoriaPiatto, string> = {
+  carne: 'Carne', pesce: 'Pesce', vegetariano: 'Vegetariano',
+}
+
+// Leggenda della barra verticale del piatto: rosso carne, blu pesce, verde
+// vegetariano. Colori fissi e non brandizzati: sono un codice di lettura del
+// menù, devono restare gli stessi per ogni cliente.
+export const CATEGORIA_BAR: Record<CategoriaPiatto, string> = {
+  carne: '#DC2626', pesce: '#2563EB', vegetariano: '#16A34A',
+}
+
+/**
+ * Colore della barra di un piatto: la categoria se assegnata, altrimenti il
+ * grigio storico per portata passato come `fallback`. I piatti in archivio
+ * senza categoria continuano così a mostrarsi come prima.
+ */
+export function coloreBarraPiatto(
+  categoria: CategoriaPiatto | string | null | undefined,
+  fallback: string,
+): string {
+  return (categoria && CATEGORIA_BAR[categoria as CategoriaPiatto]) || fallback
+}
+
 export const EMPTY_FORM: PiattoForm = {
   nome_it: '', nome_en: '', nome_fr: '', nome_de: '',
-  tipo: 'primi', ricetta: '',
+  tipo: 'primi', categoria: null, ricetta: '',
   vegetariano: false, vegano: false, no_lattosio: false, locale: false,
   all_glutine: false, all_crostacei: false, all_uova: false, all_pesce: false,
   all_arachidi: false, all_soia: false, all_latte: false, all_frutta_guscio: false,
