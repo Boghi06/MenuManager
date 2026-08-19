@@ -1,7 +1,7 @@
 import { SheetFooter } from '@/core/ui/sheet'
 import { Button } from '@/core/ui/button'
 import { Pencil, Trash2 } from 'lucide-react'
-import { TIPO_LABEL, CARATTERISTICHE, ALLERGENI, TRANSLATIONS } from '@/modules/menu/constants/piatti'
+import { TIPO_LABEL, CARATTERISTICHE, ALLERGENI, TRANSLATIONS, CATEGORIA_BAR, CATEGORIA_LABEL } from '@/modules/menu/constants/piatti'
 import { AllergenNum } from '@/modules/menu/components/piatti/PiattoBadges'
 import type { Piatto } from '@/modules/menu/types/piatto'
 
@@ -10,6 +10,8 @@ interface PiattoViewContentProps {
   onClose: () => void
   onEdit: () => void
   onDelete: (id: number) => void
+  /** Sola consultazione: il piè di pagina resta con il solo "Chiudi". */
+  readOnly?: boolean
 }
 
 /**
@@ -17,7 +19,7 @@ interface PiattoViewContentProps {
  * quello condiviso di PiattoDrawer, così il passaggio a "modifica" cambia solo
  * il contenuto senza chiudere e riaprire il pannello.
  */
-export function PiattoViewContent({ piatto, onClose, onEdit, onDelete }: PiattoViewContentProps) {
+export function PiattoViewContent({ piatto, onClose, onEdit, onDelete, readOnly = false }: PiattoViewContentProps) {
   const attiveCaratteristiche = CARATTERISTICHE.filter(c => piatto?.[c.field as keyof Piatto])
   const attiveAllergeni = ALLERGENI.filter(a => piatto?.[a.field as keyof Piatto])
 
@@ -50,6 +52,20 @@ export function PiattoViewContent({ piatto, onClose, onEdit, onDelete }: PiattoV
           <div className="font-geist text-lg">Tipologia</div>
           <div className="bg-gray-200 rounded-md h-10 flex items-center px-4 font-semibold text-base">
             {TIPO_LABEL[piatto?.tipo ?? ''] ?? '—'}
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2 mt-8 px-8 border-b border-gray-200 pb-8">
+          <div className="font-geist text-lg">Categoria</div>
+          <div className="bg-gray-200 rounded-md h-10 flex items-center gap-2 px-4 font-semibold text-base">
+            {piatto?.categoria ? (
+              <>
+                <span className="rounded-sm shrink-0" style={{ width: 4, height: 18, background: CATEGORIA_BAR[piatto.categoria] }} />
+                {CATEGORIA_LABEL[piatto.categoria]}
+              </>
+            ) : (
+              <span className="text-gray-500 font-normal italic">Non specificata</span>
+            )}
           </div>
         </div>
 
@@ -95,14 +111,14 @@ export function PiattoViewContent({ piatto, onClose, onEdit, onDelete }: PiattoV
       </div>
 
       <SheetFooter className="border-t border-gray-200 pt-6 flex flex-row justify-between w-full items-center px-8">
-        <Button
+        {readOnly ? <span /> : <Button
           variant="outline"
           className="flex items-center h-10"
           style={{ borderColor: 'var(--brand)', color: 'var(--brand)' }}
           onClick={() => piatto && onDelete(piatto.id)}
         >
           <Trash2 className="w-4 h-4 mr-2" /> Elimina
-        </Button>
+        </Button>}
         <div className="flex gap-4">
           <button
             className="h-10 px-4 py-2 border border-gray-300 rounded-md bg-white hover:bg-gray-50 text-base font-medium transition-colors"
@@ -111,13 +127,15 @@ export function PiattoViewContent({ piatto, onClose, onEdit, onDelete }: PiattoV
           >
             Chiudi
           </button>
-          <Button
-            className="text-white h-10 hover:opacity-80"
-            style={{ backgroundColor: 'var(--brand-ink)' }}
-            onClick={onEdit}
-          >
-            <Pencil className="w-4 h-4 mr-2" /> Modifica
-          </Button>
+          {!readOnly && (
+            <Button
+              className="text-white h-10 hover:opacity-80"
+              style={{ backgroundColor: 'var(--brand-ink)' }}
+              onClick={onEdit}
+            >
+              <Pencil className="w-4 h-4 mr-2" /> Modifica
+            </Button>
+          )}
         </div>
       </SheetFooter>
     </div>

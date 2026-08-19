@@ -21,13 +21,14 @@ export default function MenuPlanner() {
 
   const [duplicaOpen, setDuplicaOpen] = useState(false)
 
-  // La cucina consulta soltanto: niente inizializza/copia anno né duplica settimana
+  // Il receptionist consulta soltanto: niente inizializza/copia anno né duplica settimana
   const role = useRole()
-  const readOnly = role === 'cucina'
+  const readOnly = role === 'receptionist'
 
   // Stampa diretta del foglio di oggi: individua la bisettimana corrente (a
   // prescindere dall'anno mostrato). receptionist → menù clienti, cucina →
-  // ricette, admin → entrambe (due tasti).
+  // ricette, admin → entrambe (due tasti). Le stampe non seguono lo scambio
+  // dei ruoli: ognuno stampa il documento del proprio mestiere.
   const targetOggi = useMemo(() => findBisettimanaForDate(new Date()), [])
   // Stampa diretta del foglio di oggi: la stampa avviene in un iframe nascosto
   // (nessuna nuova scheda/finestra), gestito da StampaOggi.
@@ -119,6 +120,16 @@ export default function MenuPlanner() {
         </div>
 
         <div className="ml-auto flex items-center gap-2">
+          {/* La settimanale è il piano di lavoro: nessun ruolo la vede negata. */}
+          <button
+            onClick={() => setStampaOggi('settimana')}
+            disabled={targetOggi === null || stampaOggi !== null}
+            className="h-8 px-3 inline-flex items-center gap-1.5 border border-gray-900 rounded-md bg-gray-900 text-white text-xs transition-colors
+                       enabled:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <Printer className="w-3.5 h-3.5" />
+            {stampaOggi === 'settimana' ? 'Preparazione…' : 'Settimana corrente'}
+          </button>
           {canStampaMenu && (
             <button
               onClick={() => setStampaOggi('menu')}

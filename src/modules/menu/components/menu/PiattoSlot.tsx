@@ -1,13 +1,16 @@
 import { Plus, X } from 'lucide-react'
-import { TIPO_BAR } from '@/modules/menu/constants/piatti'
+import { TIPO_BAR, CATEGORIA_LABEL, coloreBarraPiatto } from '@/modules/menu/constants/piatti'
+import type { CategoriaPiatto } from '@/modules/menu/types/piatto'
 
 interface PiattoSlotProps {
   /** Piatto da mostrare. Se assente, lo slot è un bottone "+ Aggiungi". */
   nome?: string
   /** ID piatto, mostrato in piccolo sotto il nome. */
   piattoId?: number
-  /** Codice tipo per la barra colore (ant|pr|se|con). */
+  /** Portata dello slot: colora la barra quando il piatto non ha categoria. */
   tipo: string
+  /** Categoria del piatto (carne|pesce|vegetariano): ha la precedenza sul tipo. */
+  categoria?: CategoriaPiatto | null
   /** Testo dello slot vuoto (default "Aggiungi piatto"). */
   addLabel?: string
   /** Variante ridotta usata per i contorni. */
@@ -17,7 +20,7 @@ interface PiattoSlotProps {
 }
 
 export function PiattoSlot({
-  nome, piattoId, tipo, addLabel = 'Aggiungi piatto', compact = false, onClick, onRemove,
+  nome, piattoId, tipo, categoria, addLabel = 'Aggiungi piatto', compact = false, onClick, onRemove,
 }: PiattoSlotProps) {
   // Slot vuoto → bottone tratteggiato
   if (!nome) {
@@ -47,7 +50,8 @@ export function PiattoSlot({
     >
       <div
         className="shrink-0 self-stretch rounded-sm"
-        style={{ width: 3, background: TIPO_BAR[tipo] ?? '#000000' }}
+        title={categoria ? CATEGORIA_LABEL[categoria] : undefined}
+        style={{ width: 3, background: coloreBarraPiatto(categoria, TIPO_BAR[tipo] ?? '#000000') }}
       />
       <div className="flex-1 min-w-0">
         {compact && (

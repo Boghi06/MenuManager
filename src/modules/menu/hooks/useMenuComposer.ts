@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '@/core/lib/supabase'
 import { getCache, setCache } from '@/core/lib/cache'
 import type { MenuVoce, Servizio, SezioneTipo } from '@/modules/menu/types/menuVoce'
+import { SEZIONI_MAX, secondoHaContorno } from '@/modules/menu/constants/piatti'
 
-const MAX_ALTERNATIVE = 3
+
 const vociKey = (anno: number, mese: number, idx: 1 | 2) => `menu_voci:${anno}-${mese}-${idx}`
 
 /** Risolve (creandolo se manca) l'id della bisettimana per anno/mese/idx. */
@@ -83,7 +84,7 @@ export function useMenuComposer(anno: number, mese: number, bisettIdx: 1 | 2) {
     return () => { cancelled = true }
   }, [anno, mese, bisettIdx])
 
-  /** Aggiunge un'alternativa nella cella; usa il primo slot libero (max 3). */
+  /** Aggiunge un'alternativa nella cella, nel primo slot libero. */
   const aggiungiPiatto = useCallback(async (
     giorno: number,
     servizio: Servizio,
@@ -94,8 +95,11 @@ export function useMenuComposer(anno: number, mese: number, bisettIdx: 1 | 2) {
     const occupate = voci
       .filter(v => v.giorno === giorno && v.servizio === servizio && v.tipo === tipo)
       .map(v => v.posizione)
-    if (occupate.length >= MAX_ALTERNATIVE) {
-      setError('Massimo 3 alternative per cella.')
+    // Il tetto è per sezione (1 antipasto, 3 primi, 4 secondi), non globale:
+    // il quarto secondo esiste, un secondo antipasto no.
+    const max = SEZIONI_MAX[tipo] ?? 3
+    if (occupate.length >= max) {
+      setError(`Massimo ${max} ${max === 1 ? 'alternativa' : 'alternative'} per cella.`)
       return
     }
     let posizione = 0
@@ -112,6 +116,13 @@ export function useMenuComposer(anno: number, mese: number, bisettIdx: 1 | 2) {
 
   /** Assegna (piattoId) o rimuove (null) il contorno di un secondo. */
   const setContorno = useCallback(async (secondoVoceId: number, piattoId: number | null) => {
+    // L'ultimo secondo va senza contorno: la UI non offre il pulsante, ma la
+    // guardia serve anche qui perché il CHECK a DB rifiuterebbe la scrittura.
+    const voce = voci.find(v => v.id === secondoVoceId)
+    if (piattoId != null && voce && !secondoHaContorno(voce.posizione)) {
+      setError("L'ultimo secondo non prevede contorno.")
+      return
+    }
     const { data, error: updErr } = await supabase
       .from('menu_voci')
       .update({ contorno_id: piattoId })
@@ -120,7 +131,7 @@ export function useMenuComposer(anno: number, mese: number, bisettIdx: 1 | 2) {
       .single()
     if (updErr) { setError(updErr.message); return }
     setVoci(prev => prev.map(v => v.id === secondoVoceId ? data as MenuVoce : v))
-  }, [])
+  }, [voci])
 
   /** Rimuove un'alternativa. */
   const rimuoviPiatto = useCallback(async (voceId: number) => {

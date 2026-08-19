@@ -1,13 +1,18 @@
 import { Plus } from 'lucide-react'
 import { PiattoSlot } from './PiattoSlot'
+import type { CategoriaPiatto } from '@/modules/menu/types/piatto'
 
 interface SecondoBlockProps {
   nome: string
   piattoId: number
+  /** Categoria del secondo, per il colore della barra. */
+  categoria?: CategoriaPiatto | null
   /** Nome del contorno assegnato, o null se assente. */
   contornoNome: string | null
   /** Id del contorno: serve ad aprirne la scheda, il nome da solo non basta. */
   contornoId?: number | null
+  /** Categoria del contorno, per il colore della sua barra. */
+  contornoCategoria?: CategoriaPiatto | null
   /** Sola visualizzazione: niente rimozione né slot contorno vuoto. */
   readOnly?: boolean
   onRemove: () => void
@@ -22,7 +27,7 @@ interface SecondoBlockProps {
  * card secondo + sotto, indentato, lo slot contorno.
  */
 export function SecondoBlock({
-  nome, piattoId, contornoNome, contornoId, readOnly = false,
+  nome, piattoId, categoria, contornoNome, contornoId, contornoCategoria, readOnly = false,
   onRemove, onAddContorno, onRemoveContorno, onOpenPiatto,
 }: SecondoBlockProps) {
   const apriSecondo = onOpenPiatto ? () => onOpenPiatto(piattoId) : undefined
@@ -30,17 +35,17 @@ export function SecondoBlock({
 
   // in sola lettura senza contorno non serve mostrare lo slot vuoto
   if (readOnly && !contornoNome) {
-    return <PiattoSlot nome={nome} piattoId={piattoId} tipo="secondi" onClick={apriSecondo} />
+    return <PiattoSlot nome={nome} piattoId={piattoId} tipo="secondi" categoria={categoria} onClick={apriSecondo} />
   }
 
   return (
     <div className="flex flex-col gap-1">
-      <PiattoSlot nome={nome} piattoId={piattoId} tipo="secondi" onClick={apriSecondo} onRemove={readOnly ? undefined : onRemove} />
+      <PiattoSlot nome={nome} piattoId={piattoId} tipo="secondi" categoria={categoria} onClick={apriSecondo} onRemove={readOnly ? undefined : onRemove} />
 
       {/* contorno annidato — esattamente 0 o 1 per secondo */}
       <div className="ml-3.5 pl-2.5 border-l border-[#D4D4D4]">
         {contornoNome ? (
-          <PiattoSlot nome={contornoNome} tipo="contorni" compact onClick={apriContorno} onRemove={readOnly ? undefined : onRemoveContorno} />
+          <PiattoSlot nome={contornoNome} tipo="contorni" categoria={contornoCategoria} compact onClick={apriContorno} onRemove={readOnly ? undefined : onRemoveContorno} />
         ) : (
           <button
             type="button"

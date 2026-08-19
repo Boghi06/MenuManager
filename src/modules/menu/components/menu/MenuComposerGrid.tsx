@@ -1,9 +1,10 @@
 import { useMemo, Fragment } from 'react'
 import { Plus, X } from 'lucide-react'
-import { TIPO_BAR, TIPO_LABEL, SEZIONI_ORDER, SEZIONI_MAX } from '@/modules/menu/constants/piatti'
+import { TIPO_BAR, TIPO_LABEL, SEZIONI_ORDER, SEZIONI_MAX, secondoHaContorno } from '@/modules/menu/constants/piatti'
 import { SecondoBlock } from './SecondoBlock'
 import { PiattoSlot } from './PiattoSlot'
 import type { FlagKey, MenuVoce, Servizio, SezioneTipo } from '@/modules/menu/types/menuVoce'
+import type { CategoriaPiatto } from '@/modules/menu/types/piatto'
 import type { Evento } from '@/modules/menu/types/evento'
 
 interface MenuComposerGridProps {
@@ -12,6 +13,8 @@ interface MenuComposerGridProps {
   servizio: Servizio
   giorniLabels: string[]
   nomePiatto: (id: number | null) => string
+  /** Categoria del piatto: colora la barra dello slot (carne/pesce/vegetariano). */
+  categoriaPiatto: (id: number | null) => CategoriaPiatto | null
   /** Sola visualizzazione (ruolo cucina): nessuna azione di modifica. */
   readOnly?: boolean
   onAdd: (giorno: number, tipo: SezioneTipo) => void
@@ -140,7 +143,7 @@ function EventoCell({ eventoId, eventi, readOnly = false, onSelect }: {
 // ─── Main grid ────────────────────────────────────────────────────────────────
 
 export function MenuComposerGrid({
-  voci, settimana, servizio, giorniLabels, nomePiatto, readOnly = false,
+  voci, settimana, servizio, giorniLabels, nomePiatto, categoriaPiatto, readOnly = false,
   onAdd, onRemove, onAddContorno, onRemoveContorno,
   getFlag, onToggleFlag, getEventoId, onSetEventoId, eventi, onOpenPiatto,
 }: MenuComposerGridProps) {
@@ -233,12 +236,14 @@ export function MenuComposerGrid({
                                     ${ultima ? 'pb-1.5 border-b border-[#E5E5E5]' : ''}`}
                       >
                         {v ? (
-                          tipo === 'secondi' ? (
+                          tipo === 'secondi' && secondoHaContorno(pos) ? (
                             <SecondoBlock
                               nome={nomePiatto(v.piatto_id)}
                               piattoId={v.piatto_id}
+                              categoria={categoriaPiatto(v.piatto_id)}
                               contornoNome={v.contorno_id != null ? nomePiatto(v.contorno_id) : null}
                               contornoId={v.contorno_id}
+                              contornoCategoria={categoriaPiatto(v.contorno_id)}
                               readOnly={readOnly}
                               onRemove={() => onRemove(v.id)}
                               onAddContorno={() => onAddContorno(v.id)}
@@ -250,6 +255,7 @@ export function MenuComposerGrid({
                               nome={nomePiatto(v.piatto_id)}
                               piattoId={v.piatto_id}
                               tipo={tipo}
+                              categoria={categoriaPiatto(v.piatto_id)}
                               onClick={onOpenPiatto ? () => onOpenPiatto(v.piatto_id) : undefined}
                               onRemove={readOnly ? undefined : () => onRemove(v.id)}
                             />

@@ -3,8 +3,11 @@ import { Input } from '@/core/ui/input'
 import { Select, SelectContent, SelectItem, SelectSeparator, SelectTrigger, SelectValue } from '@/core/ui/select'
 import { Textarea } from '@/core/ui/textarea'
 import { Checkbox } from '@/core/ui/checkbox'
-import { CARATTERISTICHE, ALLERGENI, TRANSLATIONS, TIPI_PIATTO, TIPO_LABEL } from '@/modules/menu/constants/piatti'
-import type { PiattoForm } from '@/modules/menu/types/piatto'
+import {
+  CARATTERISTICHE, ALLERGENI, TRANSLATIONS, TIPI_PIATTO, TIPO_LABEL,
+  CATEGORIE_PIATTO, CATEGORIA_BAR, CATEGORIA_LABEL,
+} from '@/modules/menu/constants/piatti'
+import type { CategoriaPiatto, PiattoForm } from '@/modules/menu/types/piatto'
 
 interface PiattoFormFieldsProps {
   form: PiattoForm
@@ -79,6 +82,42 @@ export const PiattoFormFields = memo(function PiattoFormFields({ form, onChange 
             ))}
           </SelectContent>
         </Select>
+      </div>
+
+      {/* Categoria: decide il colore della barra del piatto nell'elenco e nella
+          composizione menù. Bottoni invece di una tendina perché il colore va
+          visto mentre si sceglie; "Non specificata" resta possibile per i
+          piatti storici, che mantengono la barra grigia. */}
+      <div className="flex flex-col gap-2 mt-8 px-8 border-b border-gray-200 pb-8">
+        <div className="font-geist text-lg">Categoria</div>
+        <div className="flex flex-wrap gap-2">
+          {CATEGORIE_PIATTO.map(cat => {
+            const attiva = form.categoria === cat
+            return (
+              <button
+                key={cat}
+                type="button"
+                onClick={() => onChange({ categoria: attiva ? null : (cat as CategoriaPiatto) })}
+                className={`flex items-center gap-2 h-10 px-4 rounded-md border text-base transition-colors
+                            ${attiva ? 'bg-white font-semibold' : 'bg-gray-200 border-transparent hover:bg-gray-300'}`}
+                style={attiva ? { borderColor: CATEGORIA_BAR[cat], color: CATEGORIA_BAR[cat] } : undefined}
+              >
+                <span className="rounded-sm shrink-0" style={{ width: 4, height: 18, background: CATEGORIA_BAR[cat] }} />
+                {CATEGORIA_LABEL[cat]}
+              </button>
+            )
+          })}
+          <button
+            type="button"
+            onClick={() => onChange({ categoria: null })}
+            className={`h-10 px-4 rounded-md border text-base transition-colors
+                        ${form.categoria === null
+                          ? 'bg-white border-gray-400 font-semibold text-gray-600'
+                          : 'bg-gray-200 border-transparent text-gray-500 hover:bg-gray-300'}`}
+          >
+            Non specificata
+          </button>
+        </div>
       </div>
 
       <div className="flex flex-col gap-2 mt-8 px-8 border-b border-gray-200 pb-8">
