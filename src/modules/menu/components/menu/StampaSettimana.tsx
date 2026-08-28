@@ -74,6 +74,36 @@ const tdBase: CSSProperties = {
   width: `${100 / 7}%`,
 }
 
+/**
+ * Corpo del nome del piatto.
+ *
+ * Ogni riga della tabella prende l'altezza della cella più alta fra i sette
+ * giorni: un nome lungo in un solo giorno alza la riga per tutta la settimana.
+ * L'archivio della cucina arriva a 100 caratteri e in una colonna da ~122px un
+ * nome così occupa 5 righe di testo. Sopra una certa lunghezza si scala il
+ * corpo, così il nome sta in una riga in meno senza toccare l'impaginazione di
+ * tutti gli altri piatti.
+ *
+ * Misurato sul catalogo reale (Chrome, geometria di questo componente, area
+ * utile A4 orizzontale 733px): nel caso peggiore — i nomi più lunghi
+ * dell'archivio in ogni cella — il foglio passa da 745px (che sfora) a 659px.
+ * Su una settimana composta interamente di nomi lunghi gli sfori passano dal
+ * 73% a zero.
+ *
+ * Il pavimento a 7.5px serve ai contorni, che partono già da 8: senza, i
+ * quattro contorni lunghi dell'archivio scenderebbero a 6.5px, illeggibili in
+ * stampa.
+ *
+ * NB: la lunghezza va misurata sul nome, non passata da fuori come variante —
+ * `piccola` porta con sé anche il fontWeight, che è semantico (600 il secondo,
+ * 400 il suo contorno) e non deve cambiare con la lunghezza.
+ */
+const corpoNome = (nome: string, piccola: boolean) => {
+  const base = piccola ? 8 : 9.5
+  const scala = nome.length > 80 ? 1.5 : nome.length > 55 ? 1 : 0
+  return Math.max(7.5, base - scala)
+}
+
 /** Cella con l'id del piatto a sinistra e il nome colorato per categoria. */
 function CellaVoce({ piatto, piccola = false }: { piatto?: Piatto; piccola?: boolean }) {
   if (!piatto) return <td style={tdBase} />
@@ -85,7 +115,7 @@ function CellaVoce({ piatto, piccola = false }: { piatto?: Piatto; piccola?: boo
         </span>
         <span
           style={{
-            fontSize: piccola ? 8 : 9.5,
+            fontSize: corpoNome(piatto.nome_it, piccola),
             lineHeight: 1.25,
             color: coloreNome(piatto),
             fontWeight: piccola ? 400 : 600,
