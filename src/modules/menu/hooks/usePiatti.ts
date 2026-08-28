@@ -5,6 +5,35 @@ import type { Piatto, PiattoForm } from '@/modules/menu/types/piatto'
 
 const CACHE_KEY = 'piatti'
 
+// PostgREST tronca ogni select a `db-max-rows` (1000 di default su Supabase)
+// e lo fa in silenzio, senza errore: con il catalogo a ~4.850 piatti l'elenco
+// mostrava i primi 1000 come se fossero tutti. Quindi si scorre a pagine.
+const PAGINA = 1000
+
+/**
+ * Scarica l'intero catalogo piatti pagina per pagina.
+ *
+ * L'avanzamento segue quante righe sono davvero arrivate, non `PAGINA`: se il
+ * progetto avesse un `db-max-rows` più basso di così, fermarsi alla prima
+ * pagina "corta" perderebbe silenziosamente il resto del catalogo. Si esce
+ * solo su una pagina vuota, che costa una richiesta in più ed è l'unica
+ * condizione vera di fine.
+ */
+async function scaricaTuttiIPiatti(): Promise<Piatto[]> {
+  const tutti: Piatto[] = []
+  for (;;) {
+    const { data, error } = await supabase
+      .from('piatti')
+      .select('*')
+      .order('id')
+      .range(tutti.length, tutti.length + PAGINA - 1)
+    if (error) throw new Error(error.message)
+    const pagina = (data ?? []) as Piatto[]
+    tutti.push(...pagina)
+    if (pagina.length === 0) return tutti
+  }
+}
+
 export function usePiatti() {
   const cached = getCache<Piatto[]>(CACHE_KEY)
   const [piatti, setPiattiState] = useState<Piatto[]>(cached ?? [])
@@ -23,15 +52,13 @@ export function usePiatti() {
 
   useEffect(() => {
     // revalidate in background (stale-while-revalidate)
-    supabase.from('piatti').select('*').order('id').then(({ data, error }) => {
-      if (error) {
-        console.error('Supabase fetch error:', error)
-        setError(error.message)
-      } else {
-        setPiatti((data ?? []) as Piatto[])
-      }
-      setLoading(false)
-    })
+    scaricaTuttiIPiatti()
+      .then(setPiatti)
+      .catch((e: Error) => {
+        console.error('Supabase fetch error:', e)
+        setError(e.message)
+      })
+      .finally(() => setLoading(false))
   }, [])
 
   const createPiatto = async (form: PiattoForm): Promise<string | null> => {
