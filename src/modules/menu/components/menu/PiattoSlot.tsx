@@ -43,8 +43,8 @@ export function PiattoSlot({
       onClick={onClick}
       // hover appena accennato, solo quando lo slot è cliccabile: segnala che
       // porta alla scheda del piatto senza competere con la X di rimozione,
-      // che compare in group-hover sullo stesso elemento.
-      className={`group/slot w-full flex items-start gap-1.5 border border-[#D4D4D4] bg-white rounded
+      // sempre visibile in coda allo slot.
+      className={`w-full flex items-start gap-1.5 border border-[#D4D4D4] bg-white rounded
                   ${onClick ? 'cursor-pointer transition-colors hover:bg-gray-50 hover:border-gray-400' : ''}
                   ${compact ? 'px-1.5 py-1' : 'px-2 py-1.5'}`}
     >
@@ -71,9 +71,9 @@ export function PiattoSlot({
           type="button"
           onClick={(e) => { e.stopPropagation(); onRemove() }}
           title="Rimuovi"
-          className="shrink-0 p-0.5 text-gray-400 opacity-0 group-hover/slot:opacity-60 hover:!opacity-100 hover:text-black transition-opacity"
+          className="shrink-0 p-0.5 rounded text-gray-500 hover:text-black hover:bg-gray-100 transition-colors"
         >
-          <X className={compact ? 'w-3.5 h-3.5' : 'w-3.5 h-3.5'} />
+          <X className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
         </button>
       )}
     </div>
