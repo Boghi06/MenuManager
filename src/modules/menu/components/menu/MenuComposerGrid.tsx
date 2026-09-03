@@ -59,7 +59,7 @@ function ToggleRow({ label, barColor, chipText, flagKey, giorni, readOnly = fals
         return (
           <td key={giorno} className={tdCell}>
             {shown ? (
-              <div className="group/slot w-full flex items-center gap-1.5 border border-[#D4D4D4] bg-white rounded px-2 py-1.5">
+              <div className="w-full flex items-center gap-1.5 border border-[#D4D4D4] bg-white rounded px-2 py-1.5">
                 <div className="shrink-0 rounded-sm" style={{ width: 3, height: 16, background: barColor }} />
                 <span className="font-fraunces text-sm text-gray-600 flex-1 leading-tight truncate">{chipText}</span>
                 {!readOnly && (
@@ -67,9 +67,9 @@ function ToggleRow({ label, barColor, chipText, flagKey, giorni, readOnly = fals
                     type="button"
                     title="Nascondi"
                     onClick={() => onToggleFlag(giorno, flagKey)}
-                    className="shrink-0 p-0.5 text-gray-400 opacity-0 group-hover/slot:opacity-60 hover:!opacity-100 hover:text-black transition-opacity"
+                    className="shrink-0 p-0.5 rounded text-gray-500 hover:text-black hover:bg-gray-100 transition-colors"
                   >
-                    <X className="w-3.5 h-3.5" />
+                    <X className="w-4 h-4" />
                   </button>
                 )}
               </div>
