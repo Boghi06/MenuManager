@@ -150,8 +150,15 @@ Il log è popolato dai trigger `log_piatti_changes` su `piatti` e `menu_voci`
 (snapshot old/new in jsonb); la migrazione `017_activity_log_audit.sql` aggiunge
 la policy RLS di SELECT **solo per admin** (prima era una tabella solo-scrittura)
 e ne definisce lo schema canonico per i nuovi clienti. La pagina mostra timeline
-paginata con diff campo-per-campo sulle modifiche; i nomi utente si ricavano
-dall'email sintetica (vedi login per nome utente).
+paginata (raggruppata per giornata) con diff campo-per-campo sulle modifiche; i
+nomi utente si ricavano dall'email sintetica (vedi login per nome utente).
+La lettura umana degli snapshot jsonb sta in `lib/audit.ts` (etichette dei campi,
+formattazione dei valori, `diffCampi`, descrizione della riga), la riga espandibile
+in `components/audit/AuditRow.tsx`; `hooks/useAuditLookups.ts` risolve gli id di
+`menu_voci` (piatto, contorno, bisettimana) in nomi, chiedendo al DB solo gli id
+citati dalle righe caricate. Filtri e ricerca sono client-side sul blocco già
+scaricato: se aggiungi un trigger di audit su una nuova tabella, aggiungila a
+`TABELLE_TRACCIATE` e alle etichette dei campi in `lib/audit.ts`.
 
 ## Theming (attenzione: fragile se fatto male)
 
