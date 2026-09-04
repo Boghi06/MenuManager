@@ -67,6 +67,8 @@ migrations/core/          # migrazioni condivise (oggi vuota)
 migrations/modules/<mod>/ # migrazioni SQL per modulo, numerate NNN_nome.sql
 scripts/apply-migrations.sh   # applica core + moduli a un DB (idempotente, registro in public._migrations)
 scripts/export-baseline.sh    # dump baseline da Hotel Garden (vedi gotcha sotto)
+scripts/import-piatti.py      # importa il catalogo dal file Excel della cucina (vedi sotto)
+scripts/fetch-piatti.mjs      # scarica i piatti in JSON per analisi una tantum
 ```
 
 Regole di collocazione:
@@ -231,6 +233,43 @@ scaricato: se aggiungi un trigger di audit su una nuova tabella, aggiungila a
   del giorno (codice = id piatto, caratteristiche, tipo, allergeni UE numerati dai
   campi `all_*`, testo `ricetta`). Stessa cautela di StampaPreview: verificare
   visivamente.
+
+## Import del catalogo piatti dal file della cucina
+
+`scripts/import-piatti.py` allinea `public.piatti` al foglio "Elenco" di
+`File Excel/ElencoPiatti_<data>.xls`. Gira via PostgREST con il JWT di un utente
+cucina/admin (niente psql, niente service_role) e **senza `--applica` non scrive
+nulla**: stampa il piano e, con `--csv`, lo esporta riga per riga.
+
+```
+pip install xlrd openpyxl certifi
+python3 scripts/import-piatti.py --offline --csv piano.csv   # solo analisi del file
+python3 scripts/import-piatti.py --utente admin              # piano sul DB reale
+python3 scripts/import-piatti.py --utente admin --applica    # esegue
+```
+
+Cose da sapere prima di toccarlo:
+
+- **Il `cod` del foglio non è l'id a DB.** Dopo la rinumerazione del 29/08/2026
+  la corrispondenza vive in `File Excel/ElencoPiatti_nuovo.xlsx` (colonna "cod
+  precedente"), che lo script legge come mappa; senza, ogni riga sembrerebbe un
+  piatto nuovo. Chi non è in mappa si abbina per nome, e solo in ultima istanza
+  si inserisce con un id nuovo.
+- **In Excel "vuoto" ≠ "no".** Lo script completa e non azzera: gli allergeni si
+  aggiungono soltanto, le caratteristiche si alzano soltanto, i testi già a DB
+  non si toccano (serve `--sovrascrivi`), la categoria si scrive solo se manca.
+- **Allergeni**: si leggono dalle annotazioni `(All. 1,7,8)` che la cucina lascia
+  in coda alla ricetta (~810 piatti). Con `--deduci` si scrivono anche quelli
+  ipotizzati dagli ingredienti citati (~2.600 piatti): è un suggerimento da far
+  validare in cucina, non una dichiarazione — di default resta fuori.
+- **Categoria**: dai codici `tipo` specifici (vit/mz/pesce/…), altrimenti dedotta
+  da nome e ricetta con il lessico in cima al file. Concorda al 99% con la
+  classificazione rivista a mano nel 2026; ~80 piatti dal nome di fantasia
+  restano senza categoria, ed è giusto così (li classifica l'utente dal form).
+- **Dessert e righe di servizio** (testi del footer, "CENA", separatori) non si
+  importano: il dessert non esiste più come portata (migrazione 019).
+- **L'import riempie il Registro attività**: ogni riga scritta passa dal trigger
+  di audit. Un allineamento completo sono migliaia di voci in `activity_log`.
 
 ## Database e migrazioni
 
