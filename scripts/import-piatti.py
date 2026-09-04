@@ -583,6 +583,10 @@ def main():
 
     # ── 1. lettura e normalizzazione ────────────────────────────────────────
     grezze = leggi_elenco(args.file)
+    # La mappa del catalogo di riferimento serve sempre, anche quando non detta
+    # gli id: è l'unico modo per sapere quali righe del foglio sono NUOVE, e
+    # quindi da passare al filtro dei dessert mal codificati.
+    riferimento, id_riservati = leggi_mappa_codici(args.mappa) if args.mappa.exists() else ({}, set())
     if args.id_da_foglio:
         # L'id È il codice della cucina: nessuna conversione, nessuno spazio da
         # riservare oltre ai codici stessi. È la numerazione che la cucina ha
@@ -590,8 +594,8 @@ def main():
         mappa = {r["cod"]: r["cod"] for r in grezze if r["cod"] is not None}
         id_riservati = set(mappa.values())
     else:
-        mappa, id_riservati = leggi_mappa_codici(args.mappa) if args.mappa.exists() else ({}, set())
-    if not mappa and not args.id_da_foglio:
+        mappa = riferimento
+    if not riferimento:
         print(f"⚠️  mappa dei codici assente ({args.mappa}): i piatti si abbineranno solo per nome",
               file=sys.stderr)
 
@@ -602,7 +606,7 @@ def main():
         if p is None:
             scartate.append(riga)
             continue
-        if riga["cod"] not in mappa and RX_DESSERT.search(riga["nome_it"]):
+        if riga["cod"] not in riferimento and RX_DESSERT.search(riga["nome_it"]):
             dolci.append(riga)      # dessert nuovo col codice sbagliato
             continue
         if p["cod"] is not None and p["cod"] in visti:
