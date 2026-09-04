@@ -192,10 +192,27 @@ RX_INGREDIENTI = {n: re.compile(p) for n, p in INGREDIENTI_ALLERGENE.items()}
 RX_ANNOTAZIONE = re.compile(r"\(\s*all[.:\s]*([^)]*)\)", re.IGNORECASE)
 
 # Righe che nel foglio non sono piatti: testi del footer del menù stampato,
-# separatori, note di servizio. Il footer ha già i suoi piatti a DB (id 4838+).
+# separatori, note di servizio, salse. Attenzione a non allargare troppo:
+# "Buffet di antipasti", "Buffet di insalate" e "Ricca scelta di insalate" sono
+# voci vere del catalogo, usate nei menù — le esclude solo il filtro dessert,
+# e solo se sono righe nuove. Il footer ha già i suoi piatti a DB
+# (id 4838–4846, creati dalle migrazioni di seed 011/012/014).
 RX_NON_PIATTO = re.compile(
     r"^\*+$|^cena$|^pranzo$|€|vedi ultime righe|a richiesta|previo supplement|"
-    r"^alternative sempre pronte|^à la carte|^a la carte|^volentieri con preavviso",
+    r"^alternative sempre pronte|^à la carte|^a la carte|^volentieri con preavviso|"
+    r"^salsa\b",
+    re.IGNORECASE,
+)
+
+# Dolci riconosciuti dal nome. Serve solo sulle righe NUOVE: la cucina a volte
+# digita 'pr' o 'ant' su un dessert, e senza questo controllo entrerebbe in
+# catalogo come primo o antipasto (il dessert non è più una portata, 019).
+# Sui piatti già a DB non si applica: lì l'id esiste e il piatto va aggiornato,
+# non giudicato.
+RX_DESSERT = re.compile(
+    r"\b(?:dessert|dolce|dolci|mousse|semifreddo|chantilly|crostatina|sorbetto|"
+    r"gelato|tiramis|panna cotta|cacao|cioccolat|torta|tortina|strudel|budino|"
+    r"creme caramel|profiterol|meringa|bavarese|cheesecake|macedonia)",
     re.IGNORECASE,
 )
 
@@ -300,11 +317,15 @@ def leggi_elenco(percorso: Path) -> list[dict]:
     return righe
 
 
-def leggi_mappa_codici(percorso: Path) -> dict[int, int]:
+def leggi_mappa_codici(percorso: Path) -> tuple[dict[int, int], set[int]]:
     """cod della cucina → id in public.piatti (rinumerazione del 29/08/2026).
 
     Senza questa mappa il `cod` del foglio non ha nessun rapporto con gli id a
     DB e ogni riga sembrerebbe un piatto nuovo.
+
+    Ritorna anche TUTTI gli id del catalogo di riferimento, mappati o no: le
+    ultime 9 righe (4838–4846) sono i piatti che esistono solo a DB — buffet di
+    dessert e supplementi del footer — e i loro id non vanno riusati per altro.
     """
     try:
         import openpyxl
@@ -312,12 +333,14 @@ def leggi_mappa_codici(percorso: Path) -> dict[int, int]:
         sys.exit("Manca openpyxl (serve a leggere la mappa .xlsx): pip install openpyxl")
 
     wb = openpyxl.load_workbook(percorso, read_only=True)
-    mappa = {}
+    mappa, riservati = {}, set()
     for i, riga in enumerate(wb["Elenco"].iter_rows(values_only=True)):
-        if i == 0 or riga[0] is None or riga[1] is None:
+        if i == 0 or riga[0] is None:
             continue
-        mappa[int(riga[1])] = int(riga[0])
-    return mappa
+        riservati.add(int(riga[0]))
+        if riga[1] is not None:
+            mappa[int(riga[1])] = int(riga[0])
+    return mappa, riservati
 
 
 # ─── Normalizzazione di una riga del foglio ──────────────────────────────────
@@ -558,17 +581,20 @@ def main():
 
     # ── 1. lettura e normalizzazione ────────────────────────────────────────
     grezze = leggi_elenco(args.file)
-    mappa = leggi_mappa_codici(args.mappa) if args.mappa.exists() else {}
+    mappa, id_riservati = leggi_mappa_codici(args.mappa) if args.mappa.exists() else ({}, set())
     if not mappa:
         print(f"⚠️  mappa dei codici assente ({args.mappa}): i piatti si abbineranno solo per nome",
               file=sys.stderr)
 
-    piatti, scartate, doppioni = [], [], []
+    piatti, scartate, doppioni, dolci = [], [], [], []
     visti = set()
     for riga in grezze:
         p = prepara(riga)
         if p is None:
             scartate.append(riga)
+            continue
+        if riga["cod"] not in mappa and RX_DESSERT.search(riga["nome_it"]):
+            dolci.append(riga)      # dessert nuovo col codice sbagliato
             continue
         if p["cod"] is not None and p["cod"] in visti:
             doppioni.append(p)
@@ -580,6 +606,7 @@ def main():
     print(f"  righe lette          {len(grezze)}")
     print(f"  piatti               {len(piatti)}")
     print(f"  righe scartate       {len(scartate)}  (dessert, testi del footer, righe vuote)")
+    print(f"  dolci non codificati {len(dolci)}  (righe nuove dal nome di dessert, non importate)")
     print(f"  codici doppi         {len(doppioni)}")
     print(f"  portata dedotta      {sum(1 for p in piatti if p['portata_incerta'])}"
           f"  (tipo assente o 'varie'/'gala')")
@@ -619,25 +646,49 @@ def main():
         per_nome.setdefault(normalizza(p["nome_it"]), p)
 
     # ── 3. abbinamento e piano ──────────────────────────────────────────────
-    prossimo_id = max(per_id) + 1 if per_id else 1
-    piano, per_codice, per_titolo, inseriti = [], 0, 0, 0
+    #
+    # Gli id nuovi partono DOPO lo spazio riservato dalla rinumerazione: gli id
+    # 1–4846 appartengono a piatti precisi, e `menu_voci`/`footer_riga` (o un
+    # loro ripristino) puntano lì. Riusarli per altri piatti sposterebbe in
+    # silenzio i menù già composti.
+    prossimo_id = max([*per_id, *id_riservati, 0]) + 1
+    per_codice, per_titolo, inseriti, ripresi = 0, 0, 0, 0
+    assegnati, nuovi_id, per_bersaglio = set(), [], {}
     for p in piatti:
-        attuale = per_id.get(mappa.get(p["cod"])) if p["cod"] is not None else None
+        id_mappato = mappa.get(p["cod"]) if p["cod"] is not None else None
+        attuale = per_id.get(id_mappato) if id_mappato else None
         if attuale:
             per_codice += 1
         else:
             attuale = per_nome.get(normalizza(p["nome_it"]))
             if attuale:
                 per_titolo += 1
+
         mod = calcola_modifiche(p, attuale, args.sovrascrivi, args.deduci)
-        if attuale is None:
-            p["id_assegnato"] = prossimo_id
-            prossimo_id += 1
+        if attuale is not None:
+            p["id_assegnato"] = attuale["id"]
+        elif id_mappato and id_mappato not in per_id and id_mappato not in assegnati:
+            # il piatto ha già avuto un id e quell'id è libero: si riprende,
+            # così i codici stampati in cucina restano quelli
+            p["id_assegnato"] = id_mappato
+            ripresi += 1
             inseriti += 1
         else:
-            p["id_assegnato"] = attuale["id"]
-        if mod:
-            piano.append((p, attuale, mod))
+            p["id_assegnato"] = prossimo_id
+            nuovi_id.append(prossimo_id)
+            prossimo_id += 1
+            inseriti += 1
+        assegnati.add(p["id_assegnato"])
+        # Due righe del foglio possono finire sullo stesso piatto: la cucina a
+        # volte ri-aggiunge un piatto che esiste già, con un codice nuovo. Vince
+        # l'ultima, cioè la più recente. La riga entra qui anche quando non
+        # cambia niente: è proprio il caso in cui la sorella va scartata, o le
+        # due versioni continuerebbero a sovrascriversi a ogni esecuzione.
+        if p["id_assegnato"] in per_bersaglio:
+            doppioni.append(p)
+        per_bersaglio[p["id_assegnato"]] = (p, attuale, mod)
+
+    piano = [voce for voce in per_bersaglio.values() if voce[2]]
 
     da_aggiornare = [x for x in piano if x[1] is not None]
     da_inserire = [x for x in piano if x[1] is None]
@@ -648,8 +699,10 @@ def main():
 
     print(f"  abbinati per codice  {per_codice}")
     print(f"  abbinati per nome    {per_titolo}")
+    print(f"  id ripresi dalla mappa {ripresi}  (piatti assenti a DB che avevano già un id)")
     print(f"\nPiano: {len(da_aggiornare)} piatti da aggiornare, {len(da_inserire)} da inserire"
-          f" (id da {prossimo_id - inseriti})")
+          + (f" ({ripresi} con l'id di prima, {len(nuovi_id)} con id nuovi"
+             f" {min(nuovi_id)}–{max(nuovi_id)})" if nuovi_id else ""))
     for campo, n in sorted(campi.items(), key=lambda kv: -kv[1]):
         print(f"    {campo:<22} {n}")
     if args.csv:
