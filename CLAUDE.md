@@ -250,6 +250,11 @@ python3 scripts/import-piatti.py --utente admin --applica    # esegue
 
 Cose da sapere prima di toccarlo:
 
+- **Due numerazioni possibili.** Di default gli id sono quelli della
+  rinumerazione (1–4846); con `--id-da-foglio` l'id È il `cod` della cucina
+  (3…6087), cioè il numero che sta sul foglio e che `StampaRicette` stampa.
+  Le due numerazioni si sovrappongono: passare dall'una all'altra si può fare
+  **solo a tabella vuota**, altrimenti ogni cod finisce sopra il piatto sbagliato.
 - **Il `cod` del foglio non è l'id a DB.** Dopo la rinumerazione del 29/08/2026
   la corrispondenza vive in `File Excel/ElencoPiatti_nuovo.xlsx` (colonna "cod
   precedente"), che lo script legge come mappa; senza, ogni riga sembrerebbe un

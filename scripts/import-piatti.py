@@ -572,6 +572,8 @@ def main():
                     help="lascia che il file sovrascriva i valori già presenti a DB")
     ap.add_argument("--deduci", action="store_true",
                     help="scrive anche gli allergeni ipotizzati dagli ingredienti (da far validare in cucina)")
+    ap.add_argument("--id-da-foglio", action="store_true", dest="id_da_foglio",
+                    help="usa il `cod` del foglio come id a DB invece della numerazione 1–4846")
     ap.add_argument("--offline", action="store_true", help="analizza il file senza collegarsi al DB")
     ap.add_argument("--csv", type=Path, help="scrive il piano riga per riga in un CSV")
     args = ap.parse_args()
@@ -581,8 +583,15 @@ def main():
 
     # ── 1. lettura e normalizzazione ────────────────────────────────────────
     grezze = leggi_elenco(args.file)
-    mappa, id_riservati = leggi_mappa_codici(args.mappa) if args.mappa.exists() else ({}, set())
-    if not mappa:
+    if args.id_da_foglio:
+        # L'id È il codice della cucina: nessuna conversione, nessuno spazio da
+        # riservare oltre ai codici stessi. È la numerazione che la cucina ha
+        # sotto gli occhi sul suo foglio e che ritrova stampata dalle ricette.
+        mappa = {r["cod"]: r["cod"] for r in grezze if r["cod"] is not None}
+        id_riservati = set(mappa.values())
+    else:
+        mappa, id_riservati = leggi_mappa_codici(args.mappa) if args.mappa.exists() else ({}, set())
+    if not mappa and not args.id_da_foglio:
         print(f"⚠️  mappa dei codici assente ({args.mappa}): i piatti si abbineranno solo per nome",
               file=sys.stderr)
 
