@@ -30,7 +30,7 @@ export const menuModule: ModuleDefinition = {
     { label: 'Elenco piatti', path: '/piatti', icon: ConciergeBell },
     { label: 'Pianificazione menù', path: '/menu', icon: FileText },
     { label: 'Gestione eventi', path: '/eventi', icon: CalendarHeart, roles: ['cucina', 'admin'] },
-    { label: 'Footer menù', path: '/impostazioni', icon: Settings, roles: ['cucina', 'admin'] },
+    { label: 'Note piè di pagina', path: '/impostazioni', icon: Settings, roles: ['cucina', 'admin'] },
     { label: 'Registro attività', path: '/auditing', icon: ScrollText, roles: ['admin'] },
     { label: 'Gestione utenti', path: '/utenti', icon: Users, roles: ['admin'] },
   ],
