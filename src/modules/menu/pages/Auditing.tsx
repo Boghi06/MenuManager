@@ -51,7 +51,7 @@ function ComeFunziona({ onClose }: { onClose: () => void }) {
           del dato <em>prima</em> e <em>dopo</em>. Apri una riga per vedere i campi cambiati uno per uno.
         </p>
         <button onClick={onClose} title="Chiudi" className="shrink-0 p-1 rounded text-gray-500 hover:text-black hover:bg-gray-100 transition-colors">
-          <X className="w-4 h-4" />
+          <X className="w-[18px] h-[18px]" />
         </button>
       </div>
 

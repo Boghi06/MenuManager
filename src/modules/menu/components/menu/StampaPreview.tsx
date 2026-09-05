@@ -704,7 +704,7 @@ export function StampaPreview({ open, onClose, voci, piatti, anno, mese, bisetti
               onClick={onClose}
               className="ml-2 p-1.5 text-gray-500 hover:text-black transition-colors rounded hover:bg-gray-100"
             >
-              <X className="w-4 h-4" />
+              <X className="w-[18px] h-[18px]" />
             </button>
           </div>
         </div>
