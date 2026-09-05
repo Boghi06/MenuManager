@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { SheetFooter } from '@/core/ui/sheet'
 import { Button } from '@/core/ui/button'
 import { Trash2 } from 'lucide-react'
@@ -20,12 +20,11 @@ interface PiattoEditContentProps {
 export function PiattoEditContent({ piatto, onClose, onSave, onDelete }: PiattoEditContentProps) {
   // Inizializzato subito dal piatto, non da un effetto: arrivando dalla scheda
   // il form è già compilato al primo render, senza un frame di campi vuoti.
+  // Il cambio di piatto lo gestisce la `key` in PiattoDrawer (rimonta il form):
+  // risincronizzare a ogni nuova identità di `piatto` sovrascriverebbe le
+  // modifiche in corso quando usePiatti rivalida in background.
   const [form, setForm] = useState<PiattoForm>(() => piatto ? { ...piatto } : EMPTY_FORM)
   const [saving, setSaving] = useState(false)
-
-  useEffect(() => {
-    if (piatto) setForm({ ...piatto })
-  }, [piatto])
 
   const onChange = useCallback((patch: Partial<PiattoForm>) => setForm(prev => ({ ...prev, ...patch })), [])
 

@@ -83,14 +83,23 @@ export default function Dashboard() {
     contorni:  piatti.filter(p => p.tipo === 'contorni').length,
   }), [piatti])
 
-  const filteredPiatti = useMemo(() => piatti.filter(p => {
-    const matchesCategory = activeCategory === 'all' || p.tipo === activeCategory
-    const matchesSearch = p.nome_it.toLowerCase().includes(search.toLowerCase())
-    return matchesCategory && matchesSearch
-  }), [piatti, activeCategory, search])
+  const filteredPiatti = useMemo(() => {
+    // Stessa ricerca del selettore piatto: nome italiano oppure id (il codice
+    // stampato sulle ricette, con cui la cucina cerca i piatti).
+    const q = search.trim().toLowerCase()
+    return piatti.filter(p => {
+      const matchesCategory = activeCategory === 'all' || p.tipo === activeCategory
+      const matchesSearch = !q || p.nome_it.toLowerCase().includes(q) || String(p.id).includes(q)
+      return matchesCategory && matchesSearch
+    })
+  }, [piatti, activeCategory, search])
 
   // Virtualizzazione: in DOM solo le righe visibili (+ overscan), non tutte.
   const scrollRef = useRef<HTMLDivElement>(null)
+  // useVirtualizer restituisce funzioni non memoizzabili: il React Compiler
+  // salta la memoizzazione di questa pagina. È un limite di TanStack Virtual,
+  // non un difetto qui — la pagina non passa i suoi valori a componenti memo.
+  // eslint-disable-next-line react-hooks/incompatible-library
   const rowVirtualizer = useVirtualizer({
     count: filteredPiatti.length,
     getScrollElement: () => scrollRef.current,

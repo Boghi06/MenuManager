@@ -43,21 +43,29 @@ export function useMenuComposer(anno: number, mese: number, bisettIdx: 1 | 2) {
   const [error, setError] = useState<string | null>(null)
 
   // mantiene cache e stato allineati (accetta valore o updater come useState)
-  const setVoci = (next: MenuVoce[] | ((prev: MenuVoce[]) => MenuVoce[])) => {
+  const setVoci = useCallback((next: MenuVoce[] | ((prev: MenuVoce[]) => MenuVoce[])) => {
     setVociState(prev => {
       const value = typeof next === 'function' ? (next as (p: MenuVoce[]) => MenuVoce[])(prev) : next
       setCache(vociKey(anno, mese, bisettIdx), value)
       return value
     })
+  }, [anno, mese, bisettIdx])
+
+  // stale-while-revalidate: al cambio di bisettimana riallinea lo stato alla
+  // cache durante il render, non dentro l'effetto: la bisettimana nuova non
+  // passa per un frame con le voci della precedente e si evita il render a cascata.
+  const vista = `${anno}-${mese}-${bisettIdx}`
+  const [vistaCorrente, setVistaCorrente] = useState(vista)
+  if (vistaCorrente !== vista) {
+    setVistaCorrente(vista)
+    setError(null)
+    const cached = getCache<MenuVoce[]>(vociKey(anno, mese, bisettIdx))
+    if (cached) { setVociState(cached); setLoading(false) }
+    else setLoading(true)
   }
 
   useEffect(() => {
     let cancelled = false
-    setError(null)
-    // stale-while-revalidate: se in cache mostra subito, altrimenti loading
-    const cached = getCache<MenuVoce[]>(vociKey(anno, mese, bisettIdx))
-    if (cached) { setVociState(cached); setLoading(false) }
-    else setLoading(true)
     ;(async () => {
       try {
         const id = await risolviBisettimanaId(anno, mese, bisettIdx)
@@ -112,7 +120,7 @@ export function useMenuComposer(anno: number, mese: number, bisettIdx: 1 | 2) {
       .single()
     if (insErr) { setError(insErr.message); return }
     setVoci(prev => [...prev, data as MenuVoce])
-  }, [bisettimanaId, voci])
+  }, [bisettimanaId, voci, setVoci])
 
   /** Assegna (piattoId) o rimuove (null) il contorno di un secondo. */
   const setContorno = useCallback(async (secondoVoceId: number, piattoId: number | null) => {
@@ -131,14 +139,14 @@ export function useMenuComposer(anno: number, mese: number, bisettIdx: 1 | 2) {
       .single()
     if (updErr) { setError(updErr.message); return }
     setVoci(prev => prev.map(v => v.id === secondoVoceId ? data as MenuVoce : v))
-  }, [voci])
+  }, [voci, setVoci])
 
   /** Rimuove un'alternativa. */
   const rimuoviPiatto = useCallback(async (voceId: number) => {
     const { error: delErr } = await supabase.from('menu_voci').delete().eq('id', voceId)
     if (delErr) { setError(delErr.message); return }
     setVoci(prev => prev.filter(v => v.id !== voceId))
-  }, [])
+  }, [setVoci])
 
   return { bisettimanaId, voci, loading, error, aggiungiPiatto, setContorno, rimuoviPiatto }
 }

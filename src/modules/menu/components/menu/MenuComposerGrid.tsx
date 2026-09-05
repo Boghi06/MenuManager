@@ -67,9 +67,9 @@ function ToggleRow({ label, barColor, chipText, flagKey, giorni, readOnly = fals
                     type="button"
                     title="Nascondi"
                     onClick={() => onToggleFlag(giorno, flagKey)}
-                    className="shrink-0 p-0.5 rounded text-gray-500 hover:text-black hover:bg-gray-100 transition-colors"
+                    className="shrink-0 p-0.5 rounded text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
                   >
-                    <X className="w-4 h-4" />
+                    <X className="w-[18px] h-[18px]" />
                   </button>
                 )}
               </div>
@@ -105,16 +105,16 @@ function EventoCell({ eventoId, eventi, readOnly = false, onSelect }: {
 
   if (eventoId && evento) {
     return (
-      <div className="group/slot w-full flex items-center gap-1.5 border border-amber-200 bg-amber-50 rounded px-2 py-1.5">
+      <div className="w-full flex items-center gap-1.5 border border-amber-200 bg-amber-50 rounded px-2 py-1.5">
         <span className="font-fraunces text-sm text-amber-800 flex-1 leading-tight truncate">{evento.nome}</span>
         {!readOnly && (
           <button
             type="button"
             title="Rimuovi evento"
             onClick={() => onSelect(null)}
-            className="shrink-0 p-0.5 text-amber-400 opacity-0 group-hover/slot:opacity-60 hover:!opacity-100 hover:text-amber-800 transition-opacity"
+            className="shrink-0 p-0.5 rounded text-red-500 hover:text-red-700 hover:bg-red-100 transition-colors"
           >
-            <X className="w-3.5 h-3.5" />
+            <X className="w-4 h-4" />
           </button>
         )}
       </div>

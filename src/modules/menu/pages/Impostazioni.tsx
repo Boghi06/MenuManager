@@ -127,8 +127,8 @@ function PiattiMultiSelect({ piattoIds, onChange, piatti }: {
           return (
             <span key={id} className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 text-[12.5px] rounded-md pl-2 pr-1 py-1">
               {p.nome_it}
-              <button type="button" onClick={() => remove(id)} className="text-gray-400 hover:text-red-500 rounded p-0.5">
-                <X className="w-3 h-3" />
+              <button type="button" onClick={() => remove(id)} className="text-red-500 hover:text-red-700 hover:bg-red-100 rounded p-0.5 transition-colors">
+                <X className="w-3.5 h-3.5" />
               </button>
             </span>
           )
@@ -425,8 +425,8 @@ export default function Impostazioni() {
                         className={`${inputCls} w-full pl-[26px] text-right`}
                       />
                     </div>
-                    <button onClick={() => delSuppl(i)} className="w-8 h-8 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors shrink-0">
-                      <X className="w-[15px] h-[15px]" />
+                    <button onClick={() => delSuppl(i)} className="w-8 h-8 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 flex items-center justify-center transition-colors shrink-0">
+                      <X className="w-[17px] h-[17px]" />
                     </button>
                   </div>
                 ))}
