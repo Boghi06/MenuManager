@@ -3,6 +3,7 @@ import { X, Printer } from 'lucide-react'
 import { getBisettimanaRange } from '@/modules/menu/lib/bisettimane'
 import { printHtmlDocument } from '@/modules/menu/lib/print'
 import { CATEGORIA_BAR, secondoHaContorno } from '@/modules/menu/constants/piatti'
+import { useScalaFoglio, A4_ORIZZONTALE_UTILE } from '@/modules/menu/hooks/useScalaFoglio'
 import type { MenuVoce, Servizio } from '@/modules/menu/types/menuVoce'
 import type { Piatto } from '@/modules/menu/types/piatto'
 
@@ -115,7 +116,7 @@ function CellaVoce({ piatto, piccola = false }: { piatto?: Piatto; piccola?: boo
         </span>
         <span
           style={{
-            fontSize: corpoNome(piatto.nome_it, piccola),
+            fontSize: `calc(var(--scala, 1) * ${corpoNome(piatto.nome_it, piccola)}px)`,
             lineHeight: 1.25,
             color: coloreNome(piatto),
             fontWeight: piccola ? 400 : 600,
@@ -173,6 +174,13 @@ function FoglioSettimana({
   // L'ultimo secondo non ne prevede: nessuna riga, mai.
   const haContorno = (pos: number) => secondoHaContorno(pos) && secondi.some(c => c[pos]?.contorno)
 
+  // Il corpo dei nomi si adatta al foglio: un giorno con pochi piatti li scrive
+  // grandi, uno pieno resta com'era. La chiave rifà il conto quando cambia
+  // servizio, settimana o composizione.
+  const contenutoRef = useRef<HTMLDivElement>(null)
+  const chiave = `${settimana}-${servizio}-${voci.length}-${nAntipasti}-${nPrimi}-${nSecondi}`
+  useScalaFoglio(contenutoRef, A4_ORIZZONTALE_UTILE, 'pagina', chiave)
+
   const th: CSSProperties = {
     border: BORDO,
     padding: '4px 6px',
@@ -184,6 +192,9 @@ function FoglioSettimana({
 
   return (
     <div className="set-foglio" style={{ width: 1123, minHeight: 794, background: '#fff', boxSizing: 'border-box', padding: '26px 30px', color: '#111' }}>
+      {/* Contenuto misurato per riempire la pagina: il wrapper esiste apposta,
+          il foglio ha un minHeight che falserebbe la misura. */}
+      <div ref={contenutoRef}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 10, fontFamily: 'system-ui, Arial, sans-serif' }}>
         <span style={{ fontSize: 12, fontWeight: 700, letterSpacing: '.02em' }}>
           Menù settimanale · {settimana === 0 ? '1ª' : '2ª'} settimana · {servizio === 'pranzo' ? 'Pranzo' : 'Cena'}
@@ -245,6 +256,7 @@ function FoglioSettimana({
             <span style={{ color: CATEGORIA_BAR[cat], fontWeight: 600, textTransform: 'capitalize' }}>{cat}</span>
           </span>
         ))}
+      </div>
       </div>
     </div>
   )
