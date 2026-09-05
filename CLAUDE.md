@@ -202,6 +202,18 @@ scaricato: se aggiungi un trigger di audit su una nuova tabella, aggiungila a
   nella composizione menù e nel selettore (rosso/blu/verde, `CATEGORIA_BAR`).
   Se è `null` la barra resta il grigio storico per portata (`TIPO_BAR`): i piatti
   in archivio non vanno classificati d'ufficio, li aggiorna l'utente dal form.
+  **Le portate sono più d'una** (migrazione `026_piatti_tipi_multipli.sql`):
+  `tipi text[]` è l'elenco completo, `tipo` resta la portata **principale** e
+  coincide sempre con `tipi[0]`. Ad allinearli è il trigger `sync_piatti_tipi`,
+  non il client: chi scrive solo `tipo` (script di import, SQL Editor) si vede
+  ricostruire `tipi`, chi scrive `tipi` si vede ricalcolare `tipo`. Nel codice
+  non leggere mai `piatto.tipo` per filtrare o elencare: usa `portateDi(piatto)`
+  ed `etichettaPortate(piatto)` da `constants/piatti.ts`. `tipo` da solo va bene
+  solo dove serve un valore unico per forza — il colore della barra.
+  In UI: bottoni a selezione multipla nel form (almeno una portata), il piatto
+  compare nel selettore di ogni sezione che ha, i contatori della sidebar lo
+  contano in ognuna (la somma può superare il totale, è voluto) e la stampa
+  ricette elenca tutte le abbreviazioni (`ant/se`).
   **Il dessert non esiste come tipo di piatto**: il pasto chiude sempre con il
   "Buffet di dessert", che è un flag (vedi MenuFlag). Il codice `des` e i relativi
   piatti sono stati rimossi da UI e DB con la migrazione `019_rimozione_dessert.sql`.

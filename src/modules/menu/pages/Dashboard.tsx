@@ -3,6 +3,7 @@ import { useSearchParams } from 'react-router-dom'
 import { useVirtualizer } from '@tanstack/react-virtual'
 import { Search, Plus } from 'lucide-react'
 import { Input } from '@/core/ui/input'
+import { portateDi } from '@/modules/menu/constants/piatti'
 import { usePiatti } from '@/modules/menu/hooks/usePiatti'
 import { AppLayout } from '@/core/layout/AppLayout'
 import { useRole } from '@/core/auth/roles'
@@ -75,20 +76,21 @@ export default function Dashboard() {
     pulisciParamPiatto()
   }, [pulisciParamPiatto])
 
-  const counts = useMemo(() => ({
-    all: piatti.length,
-    antipasti: piatti.filter(p => p.tipo === 'antipasti').length,
-    primi:     piatti.filter(p => p.tipo === 'primi').length,
-    secondi:   piatti.filter(p => p.tipo === 'secondi').length,
-    contorni:  piatti.filter(p => p.tipo === 'contorni').length,
-  }), [piatti])
+  // Un piatto con più portate viene contato in ognuna: la somma delle voci
+  // può superare il totale, ed è giusto — sono i piatti selezionabili in quella
+  // sezione, non una ripartizione.
+  const counts = useMemo(() => {
+    const c: Record<string, number> = { all: piatti.length, antipasti: 0, primi: 0, secondi: 0, contorni: 0 }
+    for (const p of piatti) for (const t of portateDi(p)) c[t] = (c[t] ?? 0) + 1
+    return c
+  }, [piatti])
 
   const filteredPiatti = useMemo(() => {
     // Stessa ricerca del selettore piatto: nome italiano oppure id (il codice
     // stampato sulle ricette, con cui la cucina cerca i piatti).
     const q = search.trim().toLowerCase()
     return piatti.filter(p => {
-      const matchesCategory = activeCategory === 'all' || p.tipo === activeCategory
+      const matchesCategory = activeCategory === 'all' || portateDi(p).includes(activeCategory)
       const matchesSearch = !q || p.nome_it.toLowerCase().includes(q) || String(p.id).includes(q)
       return matchesCategory && matchesSearch
     })

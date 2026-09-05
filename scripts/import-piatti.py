@@ -60,7 +60,11 @@ ALLERGENI = {
     13: "all_lupini", 14: "all_molluschi",
 }
 COLONNE_ALLERGENI = list(ALLERGENI.values())
-COLONNE = ["nome_it"] + TRADUZIONI + ["tipo", "categoria", "ricetta"] + CARATTERISTICHE + COLONNE_ALLERGENI
+COLONNE = ["nome_it"] + TRADUZIONI + ["tipo", "tipi", "categoria", "ricetta"] + CARATTERISTICHE + COLONNE_ALLERGENI
+
+# Ordine canonico delle portate: `tipi` ci si allinea, così l'elenco è lo stesso
+# che mostra il form del piatto e la principale è prevedibile.
+ORDINE_PORTATE = ["antipasti", "primi", "secondi", "contorni"]
 
 # ─── Normalizzazione del tipo (portata + categoria) ──────────────────────────
 #
@@ -507,9 +511,18 @@ def calcola_modifiche(p: dict, attuale: dict | None, sovrascrivi: bool, deduci: 
             continue
         mod[campo] = valore
 
-    # portata: valore secco, sempre allineato al file
-    if p["tipo"] != attuale.get("tipo"):
-        mod["tipo"] = p["tipo"]
+    # Portata: dalla 026 un piatto può averne più d'una. Il foglio ne conosce
+    # una sola, quindi la si AGGIUNGE all'elenco invece di sostituirlo — chi ha
+    # segnato in app che l'insalata di mare è anche un antipasto non se lo vede
+    # cancellare da un import. Con --sovrascrivi vince il foglio, come sempre.
+    tipi_db = attuale.get("tipi") or ([attuale["tipo"]] if attuale.get("tipo") else [])
+    if sovrascrivi or not tipi_db:
+        tipi = [p["tipo"]]
+    else:
+        tipi = sorted(set(tipi_db) | {p["tipo"]}, key=ORDINE_PORTATE.index)
+    if tipi != tipi_db:
+        mod["tipi"] = tipi
+        mod["tipo"] = tipi[0]
 
     # categoria: si riempie il vuoto; sovrascrivere solo su richiesta
     if p["categoria"] and (not attuale.get("categoria") or
@@ -543,7 +556,7 @@ def calcola_modifiche(p: dict, attuale: dict | None, sovrascrivi: bool, deduci: 
     return mod
 
 
-def riga_completa(piatto_id: int, attuale: dict | None, mod: dict) -> dict:
+def riga_completa(piatto_id: int, attuale: dict | None, mod: dict, colonne: list[str]) -> dict:
     """Riga intera da mandare in upsert: stato attuale + modifiche.
 
     Si spedisce tutta, non solo i campi cambiati, perché in un upsert in blocco
@@ -551,7 +564,7 @@ def riga_completa(piatto_id: int, attuale: dict | None, mod: dict) -> dict:
     cita una colonna che un'altra cita se la vedrebbe riscritta a NULL. Con la
     riga completa il risultato è esattamente il merge calcolato qui sopra.
     """
-    riga = {c: (attuale.get(c) if attuale else None) for c in COLONNE}
+    riga = {c: (attuale.get(c) if attuale else None) for c in colonne}
     for c in CARATTERISTICHE + COLONNE_ALLERGENI:
         if riga[c] is None:
             riga[c] = False          # colonne booleane: a DB sono NOT NULL
@@ -653,6 +666,13 @@ def main():
     db = Supabase.login(url, anon, args.utente, password)
     esistenti = db.piatti()
     print(f"\nDB: {len(esistenti)} piatti")
+    # `tipi` esiste solo dopo la migrazione 026: su un DB non ancora aggiornato
+    # inviarla farebbe fallire ogni scrittura con "column does not exist".
+    ha_tipi = not esistenti or "tipi" in esistenti[0]
+    colonne = COLONNE if ha_tipi else [c for c in COLONNE if c != "tipi"]
+    if not ha_tipi:
+        print("⚠️  colonna `tipi` assente: la migrazione 026 non è applicata a questo DB,"
+              " le portate multiple non verranno scritte")
     per_id = {p["id"]: p for p in esistenti}
     per_nome = {}
     for p in esistenti:
@@ -678,6 +698,8 @@ def main():
                 per_titolo += 1
 
         mod = calcola_modifiche(p, attuale, args.sovrascrivi, args.deduci)
+        if not ha_tipi:
+            mod.pop("tipi", None)
         if attuale is not None:
             p["id_assegnato"] = attuale["id"]
         elif id_mappato and id_mappato not in per_id and id_mappato not in assegnati:
@@ -736,7 +758,7 @@ def main():
           f" ~{len(piano)} voci nel Registro attività.")
     lotto, scritti = [], 0
     for p, attuale, mod in piano:
-        lotto.append(riga_completa(p["id_assegnato"], attuale, mod))
+        lotto.append(riga_completa(p["id_assegnato"], attuale, mod, colonne))
         if len(lotto) == 200:
             db.upsert(lotto)
             scritti += len(lotto)

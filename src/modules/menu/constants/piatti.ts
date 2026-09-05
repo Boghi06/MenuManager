@@ -18,6 +18,23 @@ export const TIPO_LABEL: Record<string, string> = {
 // Tipi selezionabili nel form del piatto, nell'ordine delle portate.
 export const TIPI_PIATTO = ['antipasti', 'primi', 'secondi', 'contorni'] as const
 
+/**
+ * Portate di un piatto. Un piatto può starne in più di una (migrazione 026):
+ * `tipi` è l'elenco completo, `tipo` la principale. Il fallback su `tipo` serve
+ * ai piatti letti da una cache di sessione precedente al deploy, dove `tipi`
+ * ancora non c'era.
+ */
+export function portateDi(piatto: { tipo: string | null; tipi?: string[] | null }): string[] {
+  if (piatto.tipi && piatto.tipi.length > 0) return piatto.tipi
+  return piatto.tipo ? [piatto.tipo] : []
+}
+
+/** "Antipasto · Secondo" — le portate di un piatto in forma leggibile. */
+export function etichettaPortate(piatto: { tipo: string | null; tipi?: string[] | null }): string {
+  const portate = portateDi(piatto).map(t => TIPO_LABEL[t] ?? t)
+  return portate.length > 0 ? portate.join(' · ') : '—'
+}
+
 // Abbreviazioni per la colonna "tipo" della stampa ricette, larga 34px:
 // le parole intere ci andrebbero a capo. Solo presentazione, mai valori salvati.
 export const TIPO_ABBR: Record<string, string> = {
@@ -87,7 +104,7 @@ export function coloreBarraPiatto(
 
 export const EMPTY_FORM: PiattoForm = {
   nome_it: '', nome_en: '', nome_fr: '', nome_de: '',
-  tipo: 'primi', categoria: null, ricetta: '',
+  tipo: 'primi', tipi: ['primi'], categoria: null, ricetta: '',
   vegetariano: false, vegano: false, no_lattosio: false, locale: false,
   all_glutine: false, all_crostacei: false, all_uova: false, all_pesce: false,
   all_arachidi: false, all_soia: false, all_latte: false, all_frutta_guscio: false,

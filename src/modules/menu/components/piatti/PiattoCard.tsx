@@ -4,7 +4,7 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuTrigger, DropdownMenuGroup,
 } from '@/core/ui/dropdown-menu'
-import { TIPO_LABEL, TIPO_BAR_CARD as TIPO_BAR, CATEGORIA_LABEL, coloreBarraPiatto } from '@/modules/menu/constants/piatti'
+import { TIPO_BAR_CARD as TIPO_BAR, CATEGORIA_LABEL, coloreBarraPiatto, etichettaPortate } from '@/modules/menu/constants/piatti'
 import { PiattoBadges } from './PiattoBadges'
 import type { Piatto } from '@/modules/menu/types/piatto'
 
@@ -43,7 +43,7 @@ export const PiattoCard = memo(function PiattoCard({
             </span>
           )}
         </div>
-        <p className="text-base text-gray-500 font-sans">{piatto.id} - {TIPO_LABEL[piatto.tipo ?? ''] ?? '—'}</p>
+        <p className="text-base text-gray-500 font-sans">{piatto.id} - {etichettaPortate(piatto)}</p>
       </div>
 
       <div>
