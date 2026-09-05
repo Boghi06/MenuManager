@@ -364,7 +364,7 @@ export function StampaSettimana({
           <span className="font-semibold text-[15px] text-black">Anteprima stampa settimanale</span>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-500 hover:text-black transition-colors rounded hover:bg-gray-100"
+            className="p-1.5 rounded text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
           >
             <X className="w-[18px] h-[18px]" />
           </button>
