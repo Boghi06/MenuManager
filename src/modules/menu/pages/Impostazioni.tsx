@@ -1,5 +1,6 @@
 import { useState, useMemo, useEffect, useCallback, useRef, Fragment } from 'react'
 import { Check, Plus, X, GripVertical, Info, Search, Salad, Leaf, MilkOff, ChefHat, Loader2 } from 'lucide-react'
+import { useNavigate } from 'react-router-dom'
 import { AppLayout } from '@/core/layout/AppLayout'
 import { PageHeader } from '@/core/layout/PageHeader'
 import { useFooterConfig } from '@/modules/menu/hooks/useFooterConfig'
@@ -34,13 +35,16 @@ interface SupplLocal { piatto_id: number | null; prezzo: string }
 
 // ─── Ricerca inline piatto, selezione singola (per id) ────────────────────────
 
-function PiattoSelect({ piattoId, onChange, piatti }: {
+function PiattoSelect({ piattoId, onChange, piatti, onOpenPiatto }: {
   piattoId: number | null
   onChange: (id: number) => void
   piatti: Piatto[]
+  /** Apre la scheda del piatto nell'elenco piatti. */
+  onOpenPiatto: (id: number) => void
 }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
   const selezionato = piatti.find(p => p.id === piattoId) ?? null
 
   const opzioni = useMemo(() => {
@@ -52,8 +56,38 @@ function PiattoSelect({ piattoId, onChange, piatti }: {
         if (a.tipo !== 'secondi' && b.tipo === 'secondi') return 1
         return a.nome_it.localeCompare(b.nome_it)
       })
-      .filter(p => !q || p.nome_it.toLowerCase().includes(q))
+      .filter(p => !q || p.nome_it.toLowerCase().includes(q) || String(p.id).includes(q))
   }, [piatti, query])
+
+  // Piatto già scelto e ricerca chiusa: al posto del campo si mostra il nome,
+  // che porta alla sua scheda. Per cambiare piatto c'è la lente a destra, che
+  // rimette il campo in ricerca (senza, il click sul nome non potrebbe fare
+  // entrambe le cose).
+  if (selezionato && !open) {
+    return (
+      <div
+        onClick={() => onOpenPiatto(selezionato.id)}
+        title="Apri la scheda del piatto"
+        className="relative flex-1 h-10 pl-3 pr-1 flex items-center gap-1 rounded-[9px] border border-[#DEDEDE]
+                   cursor-pointer transition-colors hover:bg-gray-50 hover:border-gray-400"
+      >
+        <span className="flex-1 min-w-0 truncate text-sm text-gray-800">
+          {selezionato.nome_it} <span className="text-[11px] text-gray-400">#{selezionato.id}</span>
+        </span>
+        <button
+          type="button"
+          // stopPropagation: dentro il box il click apre la scheda, qui deve
+          // solo rimettere il campo in ricerca.
+          // Il focus va dato dopo che il campo è montato: prima non esiste.
+          onClick={e => { e.stopPropagation(); setOpen(true); setQuery(''); requestAnimationFrame(() => inputRef.current?.focus()) }}
+          title="Cambia piatto"
+          className="shrink-0 w-8 h-8 rounded-lg text-gray-400 hover:text-gray-700 hover:bg-gray-200 flex items-center justify-center transition-colors"
+        >
+          <Search className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -62,11 +96,12 @@ function PiattoSelect({ piattoId, onChange, piatti }: {
     >
       <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
       <input
+        ref={inputRef}
         value={open ? query : (selezionato?.nome_it ?? '')}
         onChange={e => setQuery(e.target.value)}
         onFocus={() => { setOpen(true); setQuery('') }}
         onKeyDown={e => { if (e.key === 'Escape') { setOpen(false); setQuery('') } }}
-        placeholder="Cerca dall'elenco piatti…"
+        placeholder="Cerca per nome o ID…"
         className="h-10 pl-8 pr-3 w-full rounded-[9px] border border-[#DEDEDE] text-sm text-gray-800 outline-none focus:border-gray-400 transition-colors"
       />
       {open && (
@@ -84,7 +119,7 @@ function PiattoSelect({ piattoId, onChange, piatti }: {
               onClick={() => { onChange(p.id); setOpen(false); setQuery('') }}
               className={`w-full text-left px-3 py-2 text-sm transition-colors hover:bg-gray-50 ${p.id === piattoId ? 'text-gray-900 font-medium' : 'text-gray-700'}`}
             >
-              {p.nome_it}
+              {p.nome_it} <span className="text-[11px] text-gray-400">#{p.id}</span>
             </button>
           ))}
         </div>
@@ -95,10 +130,12 @@ function PiattoSelect({ piattoId, onChange, piatti }: {
 
 // ─── Ricerca inline piatto, selezione multipla (chips) ────────────────────────
 
-function PiattiMultiSelect({ piattoIds, onChange, piatti }: {
+function PiattiMultiSelect({ piattoIds, onChange, piatti, onOpenPiatto }: {
   piattoIds: number[]
   onChange: (ids: number[]) => void
   piatti: Piatto[]
+  /** Apre la scheda del piatto nell'elenco piatti. */
+  onOpenPiatto: (id: number) => void
 }) {
   const [open, setOpen] = useState(false)
   const [query, setQuery] = useState('')
@@ -109,7 +146,7 @@ function PiattiMultiSelect({ piattoIds, onChange, piatti }: {
       .filter(p => !piattoIds.includes(p.id))
       .slice()
       .sort((a, b) => a.nome_it.localeCompare(b.nome_it))
-      .filter(p => !q || p.nome_it.toLowerCase().includes(q))
+      .filter(p => !q || p.nome_it.toLowerCase().includes(q) || String(p.id).includes(q))
   }, [piatti, query, piattoIds])
 
   const add = (id: number) => { onChange([...piattoIds, id]); setQuery(''); setOpen(false) }
@@ -125,10 +162,16 @@ function PiattiMultiSelect({ piattoIds, onChange, piatti }: {
           const p = piatti.find(x => x.id === id)
           if (!p) return null
           return (
-            <span key={id} className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 text-[12.5px] rounded-md pl-2 pr-1 py-1">
+            <span
+              key={id}
+              onClick={() => onOpenPiatto(p.id)}
+              title="Apri la scheda del piatto"
+              className="inline-flex items-center gap-1 bg-gray-100 text-gray-700 text-[12.5px] rounded-md pl-2 pr-1 py-1
+                         cursor-pointer transition-colors hover:bg-gray-200 hover:text-black"
+            >
               {p.nome_it}
-              <button type="button" onClick={() => remove(id)} className="text-gray-400 hover:text-red-500 rounded p-0.5">
-                <X className="w-3 h-3" />
+              <button type="button" onClick={e => { e.stopPropagation(); remove(id) }} className="text-red-500 hover:text-red-700 hover:bg-red-100 rounded p-0.5 transition-colors">
+                <X className="w-3.5 h-3.5" />
               </button>
             </span>
           )
@@ -137,7 +180,7 @@ function PiattiMultiSelect({ piattoIds, onChange, piatti }: {
           value={query}
           onChange={e => { setQuery(e.target.value); setOpen(true) }}
           onFocus={() => setOpen(true)}
-          placeholder={piattoIds.length === 0 ? "Cerca dall'elenco piatti…" : 'Aggiungi…'}
+          placeholder={piattoIds.length === 0 ? "Cerca per nome o ID…" : 'Aggiungi…'}
           className="flex-1 min-w-[100px] text-sm outline-none py-1"
         />
       </div>
@@ -155,7 +198,7 @@ function PiattiMultiSelect({ piattoIds, onChange, piatti }: {
               onClick={() => add(p.id)}
               className="w-full text-left px-3 py-2 text-sm text-gray-700 transition-colors hover:bg-gray-50"
             >
-              {p.nome_it}
+              {p.nome_it} <span className="text-[11px] text-gray-400">#{p.id}</span>
             </button>
           ))}
         </div>
@@ -217,7 +260,9 @@ function StampaFooterPreview({ lingua, sempre, supplementi }: { lingua: Lingua; 
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><MilkOff size={16} strokeWidth={2} color="#333" /> {t.nl}</span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ChefHat size={16} strokeWidth={2} color="#333" /> {t.loc}</span>
         </div>
-        <div style={{ fontStyle: 'italic', textAlign: 'right' }}>{t.allergen}</div>
+        {/* più grande e in grassetto del resto della legenda: è l'avviso di
+            legge sugli allergeni, deve leggersi a colpo d'occhio */}
+        <div style={{ fontStyle: 'italic', fontWeight: 700, fontSize: 13, textAlign: 'right' }}>{t.allergen}</div>
       </div>
     </div>
   )
@@ -228,6 +273,7 @@ function StampaFooterPreview({ lingua, sempre, supplementi }: { lingua: Lingua; 
 export default function Impostazioni() {
   const { loading, saving, righe: righeDb, supplementi: supplDb, saveFooter } = useFooterConfig()
   const { piatti } = usePiatti()
+  const navigate = useNavigate()
   const [linguaPreview, setLinguaPreview] = useState<Lingua>('it')
   const [righe, setRighe] = useState<number[]>([])
   const [supplementi, setSupplementi] = useState<SupplLocal[]>([])
@@ -300,6 +346,19 @@ export default function Impostazioni() {
     return () => clearTimeout(t)
   }, [loaded, needsSave, saving, localKey, salva])
 
+  // La scheda del piatto vive nell'elenco piatti: ci si arriva con ?piatto=<id>,
+  // come dalla composizione menù. Il salvataggio qui è automatico e con debounce,
+  // quindi prima di lasciare la pagina si forza quello ancora in attesa: senza,
+  // l'ultima modifica fatta appena prima del click andrebbe persa. Se il
+  // salvataggio fallisce si resta qui, col banner d'errore già a schermo.
+  const apriPiatto = useCallback(async (id: number) => {
+    if (needsSave && !saving) {
+      await salva(localKey)
+      if (lastFailedRef.current === localKey) return
+    }
+    navigate(`/piatti?piatto=${id}`)
+  }, [needsSave, saving, localKey, salva, navigate])
+
   // mutators supplementi
   const addSuppl = () => setSupplementi(s => [...s, { piatto_id: null, prezzo: '' }])
   const setSuppl = (i: number, patch: Partial<SupplLocal>) =>
@@ -333,7 +392,7 @@ export default function Impostazioni() {
     <AppLayout>
       <PageHeader
         eyebrow="Configurazione"
-        title="Footer menù"
+        title="Note piè di pagina"
         subtitle="Il blocco «Sempre a Vostra scelta» in fondo a ogni pagina stampata — stessi piatti, tradotti in 4 lingue"
         actions={
           <div className="inline-flex items-center gap-2 h-[42px] text-[13.5px] font-medium whitespace-nowrap select-none">
@@ -373,7 +432,7 @@ export default function Impostazioni() {
                 <h2 className="text-xs font-semibold uppercase tracking-[0.06em] text-gray-700">Sempre a Vostra scelta</h2>
                 <span className="text-[11.5px] text-gray-400">l'impaginazione su più righe è automatica</span>
               </div>
-              <PiattiMultiSelect piattoIds={righe} onChange={setRighe} piatti={piatti} />
+              <PiattiMultiSelect piattoIds={righe} onChange={setRighe} piatti={piatti} onOpenPiatto={id => void apriPiatto(id)} />
             </section>
 
             {/* Sezione supplementi */}
@@ -414,6 +473,7 @@ export default function Impostazioni() {
                       piattoId={s.piatto_id}
                       onChange={id => setSuppl(i, { piatto_id: id })}
                       piatti={piatti}
+                      onOpenPiatto={id => void apriPiatto(id)}
                     />
                     <div className="relative w-[116px] shrink-0">
                       <span className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none">€</span>
@@ -425,8 +485,8 @@ export default function Impostazioni() {
                         className={`${inputCls} w-full pl-[26px] text-right`}
                       />
                     </div>
-                    <button onClick={() => delSuppl(i)} className="w-8 h-8 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-50 flex items-center justify-center transition-colors shrink-0">
-                      <X className="w-[15px] h-[15px]" />
+                    <button onClick={() => delSuppl(i)} className="w-8 h-8 rounded-lg text-red-500 hover:text-red-700 hover:bg-red-50 flex items-center justify-center transition-colors shrink-0">
+                      <X className="w-[17px] h-[17px]" />
                     </button>
                   </div>
                 ))}

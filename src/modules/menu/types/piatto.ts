@@ -10,7 +10,10 @@ export interface Piatto {
   nome_en: string | null
   nome_fr: string | null
   nome_de: string | null
+  /** Portata principale: coincide sempre con `tipi[0]` (trigger DB, 026). */
   tipo: string | null
+  /** Tutte le portate del piatto: un piatto può stare in più sezioni. */
+  tipi: string[]
   /** null = non specificata: barra grigia come prima dell'introduzione del campo. */
   categoria: CategoriaPiatto | null
   vegetariano: boolean

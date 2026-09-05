@@ -40,12 +40,20 @@ export function useBisettimane(anno: number) {
   const [error, setError] = useState<string | null>(null)
   const [refreshKey, setRefreshKey] = useState(0)
 
-  useEffect(() => {
-    let cancelled = false
-    // stale-while-revalidate: se l'anno è in cache mostralo subito, altrimenti loading
+  // stale-while-revalidate: al cambio di anno (o su refresh) riallinea lo stato
+  // alla cache durante il render, non dentro l'effetto: l'anno nuovo non passa
+  // per un frame con i dati del precedente e si evita il render a cascata.
+  const vista = `${anno}:${refreshKey}`
+  const [vistaCorrente, setVistaCorrente] = useState(vista)
+  if (vistaCorrente !== vista) {
+    setVistaCorrente(vista)
     const cached = getCache<Bisettimana[]>(bisKey(anno))
     if (cached) { setBisettimane(cached); setLoading(false) }
     else setLoading(true)
+  }
+
+  useEffect(() => {
+    let cancelled = false
     ;(async () => {
       const [{ data: anniData }, { data: bisData, error: bisError }] = await Promise.all([
         supabase.from('bisettimane').select('anno'),
@@ -87,7 +95,7 @@ export function useBisettimane(anno: number) {
         setRefreshKey(k => k + 1)
       }
     })()
-  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [])
 
   const inizializzaAnno = useCallback(async (a: number) => {
     setOperazione('inizializza')

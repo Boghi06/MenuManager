@@ -71,9 +71,9 @@ export function PiattoSlot({
           type="button"
           onClick={(e) => { e.stopPropagation(); onRemove() }}
           title="Rimuovi"
-          className="shrink-0 p-0.5 rounded text-gray-500 hover:text-black hover:bg-gray-100 transition-colors"
+          className="shrink-0 p-0.5 rounded text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
         >
-          <X className={compact ? 'w-3.5 h-3.5' : 'w-4 h-4'} />
+          <X className={compact ? 'w-4 h-4' : 'w-[18px] h-[18px]'} />
         </button>
       )}
     </div>

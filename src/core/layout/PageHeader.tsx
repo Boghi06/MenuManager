@@ -44,7 +44,11 @@ export function PageHeader({ eyebrow, title, subtitle, actions, back, children }
           <h1 className="font-fraunces font-light text-[44px] leading-none">{title}</h1>
           {subtitle && <p className="text-sm text-gray-500 mt-3">{subtitle}</p>}
         </div>
-        {actions && <div className="flex items-center gap-2">{actions}</div>}
+        {/* ml-auto: il contenitore è flex-wrap, e quando le azioni non stanno
+            in riga col titolo vanno a capo. Senza questo la seconda riga
+            ripartirebbe da sinistra, contraddicendo l'allineamento a destra
+            che questo componente promette. */}
+        {actions && <div className="flex items-center gap-2 ml-auto">{actions}</div>}
       </div>
       {children}
     </div>

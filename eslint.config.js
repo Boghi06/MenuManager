@@ -24,4 +24,14 @@ export default defineConfig([
       },
     },
   },
+  {
+    // react-refresh vuole file che esportino solo componenti. Due eccezioni
+    // strutturali, non difetti da correggere:
+    // - src/core/ui: componenti shadcn generati, che esportano anche le
+    //   varianti cva accanto al componente (riscriverli romperebbe il rigenera);
+    // - src/modules/*/index.tsx: manifest di modulo (ModuleDefinition), dove i
+    //   lazy() delle pagine convivono per forza con l'export della definizione.
+    files: ['src/core/ui/**/*.tsx', 'src/modules/*/index.tsx'],
+    rules: { 'react-refresh/only-export-components': 'off' },
+  },
 ])

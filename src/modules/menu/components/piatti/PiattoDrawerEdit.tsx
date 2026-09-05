@@ -1,8 +1,8 @@
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { SheetFooter } from '@/core/ui/sheet'
 import { Button } from '@/core/ui/button'
 import { Trash2 } from 'lucide-react'
-import { TIPO_LABEL, EMPTY_FORM } from '@/modules/menu/constants/piatti'
+import { EMPTY_FORM, etichettaPortate } from '@/modules/menu/constants/piatti'
 import { PiattoFormFields } from './PiattoFormFields'
 import type { Piatto, PiattoForm } from '@/modules/menu/types/piatto'
 
@@ -20,12 +20,11 @@ interface PiattoEditContentProps {
 export function PiattoEditContent({ piatto, onClose, onSave, onDelete }: PiattoEditContentProps) {
   // Inizializzato subito dal piatto, non da un effetto: arrivando dalla scheda
   // il form è già compilato al primo render, senza un frame di campi vuoti.
+  // Il cambio di piatto lo gestisce la `key` in PiattoDrawer (rimonta il form):
+  // risincronizzare a ogni nuova identità di `piatto` sovrascriverebbe le
+  // modifiche in corso quando usePiatti rivalida in background.
   const [form, setForm] = useState<PiattoForm>(() => piatto ? { ...piatto } : EMPTY_FORM)
   const [saving, setSaving] = useState(false)
-
-  useEffect(() => {
-    if (piatto) setForm({ ...piatto })
-  }, [piatto])
 
   const onChange = useCallback((patch: Partial<PiattoForm>) => setForm(prev => ({ ...prev, ...patch })), [])
 
@@ -44,7 +43,7 @@ export function PiattoEditContent({ piatto, onClose, onSave, onDelete }: PiattoE
           <div className="text-base text-gray-500 font-geist">Modifica piatto</div>
           <h2 className="text-4xl font-light font-fraunces">{piatto?.nome_it}</h2>
           <div className="text-base text-gray-500">
-            {piatto?.id} - {TIPO_LABEL[piatto?.tipo ?? ''] ?? '—'}
+            {piatto?.id} - {piatto ? etichettaPortate(piatto) : '—'}
           </div>
         </div>
         <div className="mt-8">

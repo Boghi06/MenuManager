@@ -2,7 +2,8 @@ import { useState, useRef, useMemo, useEffect, type CSSProperties } from 'react'
 import { X, Printer } from 'lucide-react'
 import { getBisettimanaRange } from '@/modules/menu/lib/bisettimane'
 import { printHtmlDocument } from '@/modules/menu/lib/print'
-import { ALLERGENI, TIPO_ABBR } from '@/modules/menu/constants/piatti'
+import { ALLERGENI, TIPO_ABBR, portateDi } from '@/modules/menu/constants/piatti'
+import { useScalaFoglio, A4_VERTICALE_UTILE } from '@/modules/menu/hooks/useScalaFoglio'
 import type { MenuVoce, Servizio } from '@/modules/menu/types/menuVoce'
 import type { Piatto } from '@/modules/menu/types/piatto'
 
@@ -96,6 +97,12 @@ const SI_NO_STYLE: CSSProperties = {
 }
 
 function SezioneServizio({ titolo, data, righe }: { titolo: string; data: Date; righe: Piatto[] }) {
+  // Il foglio occupa più pagine: il limite non è la singola pagina ma non
+  // aggiungerne un'altra, così l'ultima si riempie invece di restare a metà.
+  const contenutoRef = useRef<HTMLDivElement>(null)
+  useScalaFoglio(contenutoRef, A4_VERTICALE_UTILE, 'documento',
+    `${titolo}-${data.toDateString()}-${righe.map(r => r.id).join(',')}`)
+
   const th: CSSProperties = {
     fontFamily: 'system-ui, Arial, sans-serif',
     fontSize: 10,
@@ -106,16 +113,18 @@ function SezioneServizio({ titolo, data, righe }: { titolo: string; data: Date; 
     background: '#f2f2f2',
     verticalAlign: 'bottom',
   }
+  // Il corpo di descrizione e ricetta lo decide `useScalaFoglio`: sono le due
+  // colonne che riempiono il foglio, e sono quelle che si leggono in cucina.
   const td: CSSProperties = {
     fontFamily: 'system-ui, Arial, sans-serif',
-    fontSize: 11,
+    fontSize: 'calc(var(--scala, 1) * 11px)',
     padding: '6px 6px',
     border: '1px solid #444',
     verticalAlign: 'top',
   }
 
   return (
-    <div>
+    <div ref={contenutoRef}>
       {/* header sezione */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: 8 }}>
         <div style={{ fontFamily: 'system-ui, Arial, sans-serif', fontSize: 22, fontWeight: 800, letterSpacing: 0.5 }}>
@@ -156,7 +165,7 @@ function SezioneServizio({ titolo, data, righe }: { titolo: string; data: Date; 
               <td style={SI_NO_STYLE}>{p.vegano ? 'si' : 'no'}</td>
               <td style={SI_NO_STYLE}>{p.no_lattosio ? 'si' : 'no'}</td>
               <td style={SI_NO_STYLE}>{p.locale ? 'si' : 'no'}</td>
-              <td style={SI_NO_STYLE}>{TIPO_ABBR[p.tipo ?? ''] ?? p.tipo ?? ''}</td>
+              <td style={SI_NO_STYLE}>{portateDi(p).map(t => TIPO_ABBR[t] ?? t).join('/')}</td>
               <td style={{ ...td, fontSize: 10 }}>
                 {allergeniDi(p).length === 0 ? (
                   <span style={{ color: '#999' }}>—</span>
@@ -319,9 +328,9 @@ export function StampaRicette({ open, onClose, voci, piatti, anno, mese, bisetti
           <span className="font-semibold text-[15px] text-black">Anteprima stampa ricette</span>
           <button
             onClick={onClose}
-            className="p-1.5 text-gray-500 hover:text-black transition-colors rounded hover:bg-gray-100"
+            className="p-1.5 rounded text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
           >
-            <X className="w-4 h-4" />
+            <X className="w-[18px] h-[18px]" />
           </button>
         </div>
 

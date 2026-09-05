@@ -1,7 +1,7 @@
 import { SheetFooter } from '@/core/ui/sheet'
 import { Button } from '@/core/ui/button'
 import { Pencil, Trash2 } from 'lucide-react'
-import { TIPO_LABEL, CARATTERISTICHE, ALLERGENI, TRANSLATIONS, CATEGORIA_BAR, CATEGORIA_LABEL } from '@/modules/menu/constants/piatti'
+import { CARATTERISTICHE, ALLERGENI, TRANSLATIONS, CATEGORIA_BAR, CATEGORIA_LABEL, etichettaPortate } from '@/modules/menu/constants/piatti'
 import { AllergenNum } from '@/modules/menu/components/piatti/PiattoBadges'
 import type { Piatto } from '@/modules/menu/types/piatto'
 
@@ -29,7 +29,7 @@ export function PiattoViewContent({ piatto, onClose, onEdit, onDelete, readOnly 
 
         <div className="flex flex-col gap-1 pb-8 border-b border-gray-200 px-8">
           <div className="text-base text-gray-500 font-geist">
-            {piatto?.id} · {TIPO_LABEL[piatto?.tipo ?? ''] ?? '—'}
+            {piatto?.id} · {piatto ? etichettaPortate(piatto) : '—'}
           </div>
           <h2 className="text-4xl font-light font-fraunces">{piatto?.nome_it}</h2>
         </div>
@@ -51,7 +51,7 @@ export function PiattoViewContent({ piatto, onClose, onEdit, onDelete, readOnly 
         <div className="flex flex-col gap-2 mt-8 px-8 border-b border-gray-200 pb-8">
           <div className="font-geist text-lg">Tipologia</div>
           <div className="bg-gray-200 rounded-md h-10 flex items-center px-4 font-semibold text-base">
-            {TIPO_LABEL[piatto?.tipo ?? ''] ?? '—'}
+            {piatto ? etichettaPortate(piatto) : '—'}
           </div>
         </div>
 

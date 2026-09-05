@@ -5,7 +5,7 @@ import {
 } from '@/core/ui/sheet'
 import { Input } from '@/core/ui/input'
 import { usePiatti } from '@/modules/menu/hooks/usePiatti'
-import { TIPO_BAR, TIPO_LABEL, CATEGORIA_LABEL, coloreBarraPiatto } from '@/modules/menu/constants/piatti'
+import { TIPO_BAR, TIPO_LABEL, CATEGORIA_LABEL, coloreBarraPiatto, portateDi } from '@/modules/menu/constants/piatti'
 import { LegendaCategorie } from '@/modules/menu/components/piatti/LegendaCategorie'
 
 interface SelettorePiattoProps {
@@ -20,12 +20,23 @@ export function SelettorePiatto({ open, onOpenChange, filtroTipo, onPick }: Sele
   const { piatti, loading } = usePiatti()
   const [query, setQuery] = useState('')
 
+  // La ricerca riparte vuota a ogni apertura: il pannello resta montato fra
+  // un piatto e l'altro, quindi senza questo il secondo primo si cercherebbe
+  // dentro i risultati filtrati per il primo, e la casella andrebbe svuotata
+  // a mano. L'aggiustamento è nel render e non in un useEffect: così il testo
+  // vecchio non compare per un frame all'apertura.
+  const [eraAperto, setEraAperto] = useState(open)
+  if (open !== eraAperto) {
+    setEraAperto(open)
+    if (open) setQuery('')
+  }
+
   const label = TIPO_LABEL[filtroTipo] ?? 'piatto'
 
   const risultati = useMemo(() => {
     const q = query.trim().toLowerCase()
     return piatti
-      .filter(p => p.tipo === filtroTipo)
+      .filter(p => portateDi(p).includes(filtroTipo))
       .filter(p => !q || p.nome_it.toLowerCase().includes(q) || String(p.id).includes(q))
   }, [piatti, filtroTipo, query])
 

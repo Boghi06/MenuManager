@@ -493,7 +493,9 @@ function A4Page({ giorno, data, lingua, voci, piattoMap, flagsPranzo, flagsCena,
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><MilkOff size={20} strokeWidth={2} color="#333" /> {t.nl}</span>
           <span style={{ display: 'inline-flex', alignItems: 'center', gap: 4 }}><ChefHat size={20} strokeWidth={2} color="#333" /> {t.loc}</span>
         </div>
-        <div style={{ fontStyle: 'italic', textAlign: 'right' }}>{t.allergen}</div>
+        {/* più grande e in grassetto del resto della legenda: è l'avviso di
+            legge sugli allergeni, deve leggersi a colpo d'occhio */}
+        <div style={{ fontStyle: 'italic', fontWeight: 700, fontSize: 13, textAlign: 'right' }}>{t.allergen}</div>
       </div>
     </div>
   )
@@ -702,9 +704,9 @@ export function StampaPreview({ open, onClose, voci, piatti, anno, mese, bisetti
             ))}
             <button
               onClick={onClose}
-              className="ml-2 p-1.5 text-gray-500 hover:text-black transition-colors rounded hover:bg-gray-100"
+              className="ml-2 p-1.5 rounded text-red-500 hover:text-red-700 hover:bg-red-50 transition-colors"
             >
-              <X className="w-4 h-4" />
+              <X className="w-[18px] h-[18px]" />
             </button>
           </div>
         </div>

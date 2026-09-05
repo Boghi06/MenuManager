@@ -65,13 +65,15 @@ function SheetContent({
             render={
               <Button
                 variant="ghost"
-                className="absolute top-3 right-3"
+                /* Scostamento voluto dal componente generato: la X è rossa e da
+                   18px come tutte le altre X dell'app. Se un giorno si rigenera
+                   sheet.tsx da shadcn, questa riga va rimessa. */
+                className="absolute top-3 right-3 text-red-500 hover:text-red-700 hover:bg-red-50"
                 size="icon-sm"
               />
             }
           >
-            <XIcon
-            />
+            <XIcon className="size-[18px]" />
             <span className="sr-only">Close</span>
           </SheetPrimitive.Close>
         )}

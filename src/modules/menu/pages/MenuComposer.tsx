@@ -79,6 +79,8 @@ export default function MenuComposer() {
     }
   }, [target, servizio, aggiungiPiatto, setContorno])
 
+  const bottoneStampa = 'h-9 px-3 border border-gray-900 rounded-md bg-gray-900 text-white text-sm hover:bg-gray-700 transition-colors'
+
   return (
     <AppLayout>
       {/* Header */}
@@ -87,47 +89,51 @@ export default function MenuComposer() {
         eyebrow="Composizione menù"
         title={`${MESI[mese - 1]} ${anno} · Bisettimana ${idx === 1 ? 'A' : 'B'}`}
         subtitle={formatBisettimanaRange(range)}
-        actions={
-          <>
-            {/* Toggle settimana 1/2 */}
-            <div className="flex h-9 border border-gray-300 rounded-md overflow-hidden">
-              {([0, 1] as const).map(w => (
-                <button
-                  key={w}
-                  onClick={() => setSettimana(w)}
-                  className={`px-3.5 text-sm transition-colors ${w === 1 ? 'border-l border-gray-300' : ''}
-                              ${settimana === w ? 'bg-gray-900 text-white' : 'bg-white text-black hover:bg-gray-50'}`}
-                >
-                  Sett. {w + 1}
-                </button>
-              ))}
-            </div>
+      >
+        {/* Una riga sola sotto il titolo: a sinistra cosa mostra la griglia,
+            a destra le stampe. In `actions` finivano all'altezza del titolo,
+            staccate dai toggle che comandano la stessa vista. */}
+        <div className="flex flex-wrap items-center gap-2 mt-6">
+          {/* Toggle settimana 1/2 */}
+          <div className="flex h-9 border border-gray-300 rounded-md overflow-hidden">
+            {([0, 1] as const).map(w => (
+              <button
+                key={w}
+                onClick={() => setSettimana(w)}
+                className={`px-3.5 text-sm transition-colors ${w === 1 ? 'border-l border-gray-300' : ''}
+                            ${settimana === w ? 'bg-gray-900 text-white' : 'bg-white text-black hover:bg-gray-50'}`}
+              >
+                Sett. {w + 1}
+              </button>
+            ))}
+          </div>
 
-            {/* Toggle pranzo/cena */}
-            <div className="flex h-9 border border-gray-300 rounded-md overflow-hidden">
-              {(['pranzo', 'cena'] as const).map((s, i) => (
-                <button
-                  key={s}
-                  onClick={() => setServizio(s)}
-                  className={`px-3.5 text-sm capitalize transition-colors ${i === 1 ? 'border-l border-gray-300' : ''}
-                              ${servizio === s ? 'bg-gray-900 text-white' : 'bg-white text-black hover:bg-gray-50'}`}
-                >
-                  {s}
-                </button>
-              ))}
-            </div>
+          {/* Toggle pranzo/cena */}
+          <div className="flex h-9 border border-gray-300 rounded-md overflow-hidden">
+            {(['pranzo', 'cena'] as const).map((s, i) => (
+              <button
+                key={s}
+                onClick={() => setServizio(s)}
+                className={`px-3.5 text-sm capitalize transition-colors ${i === 1 ? 'border-l border-gray-300' : ''}
+                            ${servizio === s ? 'bg-gray-900 text-white' : 'bg-white text-black hover:bg-gray-50'}`}
+              >
+                {s}
+              </button>
+            ))}
+          </div>
 
+          <div className="ml-auto flex items-center gap-2">
             {/* La settimanale è il piano di lavoro: la vedono tutti i ruoli. */}
             <button
               onClick={() => setSettimanaOpen(true)}
-              className="h-9 px-3 border border-gray-900 rounded-md bg-gray-900 text-white text-sm hover:bg-gray-700 transition-colors"
+              className={bottoneStampa}
             >
               Stampa settimana
             </button>
             {role !== 'cucina' && (
               <button
                 onClick={() => setStampaOpen(true)}
-                className="h-9 px-3 border border-gray-900 rounded-md bg-gray-900 text-white text-sm hover:bg-gray-700 transition-colors"
+                className={bottoneStampa}
               >
                 Stampa menù
               </button>
@@ -135,14 +141,14 @@ export default function MenuComposer() {
             {role !== 'receptionist' && (
               <button
                 onClick={() => setRicetteOpen(true)}
-                className="h-9 px-3 border border-gray-900 rounded-md bg-gray-900 text-white text-sm hover:bg-gray-700 transition-colors"
+                className={bottoneStampa}
               >
                 Stampa ricette
               </button>
             )}
-          </>
-        }
-      />
+          </div>
+        </div>
+      </PageHeader>
 
       {/* Body */}
       <div className="flex-1 overflow-auto p-8">

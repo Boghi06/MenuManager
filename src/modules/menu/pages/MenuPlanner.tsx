@@ -47,6 +47,12 @@ export default function MenuPlanner() {
     return mappa.get(`${mese}-${idx}`)?.stato ?? 'empty'
   }
 
+  // Stessa misura dei bottoni "Stampa …" della composizione menù: sono le
+  // stesse tre stampe, non ha senso che qui siano più piccoli.
+  const bottoneStampa = `h-9 px-3 inline-flex items-center gap-1.5 border border-gray-900 rounded-md
+                         bg-gray-900 text-white text-sm transition-colors
+                         enabled:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed`
+
   return (
     <AppLayout>
       {/* Header */}
@@ -124,20 +130,18 @@ export default function MenuPlanner() {
           <button
             onClick={() => setStampaOggi('settimana')}
             disabled={targetOggi === null || stampaOggi !== null}
-            className="h-8 px-3 inline-flex items-center gap-1.5 border border-gray-900 rounded-md bg-gray-900 text-white text-xs transition-colors
-                       enabled:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+            className={bottoneStampa}
           >
-            <Printer className="w-3.5 h-3.5" />
+            <Printer className="w-4 h-4" />
             {stampaOggi === 'settimana' ? 'Preparazione…' : 'Settimana corrente'}
           </button>
           {canStampaMenu && (
             <button
               onClick={() => setStampaOggi('menu')}
               disabled={targetOggi === null || stampaOggi !== null}
-              className="h-8 px-3 inline-flex items-center gap-1.5 border border-gray-900 rounded-md bg-gray-900 text-white text-xs transition-colors
-                         enabled:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={bottoneStampa}
             >
-              <Printer className="w-3.5 h-3.5" />
+              <Printer className="w-4 h-4" />
               {stampaOggi === 'menu' ? 'Preparazione…' : 'Menù di oggi'}
             </button>
           )}
@@ -145,10 +149,9 @@ export default function MenuPlanner() {
             <button
               onClick={() => setStampaOggi('ricette')}
               disabled={targetOggi === null || stampaOggi !== null}
-              className="h-8 px-3 inline-flex items-center gap-1.5 border border-gray-900 rounded-md bg-gray-900 text-white text-xs transition-colors
-                         enabled:hover:bg-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              className={bottoneStampa}
             >
-              <Printer className="w-3.5 h-3.5" />
+              <Printer className="w-4 h-4" />
               {stampaOggi === 'ricette' ? 'Preparazione…' : 'Ricette di oggi'}
             </button>
           )}
